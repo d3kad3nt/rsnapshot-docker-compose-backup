@@ -1,15 +1,33 @@
 #This Script is used to create a config file for rsnapshot that can be used to backup different docker-compose container.
 from typing import List
 import os
+import configparser
 
-backup_dir: str = "/mount/backup"
-
+backupSteps = [
+    ("RuntimeBackup",""),
+    ("PreStop","")
+    ("Stop","")
+    ("PreBackup","")
+    ("Backup","")
+    ("PostBackup","")
+    ("Restart","")
+    ("PostRestart","")
+]
 class Container:
     folder:str
-    name:str = "test"
+    name:str
+    config: configparser.ConfigParser
 
     def __init__(self, folder:str):
         self.folder = folder
+        self.name = os.path.basename(os.path.normpath(folder))
+        self.readConfig()
+
+    def readConfig(self):
+        self.config = configparser.ConfigParser()
+        self.config.read(self.folder + "backup.ini")
+
+        pass
 
 """Finds all docker-compose dirs in current subfolders
 :returns: a list of all folders
@@ -25,11 +43,20 @@ def findDockerDirs() -> List[Container]:
 
 def backup(container:Container):
     backupYAML(container)
+    for step in backupSteps:
+        backupStep(step,container)
 
 def backupYAML(container:Container):
-    print(f"backup\t{container.folder}/docker-compose.yml\t{backup_dir}/{container.name}")
+    print(f"backup\t{container.folder}/docker-compose.yml\tdocker/{container.name}")
+
+def testDefaultConfig():
+    config = configparser.ConfigParser()
+    config["defaultActions"]["PreBackup"] = "cmd docker-compose stop"
+    config["defaultActions"]["Backup"] = ""#TODO add Backup command
+    config["defaultActions"]["PostBackup"] = "cmd docker-compose start"
 
 def main():
+    testDefaultConfig()
     dockerContainer: List[Container] = findDockerDirs()
     for container in dockerContainer:
         backup(container)
