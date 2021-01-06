@@ -54,19 +54,22 @@ PostRestart
 
 Die Backup-Dateien für die Docker-Container müssen in dem gleichen Verzeichnis wie die docker-compose.yml Dateien liegen und backup.ini heißen.  
 Struktur:
-Die Struktur der Datei ist eine INI Datei, welche in verschiedene Sektionen unterteilt sein kann. Hierbei ist jede Sektion für einen Container in der compose Datei. Wenn in der Comose-Datei nur ein einziger Container definiert ist, dann kann die Sektion weggelassen werden.
+Die Struktur der Datei ist eine INI Datei, welche in verschiedene Sektionen unterteilt sein kann. Hierbei ist jede Sektion für einen Container in der compose Datei.  
 
 Innerhalb einer Sektion kann angepasst werden wie das Backup des Containers abläuft. Wenn ein Schritt nicht angepasst wird, dann wird der Schritt so ausgeführt wie er in der default-config definiert ist.  
 Schritte können angepasst werden indem der Schritt als Key genannt wird und dann als Value der angepasste Schritt beschrieben wird. Hierbei kann ein Value aus mehreren Zeilen bestehen, wenn die weiteren Zeilen eingerückt sind.  
 In diesen Zeilen sind die Befehle die von RSnapshot ausgeführt werden sollen definiert. An dieser Stelle können normale RSnapshot befehle wie "backup" oder "backup_script" verwendet werden. Des weiteren ist es aber auch möglich einige erweiterungen zu verwenden die in RSnapshot Befehle umgewandelt werden.  
 Es existieren folgende Erweiterungen:
   "cmd": Dieser Befehl nimmt als Argument einen Shell Befehl an der von RSnapshot ausgeführt werden soll. Intern wird dies zu einem backup_script befehl bei dem die Ausgabe verworfen wird.  
-Des weiterem können in der Konfiguration verschiedene Variablen verwendet werden. Die Variablen fangen mit einem "$"-Zeichen an. Wenn ein normalen "$"-Zeichen geschrieben werden soll muss dies escaped werden mithilfe eines weitren "$"-Zeichens (also "$$").  
+Des weiterem können in der Konfiguration verschiedene Variablen verwendet werden. Die Variablen fangen mit einem "$"-Zeichen an.  
 Es existieren folgende Variablen:
 
 - $volumeRootDir
 - $containerConfigDir
 - $containerName
+- $volumes
+- $volumeRootDir
+- $backupPrefixFolder
 
 ### Einbindung in Rsnapshot
 
