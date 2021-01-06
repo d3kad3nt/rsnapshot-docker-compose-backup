@@ -27,16 +27,12 @@ class Config:
     vars = {}
 
     def __init__(self, configFile: configparser.ConfigParser, container: Container = None):
-        super().__init__()
         self.configFile = configFile
         self.container = container
         if container:
             self.vars["$volumeRootDir"] = defaultConfig.setting("volumeRootDir")
             self.vars["$containerName"] = self.container.name
             self.vars["$containerConfigDir"] = self.container.folder
-
-    def merge(self, other: Config) -> Config:
-        pass
 
     def output(self) -> NoReturn:
         for section in self.configFile.sections():
@@ -79,7 +75,7 @@ class Container:
         fileName =  os.path.join(self.folder,"backup.ini")
         configParser = configparser.ConfigParser()
         if os.path.isfile(fileName):
-            configParser.read(fileName)
+            configParser.read([defaultConfigName,fileName])
             if not configParser.sections():
                 raise Exception("The Config for {} has no Sections".format(self.name))
         else:
@@ -89,7 +85,7 @@ class Container:
 
     def backup(self) -> NoReturn:
         print(f"backup\t{self.folder}/docker-compose.yml\tdocker/{self.name}")
-        self.config.merge(defaultConfig).output()
+        self.config.output()
 
 
 defaultConfigName  = "backup.ini"
