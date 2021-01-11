@@ -1,16 +1,15 @@
 #This Script is used to create a config file for rsnapshot that can be used to backup different docker-compose container.
 
 #Imports for typing
-from __future__ import annotations
 from typing import List
 from typing import NoReturn
 
 #Other imports
 import os
-import configparser
 
 from container import Container
 from config import Config
+import dockerCompose
 
 """Finds all docker-compose dirs in current subfolders
 :returns: a list of all folders
@@ -23,13 +22,11 @@ def findDockerDirs() -> List[Container]:
             dirs.append(Container(treeElement[0]))
     return dirs
 
-def backup(container:Container) -> NoReturn:
-    container.backup()
-
 def main() -> NoReturn:
-    dockerContainer: List[Container] = findDockerDirs()
+    dockerCompose.findContainer()
+    dockerContainer: List[Container] = findDockerDirs() 
     for container in dockerContainer:
-        backup(container)
+        container.backup()
 
 if __name__ == "__main__":
     main()

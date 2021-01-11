@@ -81,14 +81,15 @@ def loadConfig(name: str) -> Config:
 
 def createDefaultConfig() -> Config:
     defaultConfig = configparser.ConfigParser()
-
-    defaultConfig[settingSection] = {}
-    defaultConfig[settingSection]["volumeRootDir"] = "/var/lib/docker/volumes/"
-    defaultConfig[settingSection]["backupPrefixFolder"] = "/var/lib/docker/volumes/"
-    defaultConfig[defaultActions] = {}
-    defaultConfig[defaultActions]["PreBackup"] = "cmd docker-compose stop"
-    defaultConfig[defaultActions]["Backup"] = "backup    $volumes    $backupPrefixFolder/$containerName/$volumes"
-    defaultConfig[defaultActions]["PostBackup"] = "cmd docker-compose start"
+    defaultConfig[settingSection] = {
+        "volumeRootDir": "/var/lib/docker/volumes/",
+        "backupPrefixFolder": "/var/lib/docker/volumes/"
+    }
+    defaultConfig[defaultActions] = {
+        "PreBackup": "cmd docker-compose stop",
+        "Backup": "backup    $volumes    $backupPrefixFolder/$containerName/$volumes",
+        "PostBackup": "cmd docker-compose start"
+    }
     with open(defaultConfigName,'w') as configfile:
         defaultConfig.write(configfile)
     return Config(defaultConfig)
@@ -98,5 +99,5 @@ def getDefaultConfig() -> Config:
         return loadConfig(defaultConfigName) 
     else:
         return createDefaultConfig()
-
-Config.defaultConfig = getDefaultConfig()
+if __name__ == "config":
+    Config.defaultConfig = getDefaultConfig()
