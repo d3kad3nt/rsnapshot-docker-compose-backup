@@ -1,2 +1,6 @@
 backup.ini
 *.cpython*.pyc
+venv/
+src/venv/
+src/__pycache__
+.idea/
