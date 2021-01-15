@@ -1,25 +1,25 @@
 from typing import NoReturn
 
 import os
+from config import ContainerConfig
 
-from config import Config
 
 class Container:
-    folder:str
-    name:str
-    config: Config
+    folder: str
+    name: str
+    config: ContainerConfig
 
-    def __init__(self, folder:str, name:str = None ):
+    def __init__(self, folder: str, name: str = None):
         self.folder = folder
         if name:
             self.name = name
         else:
             self.name = os.path.basename(os.path.normpath(folder))
-        self.__readConfig()
+        self._read_config()
 
-    def __readConfig(self)-> NoReturn:
-        fileName =  os.path.join(self.folder,"backup.ini")
-        self.config = Config(fileName,self)
+    def _read_config(self) -> NoReturn:
+        file_name = os.path.join(self.folder, "backup.ini")
+        self.config = ContainerConfig(file_name, self.name)
 
     def backup(self) -> NoReturn:
         print(f"backup\t{self.folder}/docker-compose.yml\tdocker/{self.name}")
