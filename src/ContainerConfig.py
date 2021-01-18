@@ -1,5 +1,6 @@
 from typing import NoReturn
 
+from src import docker
 from src.AbstractConfig import AbstractConfig
 from src.DefaultConfig import DefaultConfig
 
@@ -9,6 +10,9 @@ class ContainerConfig(AbstractConfig):
 
     def __init__(self, config_path: str, container_name: str):
         super().__init__(config_path, container_name)
+        self.vars["$containerName"] = container_name
+        self.vars["$volumes"] = docker.volumes(container_name)
+        print("Test")
 
     def output(self) -> NoReturn:
         for step in self.backupSteps:

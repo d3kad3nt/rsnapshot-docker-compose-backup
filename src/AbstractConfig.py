@@ -25,9 +25,7 @@ class AbstractConfig(ABC):
         self._load_config_file(config_path, name)
         self.name = name
         self.vars = {"$volumeRootDir": self.setting("volumeRootDir"),
-                     "$containerName": name,
                      "$containerConfigDir": config_path}
-        # self.vars["$volume"] = dockerCompose.inspect(name).volumes()
 
     def _load_config_file(self, config_path: str, section_name: str):
         config_file = configparser.ConfigParser()
