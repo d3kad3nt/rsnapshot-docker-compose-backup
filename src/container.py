@@ -1,7 +1,7 @@
 from typing import NoReturn
 
 import os
-from config import ContainerConfig
+from src.ContainerConfig import ContainerConfig
 
 
 class Container:
@@ -9,12 +9,9 @@ class Container:
     name: str
     config: ContainerConfig
 
-    def __init__(self, folder: str, name: str = None):
+    def __init__(self, folder: str, name: str):
         self.folder = folder
-        if name:
-            self.name = name
-        else:
-            self.name = os.path.basename(os.path.normpath(folder))
+        self.name = name
         self._read_config()
 
     def _read_config(self) -> NoReturn:
@@ -25,3 +22,9 @@ class Container:
         print(f"backup\t{self.folder}/docker-compose.yml\tdocker/{self.name}")
         self.config.output()
         print("\n")
+
+    def __str__(self):
+        return "Container {} in folder {}".format(self.name, self.folder)
+
+    def __repr__(self):
+        return "Container {} in folder {}".format(self.name, self.folder)
