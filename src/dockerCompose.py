@@ -1,9 +1,9 @@
 import os
 import re
-import subprocess
 from typing import List
 
 from container import Container
+from src.utils import command
 
 
 def find_running_container() -> List[Container]:
@@ -46,12 +46,3 @@ def get_container(ps_out: str, state: str = None) -> List[str]:
         if not state or up == state.upper():
             container.append(parts[0])
     return container
-
-
-def command(cmd: str, path: str = ".") -> subprocess.CompletedProcess:
-    res = subprocess.run(cmd.split(" "), cwd=path, encoding="UTF-8", capture_output=True)
-    return res
-
-
-def inspect(contaiener: str):
-    return command("docker inspect {}".format(contaiener))

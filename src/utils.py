@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import subprocess
+
 
 class CaseInsensitiveRe:
     def __init__(self, regex):
@@ -20,3 +22,6 @@ class CaseInsensitiveMatch:
         return self.match.group(name).lower()
 
 
+def command(cmd: str, path: str = ".") -> subprocess.CompletedProcess:
+    res = subprocess.run(cmd.split(" "), cwd=path, encoding="UTF-8", capture_output=True)
+    return res
