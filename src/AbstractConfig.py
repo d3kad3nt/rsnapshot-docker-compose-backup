@@ -50,7 +50,14 @@ class AbstractConfig(ABC):
 
     def _resolve_vars(self, cmd: str) -> str:
         for var in self.vars:
-            cmd = cmd.replace(var, self.vars[var])
+            if var in cmd:
+                if type(self.vars[var]) is list:
+                    res = ""
+                    for val in self.vars[var]:
+                        res += cmd.replace(var, val) + "\n"
+                    cmd = res
+                else:
+                    cmd = cmd.replace(var, self.vars[var])
         return cmd
 
     @abstractmethod

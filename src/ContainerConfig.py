@@ -12,7 +12,6 @@ class ContainerConfig(AbstractConfig):
         super().__init__(config_path, container_name)
         self.vars["$containerName"] = container_name
         self.vars["$volumes"] = docker.volumes(container_name)
-        print("Test")
 
     def output(self) -> NoReturn:
         for step in self.backupSteps:

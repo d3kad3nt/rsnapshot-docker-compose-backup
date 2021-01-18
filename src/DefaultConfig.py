@@ -19,9 +19,9 @@ class DefaultConfig(AbstractConfig):
         default_config.read_dict(
             {
                 DefaultConfig.defaultActions: {
-                    "PreBackup": "cmd docker-compose stop",
+                    "PreBackup": "backup-exec docker-compose stop",
                     "Backup": "backup    $volumes    $backupPrefixFolder/$containerName/$volumes",
-                    "PostBackup": "cmd docker-compose start"},
+                    "PostBackup": "backup-exec docker-compose start"},
                 DefaultConfig._settings_name(DefaultConfig.defaultActions): {
                     "volumeRootDir": "/var/lib/docker/volumes/",
                     "backupPrefixFolder": "/var/lib/docker/volumes/"}
