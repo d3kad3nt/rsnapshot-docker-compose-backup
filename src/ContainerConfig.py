@@ -8,10 +8,10 @@ from src.DefaultConfig import DefaultConfig
 class ContainerConfig(AbstractConfig):
     defaultConfig: DefaultConfig = DefaultConfig()
 
-    def __init__(self, config_path: str, container_name: str):
-        super().__init__(config_path, container_name)
-        self.vars["$containerName"] = container_name
-        self.vars["$volumes"] = docker.volumes(container_name)
+    def __init__(self, container):
+        super().__init__(container.file_name, container.name)
+        self.vars["$containerName"] = container.name
+        self.vars["$volumes"] = container.volumes
 
     def output(self) -> NoReturn:
         for step in self.backupSteps:

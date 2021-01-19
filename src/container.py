@@ -1,6 +1,8 @@
 from typing import NoReturn
 
 import os
+
+from src import docker
 from src.ContainerConfig import ContainerConfig
 
 
@@ -12,11 +14,9 @@ class Container:
     def __init__(self, folder: str, name: str):
         self.folder = folder
         self.name = name
-        self._read_config()
-
-    def _read_config(self) -> NoReturn:
-        file_name = os.path.join(self.folder, "backup.ini")
-        self.config = ContainerConfig(file_name, self.name)
+        self.file_name = os.path.join(self.folder, "backup.ini")
+        self.volumes = docker.volumes(name)
+        self.config = ContainerConfig(self)
 
     def backup(self) -> NoReturn:
         print(f"backup\t{self.folder}/docker-compose.yml\tdocker/{self.name}")
