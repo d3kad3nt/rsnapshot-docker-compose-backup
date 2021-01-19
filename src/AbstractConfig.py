@@ -4,6 +4,7 @@ import re
 from abc import ABC, abstractmethod
 
 from src.utils import CaseInsensitiveRe
+from src.volume import Volume
 
 
 class AbstractConfig(ABC):
@@ -54,7 +55,13 @@ class AbstractConfig(ABC):
                 if type(self.vars[var]) is list:
                     res = ""
                     for val in self.vars[var]:
-                        res += cmd.replace(var, val) + "\n"
+                        if type(val) is Volume:
+                            tmp = cmd.replace(var + ".name", val.name)
+                            tmp = tmp.replace(var + ".path", val.path)
+                            tmp = tmp.replace(var, val.path)
+                            res += tmp + "\n"
+                        else:
+                            res += cmd.replace(var, val) + "\n"
                     cmd = res
                 else:
                     cmd = cmd.replace(var, self.vars[var])

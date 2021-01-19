@@ -20,7 +20,7 @@ class DefaultConfig(AbstractConfig):
             {
                 DefaultConfig.defaultActions: {
                     "PreBackup": "backup-exec docker-compose stop",
-                    "Backup": "backup    $volumes    $backupPrefixFolder/$containerName/$volumes",
+                    "Backup": "backup    $volumes.path    $backupPrefixFolder/$containerName/$volumes.name",
                     "PostBackup": "backup-exec docker-compose start"},
                 DefaultConfig._settings_name(DefaultConfig.defaultActions): {
                     "volumeRootDir": "/var/lib/docker/volumes/",
