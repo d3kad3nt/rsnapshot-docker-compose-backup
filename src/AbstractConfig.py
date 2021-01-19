@@ -52,19 +52,8 @@ class AbstractConfig(ABC):
     def _resolve_vars(self, cmd: str) -> str:
         for var in self.vars:
             if var in cmd:
-                if type(self.vars[var]) is list:
-                    res = ""
-                    for val in self.vars[var]:
-                        if type(val) is Volume:
-                            tmp = cmd.replace(var + ".name", val.name)
-                            tmp = tmp.replace(var + ".path", val.path)
-                            tmp = tmp.replace(var, val.path)
-                            res += tmp + "\n"
-                        else:
-                            res += cmd.replace(var, val) + "\n"
-                    cmd = res
-                else:
-                    cmd = cmd.replace(var, self.vars[var])
+                replace_function = _replace_var.get(type(self.vars[var]))
+                cmd = replace_function(cmd, var, self.vars[var])
         return cmd
 
     @abstractmethod
@@ -78,3 +67,28 @@ class AbstractConfig(ABC):
     @staticmethod
     def _settings_name(section_name: str) -> str:
         return section_name + "." + AbstractConfig.settingSection
+
+
+def _replace_list(cmd: str, var: str, val: list):
+    result = ""
+    for i in val:
+        result += _replace_var[type(i)](cmd, var, i)
+    return result
+
+
+def _replace_str(cmd: str, var: str, val: str):
+    return cmd.replace(var, val)
+
+
+def _replace_volume(cmd: str, var: str, val: Volume):
+    tmp = cmd.replace(var + ".name", val.name)
+    tmp = tmp.replace(var + ".path", val.path)
+    tmp = tmp.replace(var, val.path)
+    return tmp + "\n"
+
+
+_replace_var = {
+    list: _replace_list,
+    str: _replace_str,
+    Volume: _replace_volume
+}
