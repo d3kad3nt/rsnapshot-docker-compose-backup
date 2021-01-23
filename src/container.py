@@ -22,7 +22,6 @@ class Container:
 
     def backup(self) -> NoReturn:
         print("#{}".format(self.name))
-        print(f"backup\t{self.folder}/docker-compose.yml\tdocker/{self.name}")
         self.config.output()
         print("\n")
 
