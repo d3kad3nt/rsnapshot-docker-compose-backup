@@ -13,9 +13,10 @@ class Container:
     config: ContainerConfig
     volumes: List[Volume]
 
-    def __init__(self, folder: str, name: str):
+    def __init__(self, folder: str, name: str, image_id: str):
         self.folder = folder
         self.name = name
+        self.image = image_id
         self.file_name = os.path.join(self.folder, "backup.ini")
         self.volumes = docker.volumes(name)
         self.config = ContainerConfig(self)

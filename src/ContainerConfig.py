@@ -13,6 +13,7 @@ class ContainerConfig(AbstractConfig):
         self.vars["$containerName"] = container.name
         self.vars["$containerFolder"] = container.folder
         self.vars["$volumes"] = container.volumes
+        self.vars["$image"] = container.image
         self.add_action_content()
 
     def output(self) -> NoReturn:

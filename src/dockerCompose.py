@@ -13,7 +13,8 @@ def find_running_container() -> List[Container]:
         res = command("docker-compose ps", path=directory)
         container_list: List[str] = get_running_container(res.stdout)
         for container in container_list:
-            all_container.append(Container(directory, container))
+            image = image_id(container, directory)
+            all_container.append(Container(directory, container, image))
     return all_container
 
 
@@ -35,14 +36,27 @@ def get_running_container(ps_out: str) -> List[str]:
     return get_container(ps_out, state="UP")
 
 
+def get_column(column_nr: int, input_str: str):
+    return re.sub(r"\s\s+", "  ", input_str).split("  ")[column_nr]
+
+
 def get_container(ps_out: str, state: str = None) -> List[str]:
     all_container = ps_out.splitlines()[2:]
     container = []
     if not all_container:
         return []
     for line in all_container:
-        parts = re.sub(r"\s\s+", "  ", line).split("  ")
-        up = parts[2].upper()
+        up = get_column(2, line).upper()
         if not state or up == state.upper():
-            container.append(parts[0])
+            container.append(get_column(0, line))
     return container
+
+
+def image_id(container_name: str, path: str):
+    output = command("docker-compose images".format(container_name), path=path).stdout
+    #The information about the services start at the third line and the 4. column contains the image id
+    without_head: List[str] = output.splitlines()[2:]
+    for service in without_head:
+        if service.lower().startswith(container_name.lower()):
+            return get_column(3, service)
+    raise Exception("Cant find image for Service" + container_name)
