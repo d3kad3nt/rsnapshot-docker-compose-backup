@@ -74,12 +74,16 @@ class AbstractConfig(ABC):
         pass
 
     @staticmethod
+    def _create_subsection(super_section: str, sub_section: str):
+        return "{}.{}".format(super_section, sub_section)
+
+    @staticmethod
     def _settings_name(section_name: str) -> str:
-        return section_name + "." + AbstractConfig.settingSection
-    
+        return AbstractConfig._create_subsection(section_name, AbstractConfig.settingSection)
+
     @staticmethod
     def _actions_name(section_name: str) -> str:
-        return section_name + "." + AbstractConfig.actionSection
+        return AbstractConfig._create_subsection(section_name, AbstractConfig.actionSection)
 
 
 def _replace_list(cmd: str, var: str, val: list):

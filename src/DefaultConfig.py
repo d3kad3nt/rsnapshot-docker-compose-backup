@@ -9,6 +9,8 @@ from src.utils import CaseInsensitiveRe
 
 class DefaultConfig(AbstractConfig):
     predefined_actions = "predefined_actions"
+    predefined_actions_command = "command"
+    predefined_actions_step = "step"
     defaultConfig = "default_config"
     defaultConfigName = "backup.ini"
     actions: Dict[str, Tuple[str, str]] = {}
@@ -32,13 +34,25 @@ class DefaultConfig(AbstractConfig):
                     "backupPrefixFolder": "/var/lib/docker/volumes/"},
                 DefaultConfig._actions_name(DefaultConfig.defaultConfig): {
                     "volumeBackup": "true",
-                    "yamlBackup": "true"
+                    "yamlBackup": "true",
+                    "imageBackup": "true"
                 },
-                DefaultConfig.predefined_actions: {
-                    "volumeBackup": "backup    $volumes.path    $backupPrefixFolder/$containerName/$volumes.name",
-                    "yamlBackup": "backup   $containerFolder/docker-compose.yml $backupPrefixFolder/$containerName/docker-compose.yml"
+                DefaultConfig._create_subsection(DefaultConfig.predefined_actions, "volumeBackup"): {
+                    DefaultConfig.predefined_actions_command: "backup    $volumes.path    $backupPrefixFolder/$containerName/$volumes.name",
+                    DefaultConfig.predefined_actions_step: "backup"
+                },
+                DefaultConfig._create_subsection(DefaultConfig.predefined_actions,  "yamlBackup"): {
+                    DefaultConfig.predefined_actions_command: "backup   $containerFolder/docker-compose.yml $backupPrefixFolder/$containerName/docker-compose.yml",
+                    DefaultConfig.predefined_actions_step: "runtime_backup"
+                },
+                DefaultConfig._create_subsection(DefaultConfig.predefined_actions,  "imageBackup"): {
+                    DefaultConfig.predefined_actions_command: "backup_script	docker image save $image -o $containerName_image.tar    $backupPrefixFolder/$containerName/",
+                    DefaultConfig.predefined_actions_step: "runtime_backup"
+                },
+                DefaultConfig._create_subsection(DefaultConfig.predefined_actions,  "logBackup"): {
+                    DefaultConfig.predefined_actions_command: "backup_script docker logs $containerName > $containerName_logs.log    $backupPrefixFolder/$containerName/",
+                    DefaultConfig.predefined_actions_step: "backup"
                 }
-
             }
         )
         with open(DefaultConfig.defaultConfigName, 'w') as configfile:
@@ -54,14 +68,16 @@ class DefaultConfig(AbstractConfig):
         config_file = configparser.ConfigParser(allow_no_value=True)
         config_file.SECTCRE = CaseInsensitiveRe(re.compile(r"\[ *(?P<header>[^]]+?) *]"))
         config_file.read(self.defaultConfigName)
-        step_postfix = "_step"
-        if config_file.has_section(self.predefined_actions):
-            for action in config_file.options(self.predefined_actions):
-                if step_postfix not in action:
-                    step = "backup"
-                    if config_file.has_option(self.predefined_actions, action+step_postfix):
-                        step = config_file.get(self.predefined_actions, action+step_postfix)
-                    self.actions[action] = (step, config_file.get(self.predefined_actions, action))
+        for section in config_file.sections():
+            if section.startswith(self.predefined_actions):
+                action_name = section[len(self.predefined_actions + "."):]
+                if not config_file.has_option(section, self.predefined_actions_command):
+                    raise Exception("The action {} has to have a command".format(action_name))
+                command = config_file.get(section, self.predefined_actions_command)
+                step = "backup"
+                if config_file.has_option(section, self.predefined_actions_step):
+                    step = config_file.get(section, self.predefined_actions_step)
+                self.actions[action_name] = (step, command)
 
     def get_action(self, name: str) -> (str, str):
         return self.actions[name]
