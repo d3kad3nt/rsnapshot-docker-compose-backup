@@ -28,8 +28,12 @@ class AbstractConfig(ABC):
         }
         self._load_config_file(config_path, name)
         self.name = name
-        self.vars = {"$volumeRootDir": self.setting("volumeRootDir"),
-                     "$containerConfigDir": config_path}
+        self._init_vars(config_path)
+
+    def _init_vars(self, config_path: str):
+        self.vars = {"$containerConfigDir": config_path,
+                     "$volumeRootDir":      self.setting_or_default("volumeRootDir"),
+                     "$backupPrefixFolder": self.setting_or_default("backupPrefixFolder", ".")}
 
     def _load_config_file(self, config_path: str, section_name: str):
         config_file = configparser.ConfigParser(allow_no_value=True)
@@ -69,6 +73,19 @@ class AbstractConfig(ABC):
     def setting(self, name: str) -> str:
         pass
 
+    def has_setting(self, name: str):
+        try:
+            self.setting(name)
+            return True
+        except Exception:
+            return False
+
+    def setting_or_default(self, name: str, default_val: str = ""):
+        try:
+            return self.setting(name)
+        except Exception:
+            return default_val
+
     @abstractmethod
     def get_step(self, step: str) -> str:
         pass
@@ -84,6 +101,8 @@ class AbstractConfig(ABC):
     @staticmethod
     def _actions_name(section_name: str) -> str:
         return AbstractConfig._create_subsection(section_name, AbstractConfig.actionSection)
+
+
 
 
 def _replace_list(cmd: str, var: str, val: list):
