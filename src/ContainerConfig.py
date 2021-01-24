@@ -44,5 +44,6 @@ class ContainerConfig(AbstractConfig):
     def add_action_content(self):
         for action, enabled in self.get_enabled_actions().items():
             if enabled:
-                command = self.defaultConfig.get_action(action)
-                self.backupSteps[command[0]] += command[1].strip() + "\n"
+                commands = self.defaultConfig.get_action(action)
+                for step, command in commands:
+                    self.backupSteps[step] += command.strip() + "\n"
