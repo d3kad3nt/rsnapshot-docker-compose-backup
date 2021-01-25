@@ -3,24 +3,37 @@ import re
 from typing import List, Tuple
 
 from container import Container
+from src import docker
 from src.utils import command
 from concurrent import futures
+
+
+def get_container_id(container: str, path: str) -> str:
+    return command("docker-compose ps -q {}".format(container), path=path).stdout
+
+
+def container_runs(container_id):
+    if docker.ps(container_id):
+        return True
+    else:
+        return False
 
 
 def find_running_container() -> List[Container]:
     all_container: List[Container] = []
     docker_dirs: List[str] = find_docker_dirs()
     with futures.ProcessPoolExecutor() as pool:
-        for output, directory in pool.map(ps, docker_dirs):
-            container_list: List[str] = get_running_container(output)
+        for container_list, directory in pool.map(get_services, docker_dirs):
+            # container_list: List[str] = get_services(output)
             for container in container_list:
-                image = image_id(container, directory)
-                all_container.append(Container(directory, container, image))
+                container_id = get_container_id(container, directory)[:12]
+                if container_id and container_runs(container_id):
+                    all_container.append(Container(directory, container, container_id))
     return all_container
 
 
-def ps(path: str) -> Tuple[str, str]:
-    return command("docker-compose ps", path=path).stdout, path
+def get_services(path: str) -> Tuple[List[str], str]:
+    return command("docker-compose ps --services", path=path).stdout.splitlines(), path
 
 
 """Finds all docker-compose dirs in current sub folder

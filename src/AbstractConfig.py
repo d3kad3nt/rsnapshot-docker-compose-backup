@@ -36,6 +36,7 @@ class AbstractConfig(ABC):
                      "$backupPrefixFolder": self.setting_or_default("backupPrefixFolder", ".")}
 
     def _load_config_file(self, config_path: str, section_name: str):
+        section_name = section_name.lower()
         config_file = configparser.ConfigParser(allow_no_value=True)
         config_file.SECTCRE = CaseInsensitiveRe(re.compile(r"\[ *(?P<header>[^]]+?) *]"))
         if os.path.isfile(config_path):
@@ -45,9 +46,6 @@ class AbstractConfig(ABC):
             if not config_file.has_section(section_name):
                 raise Exception("The Config for {} has no Section with the name of the Container ({})".
                                 format(config_path, section_name))
-        else:
-            print("#No specific config for {}.".format(section_name))
-
         for step in self.backupSteps.keys():
             if config_file.has_option(section_name, step):
                 self.backupSteps[step] = config_file.get(section_name, step).strip()+"\n"

@@ -13,12 +13,13 @@ class Container:
     config: ContainerConfig
     volumes: List[Volume]
 
-    def __init__(self, folder: str, name: str, image_id: str):
+    def __init__(self, folder: str, name: str, container_id: str):
         self.folder = folder
         self.name = name
-        self.image = image_id
+        self.container_id = container_id
+        self.image = docker.image(container_id)
         self.file_name = os.path.join(self.folder, "backup.ini")
-        self.volumes = docker.volumes(name)
+        self.volumes = docker.volumes(container_id)
         self.config = ContainerConfig(self)
 
     def backup(self) -> NoReturn:
