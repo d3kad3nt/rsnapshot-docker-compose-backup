@@ -20,7 +20,7 @@ class ContainerConfig(AbstractConfig):
         for step in self.backupSteps:
             backup_action = self.get_step(step)
             if backup_action:
-                print(f"#{step}")
+                print("#{}".format(step))
                 for line in backup_action.splitlines():
                     print(self._resolve_vars(line))
 
