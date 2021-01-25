@@ -50,7 +50,7 @@ class AbstractConfig(ABC):
 
         for step in self.backupSteps.keys():
             if config_file.has_option(section_name, step):
-                self.backupSteps[step] = config_file.get(section_name, step)
+                self.backupSteps[step] = config_file.get(section_name, step).strip()+"\n"
         setting_section = self._settings_name(section_name)
         if config_file.has_section(setting_section):
             for setting in config_file.options(setting_section):

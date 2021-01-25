@@ -14,6 +14,7 @@ class DefaultConfig(AbstractConfig):
     predefined_actions_step = "step"
     defaultConfig = "default_config"
     defaultConfigName = "backup.ini"
+
     actions: Dict[str, List[Tuple[str, str]]] = {}
 
     def __init__(self):
@@ -24,52 +25,8 @@ class DefaultConfig(AbstractConfig):
 
     @staticmethod
     def _create_default_config():
-        default_config = configparser.ConfigParser()
-        default_config.read_dict(
-            {
-                DefaultConfig.defaultConfig: {
-                    "pre_backup": "backup-exec docker-compose stop",
-                    "post_backup": "backup-exec docker-compose start"},
-                DefaultConfig._settings_name(DefaultConfig.defaultConfig): {
-                    "volumeRootDir": "/var/lib/docker/volumes/",
-                    "backupPrefixFolder": "/var/lib/docker/volumes/"},
-                DefaultConfig._actions_name(DefaultConfig.defaultConfig): {
-                    "stopContainer": "true",
-                    "volumeBackup": "true",
-                    "yamlBackup": "true",
-                    "imageBackup": "true",
-                },
-                DefaultConfig._create_subsection(DefaultConfig.predefined_actions, "volumeBackup"): {
-                    DefaultConfig.predefined_actions_command: "backup    $volumes.path    $backupPrefixFolder/$containerName/$volumes.name",
-                    DefaultConfig.predefined_actions_step: "backup"
-                },
-                DefaultConfig._create_subsection(DefaultConfig.predefined_actions,  "yamlBackup"): {
-                    DefaultConfig.predefined_actions_command: "backup   $containerFolder/docker-compose.yml $backupPrefixFolder/$containerName/docker-compose.yml",
-                    DefaultConfig.predefined_actions_step: "runtime_backup"
-                },
-                DefaultConfig._create_subsection(DefaultConfig.predefined_actions,  "imageBackup"): {
-                    DefaultConfig.predefined_actions_command: "backup_script	docker image save $image -o $containerName_image.tar    $backupPrefixFolder/$containerName/",
-                    DefaultConfig.predefined_actions_step: "runtime_backup"
-                },
-                DefaultConfig._create_subsection(DefaultConfig.predefined_actions,  "logBackup"): {
-                    DefaultConfig.predefined_actions_command: "backup_script docker logs $containerName > $containerName_logs.log    $backupPrefixFolder/$containerName/",
-                    DefaultConfig.predefined_actions_step: "backup"
-                },
-                DefaultConfig._create_subsection(DefaultConfig.predefined_actions, "stopContainer"): {
-                    DefaultConfig.predefined_actions_action: "stopContainer_stop, stopContainer_start",
-                },
-                DefaultConfig._create_subsection(DefaultConfig.predefined_actions, "stopContainer_stop"): {
-                    DefaultConfig.predefined_actions_command: "backup-exec docker-compose stop",
-                    DefaultConfig.predefined_actions_step: "pre_backup"
-                },
-                DefaultConfig._create_subsection(DefaultConfig.predefined_actions, "stopContainer_start"): {
-                    DefaultConfig.predefined_actions_command: "backup-exec docker-compose start",
-                    DefaultConfig.predefined_actions_step: "post_backup"
-                }
-            }
-        )
         with open(DefaultConfig.defaultConfigName, 'w') as configfile:
-            default_config.write(configfile)
+            configfile.write(defaultConfigContent)
 
     def setting(self, name: str) -> str:
         return self.settings[name.lower()]
@@ -100,3 +57,66 @@ class DefaultConfig(AbstractConfig):
 
     def get_action(self, name: str) -> (str, str):
         return self.actions[name]
+
+
+defaultConfigContent = """
+#This is the default config of the rsnapshot-docker-compose-backup program.
+
+#This section can contain rsnapshot commands that are executed in the different steps of the container backup
+[{default_config}]
+#Example:
+#run_backup=backup_script   echo "Hello" > helloWorld   test/
+
+#This section contains settings that are used by the backup
+[{default_config_settings}]
+#This setting corresponds to the var with the same name and can be used as a prefix in the folder path
+backupprefixfolder = .
+
+#This Section controls which actions should be enabled
+[{default_config_actions}]
+#This action stops the container before copying the volumes and starts it after it finished.
+stopcontainer = true
+
+#This action backups all volumes of the container
+volumebackup = true
+
+#This action saves the docker-compose.yml
+yamlbackup = true
+imagebackup = true
+
+#The following is the definition of actions that can be used in the backup
+
+[{predefined_actions}.volumeBackup]
+{command} = backup    $volumes.path    $backupPrefixFolder/$containerName/$volumes.name
+{step} = backup
+
+[{predefined_actions}.yamlBackup]
+{command} = backup   $containerFolder/docker-compose.yml $backupPrefixFolder/$containerName/docker-compose.yml
+{step} = runtime_backup
+
+[{predefined_actions}.imageBackup]
+{command} = backup_script	docker image save $image -o $containerName_image.tar    $backupPrefixFolder/$containerName/
+{step} = runtime_backup
+
+[{predefined_actions}.logBackup]
+{command} = backup_script docker logs $containerName > $containerName_logs.log    $backupPrefixFolder/$containerName/
+{step} = backup
+
+[{predefined_actions}.stopContainer]
+{actions} = stopContainer_stop, stopContainer_start
+
+[{predefined_actions}.stopContainer_stop]
+{command} = backup-exec docker-compose stop
+{step} = pre_backup
+
+[{predefined_actions}.stopContainer_start]
+{command} = backup-exec docker-compose start
+{step} = post_backup""".format(
+    default_config=DefaultConfig.defaultConfig,
+    default_config_settings=DefaultConfig._settings_name(DefaultConfig.defaultConfig),
+    default_config_actions=DefaultConfig._actions_name(DefaultConfig.defaultConfig),
+    predefined_actions=DefaultConfig.predefined_actions,
+    actions=DefaultConfig.predefined_actions_action,
+    command=DefaultConfig.predefined_actions_command,
+    step=DefaultConfig.predefined_actions_step
+)
