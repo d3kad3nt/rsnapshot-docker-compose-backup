@@ -33,7 +33,7 @@ def find_running_container() -> List[Container]:
 
 
 def get_services(path: str) -> Tuple[List[str], str]:
-    return command("docker-compose ps --services", path=path).stdout.splitlines(), path
+    return command("docker-compose config --services", path=path).stdout.splitlines(), path
 
 
 """Finds all docker-compose dirs in current sub folder
@@ -68,13 +68,3 @@ def get_container(ps_out: str, state: str = None) -> List[str]:
         if not state or up == state.upper():
             container.append(get_column(0, line))
     return container
-
-
-def image_id(container_name: str, path: str):
-    output = command("docker-compose images".format(container_name), path=path).stdout
-    #The information about the services start at the third line and the 4. column contains the image id
-    without_head: List[str] = output.splitlines()[2:]
-    for service in without_head:
-        if service.lower().startswith(container_name.lower()):
-            return get_column(3, service)
-    raise Exception("Cant find image for Service" + container_name)
