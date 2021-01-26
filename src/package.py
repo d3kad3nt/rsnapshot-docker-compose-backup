@@ -1,11 +1,11 @@
+import ast
 import os
 from typing import List
-import ast
+
 import astor
-import sys
 
 imported = []
-
+imported_files = []
 
 def find_python_files() -> List[str]:
     cwd = os.getcwd()
@@ -30,6 +30,9 @@ def package():
 
 
 def import_file(file: str, output):
+    if file in imported_files:
+        return
+    imported_files.append(file)
     with open(file, "r") as python_file:
         for line in python_file:
             if line.strip().startswith("from") or line.strip().startswith("import"):
