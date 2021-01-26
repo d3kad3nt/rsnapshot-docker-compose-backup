@@ -22,7 +22,7 @@ class ContainerConfig(AbstractConfig):
             if backup_action:
                 print("#{}".format(step))
                 for line in backup_action.splitlines():
-                    print(self._resolve_vars(line))
+                    print(self._resolve_vars(line).strip("\n"))
 
     def setting(self, name: str) -> str:
         if name.lower() in self.settings:
