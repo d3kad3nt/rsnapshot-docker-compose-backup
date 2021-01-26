@@ -107,11 +107,11 @@ imagebackup = true
 
 [{predefined_actions}.stopContainer_stop]
 {command} = backup-exec docker-compose stop
-{step} = pre_backup
+{step} = stop
 
 [{predefined_actions}.stopContainer_start]
 {command} = backup-exec docker-compose start
-{step} = post_backup""".format(
+{step} = restart""".format(
     default_config=DefaultConfig.defaultConfig,
     default_config_settings=DefaultConfig._settings_name(DefaultConfig.defaultConfig),
     default_config_actions=DefaultConfig._actions_name(DefaultConfig.defaultConfig),
