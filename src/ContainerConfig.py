@@ -6,10 +6,11 @@ from src.DefaultConfig import DefaultConfig
 
 
 class ContainerConfig(AbstractConfig):
-    defaultConfig: DefaultConfig = DefaultConfig()
+
 
     def __init__(self, container):
         super().__init__(container.file_name, container.name)
+        self.defaultConfig: DefaultConfig = DefaultConfig.get_instance()
         self.vars["$containerName"] = container.name
         self.vars["$containerFolder"] = container.folder
         self.vars["$volumes"] = container.volumes
