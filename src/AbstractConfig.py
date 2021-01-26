@@ -12,20 +12,23 @@ class AbstractConfig(ABC):
 
     actionSection = "actions"
     settingSection = "settings"
+    backupOrder = [
+        "runtime_backup",
+        "pre_stop",
+        "stop",
+        "pre_backup",
+        "backup",
+        "post_backup",
+        "restart",
+        "post_restart",
+    ]
 
     def __init__(self, config_path: str, name: str):
         self.enabled_actions: Dict[str, bool] = {}
         self.settings: Dict[str, str] = {}
-        self.backupSteps = {
-            "runtime_backup": "",
-            "pre_stop": "",
-            "stop": "",
-            "pre_backup": "",
-            "backup": "",
-            "post_backup": "",
-            "restart": "",
-            "post_restart": "",
-        }
+        self.backupSteps = {}
+        for step in self.backupOrder:
+            self.backupSteps[step] = ""
         self._load_config_file(config_path, name)
         self.name = name
         self._init_vars(config_path)

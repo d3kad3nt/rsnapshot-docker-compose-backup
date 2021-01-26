@@ -17,7 +17,7 @@ class ContainerConfig(AbstractConfig):
         self.add_action_content()
 
     def output(self) -> NoReturn:
-        for step in self.backupSteps:
+        for step in self.backupOrder:
             backup_action = self.get_step(step)
             if backup_action:
                 print("#{}".format(step))
