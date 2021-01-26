@@ -46,9 +46,6 @@ class AbstractConfig(ABC):
             config_file.read(config_path)
             if not config_file.sections():
                 raise Exception("The Config for {} has no Sections".format(config_path))
-            if not config_file.has_section(section_name):
-                raise Exception("The Config for {} has no Section with the name of the Container ({})".
-                                format(config_path, section_name))
         for step in self.backupSteps.keys():
             if config_file.has_option(section_name, step):
                 self.backupSteps[step] = config_file.get(section_name, step).strip()+"\n"
@@ -109,7 +106,7 @@ class AbstractConfig(ABC):
 def _replace_list(cmd: str, var: str, val: list):
     result = ""
     for i in val:
-        result += _replace_var[type(i)](cmd, var, i)
+        result += _replace_var[type(i)](cmd, var, i) + "\n"
     return result
 
 
@@ -121,7 +118,7 @@ def _replace_volume(cmd: str, var: str, val: Volume):
     tmp = cmd.replace(var + ".name", val.name)
     tmp = tmp.replace(var + ".path", val.path)
     tmp = tmp.replace(var, val.path)
-    return tmp + "\n"
+    return tmp
 
 
 _replace_var = {
