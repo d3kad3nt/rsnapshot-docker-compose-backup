@@ -8,6 +8,7 @@ from src.utils import CaseInsensitiveRe
 
 
 class DefaultConfig(AbstractConfig):
+    defaultConfigFolder = "."
     predefined_actions = "predefined_actions"
     predefined_actions_action = "actions"
     predefined_actions_command = "command"
@@ -18,14 +19,14 @@ class DefaultConfig(AbstractConfig):
     actions: Dict[str, List[Tuple[str, str]]] = {}
 
     def __init__(self):
-        if not os.path.isfile(self.defaultConfigName):
+        self.filename = os.path.join(self.defaultConfigFolder, self.defaultConfigName)
+        if not os.path.isfile(self.filename):
             self._create_default_config()
-        super().__init__(self.defaultConfigName, self.defaultConfig)
+        super().__init__(self.filename, self.defaultConfig)
         self._load_predefined_actions()
 
-    @staticmethod
-    def _create_default_config():
-        with open(DefaultConfig.defaultConfigName, 'w') as configfile:
+    def _create_default_config(self):
+        with open(self.filename, 'w') as configfile:
             configfile.write(defaultConfigContent)
 
     def setting(self, name: str) -> str:

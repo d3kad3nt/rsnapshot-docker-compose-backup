@@ -19,9 +19,9 @@ def container_runs(container_id):
         return False
 
 
-def find_running_container() -> List[Container]:
+def find_running_container(root_folder: str) -> List[Container]:
     all_container: List[Container] = []
-    docker_dirs: List[str] = find_docker_dirs()
+    docker_dirs: List[str] = find_docker_dirs(root_folder)
     with futures.ProcessPoolExecutor() as pool:
         for container_list, directory in pool.map(get_services, docker_dirs):
             # container_list: List[str] = get_services(output)
@@ -40,15 +40,13 @@ def get_services(path: str) -> Tuple[List[Tuple[str, str]], str]:
         services.append((service, container_id))
     return services, path
 
+
 """Finds all docker-compose dirs in current sub folder
 :returns: a list of all folders
 """
-
-
-def find_docker_dirs() -> List[str]:
+def find_docker_dirs(root_folder: str = os.getcwd()) -> List[str]:
     dirs: List[str] = []
-    cwd: str = os.getcwd()
-    for treeElement in os.walk(cwd):
+    for treeElement in os.walk(root_folder):
         if "docker-compose.yml" in treeElement[2]:
             dirs.append(treeElement[0])
     return dirs
