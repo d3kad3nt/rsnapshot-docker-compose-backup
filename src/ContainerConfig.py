@@ -1,6 +1,5 @@
 from typing import NoReturn, Set, Dict
 
-from src import docker
 from src.AbstractConfig import AbstractConfig
 from src.DefaultConfig import DefaultConfig
 
@@ -9,8 +8,8 @@ class ContainerConfig(AbstractConfig):
 
 
     def __init__(self, container):
-        super().__init__(container.file_name, container.name)
         self.defaultConfig: DefaultConfig = DefaultConfig.get_instance()
+        super().__init__(container.file_name, container.name)
         self.vars["$containerName"] = container.name
         self.vars["$containerFolder"] = container.folder
         self.vars["$volumes"] = container.volumes

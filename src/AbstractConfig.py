@@ -36,6 +36,7 @@ class AbstractConfig(ABC):
     def _init_vars(self, config_path: str):
         self.vars = {"$containerConfigDir": config_path,
                      "$volumeRootDir":      self.setting_or_default("volumeRootDir"),
+                     "$remoteSystem":      self.setting_or_default("remoteSystem"),
                      "$backupPrefixFolder": self.setting_or_default("backupPrefixFolder", ".")}
 
     def _load_config_file(self, config_path: str, section_name: str):
@@ -52,7 +53,7 @@ class AbstractConfig(ABC):
         setting_section = self._settings_name(section_name)
         if config_file.has_section(setting_section):
             for setting in config_file.options(setting_section):
-                self.settings[setting] = config_file.get(setting_section, setting)
+                self.settings[setting.lower()] = config_file.get(setting_section, setting)
         actions_section = self._actions_name(section_name)
         if config_file.has_section(actions_section):
             for action in config_file.options(actions_section):

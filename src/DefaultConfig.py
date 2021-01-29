@@ -3,7 +3,7 @@ import os
 import re
 from typing import Dict, Tuple, List
 
-from src.global_values import folder
+import src.global_values
 from src.AbstractConfig import AbstractConfig
 from src.utils import CaseInsensitiveRe
 
@@ -16,7 +16,6 @@ class DefaultConfig(AbstractConfig):
     predefined_actions_step = "step"
     defaultConfig = "default_config"
     defaultConfigName = "backup.ini"
-    defaultConfigFolder = "sdfasdfö"
 
     actions: Dict[str, List[Tuple[str, str]]] = {}
 
@@ -29,7 +28,7 @@ class DefaultConfig(AbstractConfig):
     def __init__(self):
         if DefaultConfig.__instance is not None:
             raise Exception("This class is a singelton!")
-        self.filename = os.path.join(folder, self.defaultConfigName)
+        self.filename = os.path.join(src.global_values.folder, self.defaultConfigName)
         if not os.path.isfile(self.filename):
             self._create_default_config()
         super().__init__(self.filename, self.defaultConfig)
@@ -83,6 +82,7 @@ defaultConfigContent = """
 [{default_config_settings}]
 #This setting corresponds to the var with the same name and can be used as a prefix in the folder path
 backupprefixfolder = .
+# remoteSystem = user@127.0.0.1:
 
 #This Section controls which actions should be enabled
 [{default_config_actions}]
@@ -99,30 +99,30 @@ imagebackup = true
 #The following is the definition of actions that can be used in the backup
 
 [{predefined_actions}.volumeBackup]
-{command} = backup\t$volumes.path\t$backupPrefixFolder/$containerName/$volumes.name
+{command} = backup\t$remoteSystem$volumes.path\t$backupPrefixFolder/$containerName/$volumes.name
 {step} = backup
 
 [{predefined_actions}.yamlBackup]
-{command} = backup\t$containerFolder/docker-compose.yml\t$backupPrefixFolder/$containerName/docker-compose.yml
+{command} = backup\t$remoteSystem$containerFolder/docker-compose.yml\t$backupPrefixFolder/$containerName/docker-compose.yml
 {step} = runtime_backup
 
 [{predefined_actions}.imageBackup]
-{command} = backup_script\tdocker image save $image -o $containerName_image.tar\t$backupPrefixFolder/$containerName/
+{command} = backup_script\t$remoteSystem/usr/bin/docker image save $image -o $containerName_image.tar\t$backupPrefixFolder/$containerName/
 {step} = runtime_backup
 
 [{predefined_actions}.logBackup]
-{command} = backup_script\tdocker logs $containerName > $containerName_logs.log\t$backupPrefixFolder/$containerName/
+{command} = backup_script\t$remoteSystem/usr/bin/docker logs $containerName > $containerName_logs.log\t$backupPrefixFolder/$containerName/
 {step} = backup
 
 [{predefined_actions}.stopContainer]
 {actions} = stopContainer_stop, stopContainer_start
 
 [{predefined_actions}.stopContainer_stop]
-{command} = backup-exec\tdocker-compose stop
+{command} = backup-exec\t$remoteSystem/usr/bin/docker-compose stop
 {step} = stop
 
 [{predefined_actions}.stopContainer_start]
-{command} = backup-exec\tdocker-compose start
+{command} = backup-exec\t$remoteSystem/usr/bin/docker-compose start
 {step} = restart""".format(
     default_config=DefaultConfig.defaultConfig,
     default_config_settings=DefaultConfig._settings_name(DefaultConfig.defaultConfig),
