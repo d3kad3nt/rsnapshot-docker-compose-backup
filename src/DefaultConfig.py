@@ -3,15 +3,9 @@ import os
 import re
 from typing import Dict, Tuple, List
 
+from src.global_values import folder
 from src.AbstractConfig import AbstractConfig
 from src.utils import CaseInsensitiveRe
-
-folder = None
-
-
-def set_folder(path: str):
-    global folder
-    folder = path
 
 
 class DefaultConfig(AbstractConfig):
@@ -55,7 +49,7 @@ class DefaultConfig(AbstractConfig):
     def _load_predefined_actions(self):
         config_file = configparser.ConfigParser(allow_no_value=True)
         config_file.SECTCRE = CaseInsensitiveRe(re.compile(r"\[ *(?P<header>[^]]+?) *]"))
-        config_file.read(self.defaultConfigName)
+        config_file.read(self.filename)
         sub_actions: List[Tuple[str, str]] = []
         for section in config_file.sections():
             if section.startswith(self.predefined_actions):
@@ -105,30 +99,30 @@ imagebackup = true
 #The following is the definition of actions that can be used in the backup
 
 [{predefined_actions}.volumeBackup]
-{command} = backup\\t$volumes.path\\t$backupPrefixFolder/$containerName/$volumes.name
+{command} = backup\t$volumes.path\t$backupPrefixFolder/$containerName/$volumes.name
 {step} = backup
 
 [{predefined_actions}.yamlBackup]
-{command} = backup\\t$containerFolder/docker-compose.yml\\t$backupPrefixFolder/$containerName/docker-compose.yml
+{command} = backup\t$containerFolder/docker-compose.yml\t$backupPrefixFolder/$containerName/docker-compose.yml
 {step} = runtime_backup
 
 [{predefined_actions}.imageBackup]
-{command} = backup_script\\tdocker image save $image -o $containerName_image.tar\\t$backupPrefixFolder/$containerName/
+{command} = backup_script\tdocker image save $image -o $containerName_image.tar\t$backupPrefixFolder/$containerName/
 {step} = runtime_backup
 
 [{predefined_actions}.logBackup]
-{command} = backup_script\\tdocker logs $containerName > $containerName_logs.log\\t$backupPrefixFolder/$containerName/
+{command} = backup_script\tdocker logs $containerName > $containerName_logs.log\t$backupPrefixFolder/$containerName/
 {step} = backup
 
 [{predefined_actions}.stopContainer]
 {actions} = stopContainer_stop, stopContainer_start
 
 [{predefined_actions}.stopContainer_stop]
-{command} = backup-exec\\tdocker-compose stop
+{command} = backup-exec\tdocker-compose stop
 {step} = stop
 
 [{predefined_actions}.stopContainer_start]
-{command} = backup-exec\\tdocker-compose start
+{command} = backup-exec\tdocker-compose start
 {step} = restart""".format(
     default_config=DefaultConfig.defaultConfig,
     default_config_settings=DefaultConfig._settings_name(DefaultConfig.defaultConfig),
