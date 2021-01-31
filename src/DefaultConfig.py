@@ -118,11 +118,11 @@ imagebackup = true
 {actions} = stopContainer_stop, stopContainer_start
 
 [{predefined_actions}.stopContainer_stop]
-{command} = backup-exec\t$remoteSystem/usr/bin/docker-compose stop
+{command} = backup_exec\t$remoteSystem/usr/bin/docker-compose stop
 {step} = stop
 
 [{predefined_actions}.stopContainer_start]
-{command} = backup-exec\t$remoteSystem/usr/bin/docker-compose start
+{command} = backup_exec\t$remoteSystem/usr/bin/docker-compose start
 {step} = restart""".format(
     default_config=DefaultConfig.defaultConfig,
     default_config_settings=DefaultConfig._settings_name(DefaultConfig.defaultConfig),
