@@ -103,15 +103,15 @@ imagebackup = true
 {step} = backup
 
 [{predefined_actions}.yamlBackup]
-{command} = backup\t$remoteSystem$containerFolder/docker-compose.yml\t$backupPrefixFolder/$containerName/docker-compose.yml
+{command} = backup\t$remoteSystem$containerFolder/docker-compose.yml\t$backupPrefixFolder/$containerName/yaml
 {step} = runtime_backup
 
 [{predefined_actions}.imageBackup]
-{command} = backup_script\t$remoteSystem/usr/bin/docker image save $image -o $containerName_image.tar\t$backupPrefixFolder/$containerName/
+{command} = backup_script\t$remoteSystem/usr/bin/docker image save $image -o $containerName_image.tar\t$backupPrefixFolder/$containerName/image
 {step} = runtime_backup
 
 [{predefined_actions}.logBackup]
-{command} = backup_script\t$remoteSystem/usr/bin/docker logs $containerName > $containerName_logs.log\t$backupPrefixFolder/$containerName/
+{command} = backup_script\t$remoteSystem/usr/bin/docker logs $containerName > $containerName_logs.log\t$backupPrefixFolder/$containerName/log
 {step} = backup
 
 [{predefined_actions}.stopContainer]
