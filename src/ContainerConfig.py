@@ -6,15 +6,21 @@ from src.DefaultConfig import DefaultConfig
 
 class ContainerConfig(AbstractConfig):
 
-
     def __init__(self, container):
         self.defaultConfig: DefaultConfig = DefaultConfig.get_instance()
         super().__init__(container.file_name, container.name)
         self.vars["$containerName"] = container.name
+        self.vars["$containerID"] = container.container_id
         self.vars["$containerFolder"] = container.folder
         self.vars["$volumes"] = container.volumes
         self.vars["$image"] = container.image
         self.add_action_content()
+
+    def _all_vars(self):
+        variables = {}
+        variables.update(self.defaultConfig.vars)
+        variables.update(self.vars)
+        return variables
 
     def output(self) -> NoReturn:
         for step in self.backupOrder:
@@ -22,7 +28,7 @@ class ContainerConfig(AbstractConfig):
             if backup_action:
                 print("#{}".format(step))
                 for line in backup_action.splitlines():
-                    print(self._resolve_vars(line).strip("\n"))
+                    print(self._resolve_vars(line, self._all_vars()).strip("\n"))
 
     def setting(self, name: str) -> str:
         if name.lower() in self.settings:

@@ -2,7 +2,7 @@ import configparser
 import os
 import re
 from abc import ABC, abstractmethod
-from typing import Set, Dict
+from typing import Dict
 
 from src.utils import CaseInsensitiveRe
 from src.volume import Volume
@@ -12,6 +12,7 @@ class AbstractConfig(ABC):
 
     actionSection = "actions"
     settingSection = "settings"
+    varSection = "vars"
     backupOrder = [
         "runtime_backup",
         "pre_stop",
@@ -27,6 +28,7 @@ class AbstractConfig(ABC):
         self.enabled_actions: Dict[str, bool] = {}
         self.settings: Dict[str, str] = {}
         self.backupSteps = {}
+        self.vars = {}
         for step in self.backupOrder:
             self.backupSteps[step] = ""
         self._load_config_file(config_path, name)
@@ -34,10 +36,9 @@ class AbstractConfig(ABC):
         self._init_vars(config_path)
 
     def _init_vars(self, config_path: str):
-        self.vars = {"$containerConfigDir": config_path,
-                     "$volumeRootDir":      self.setting_or_default("volumeRootDir"),
-                     "$remoteSystem":      self.setting_or_default("remoteSystem"),
-                     "$backupPrefixFolder": self.setting_or_default("backupPrefixFolder", ".")}
+        self.vars["$containerConfigDir"] = config_path
+        if "$backupPrefixFolder" not in self.vars:
+            self.vars["$backupPrefixFolder"] = "."
 
     def _load_config_file(self, config_path: str, section_name: str):
         section_name = section_name.lower()
@@ -60,12 +61,17 @@ class AbstractConfig(ABC):
                 val = config_file.get(actions_section, action)
                 use = val is None or val.lower() in ["true"]
                 self.enabled_actions[action] = use
+        vars_section = self._vars_name(section_name)
+        if config_file.has_section(vars_section):
+            for var in config_file.options(vars_section):
+                val = config_file.get(vars_section, var)
+                self.vars["${}".format(var)] = val
 
-    def _resolve_vars(self, cmd: str) -> str:
-        for var in self.vars:
-            if var in cmd:
-                replace_function = _replace_var.get(type(self.vars[var]))
-                cmd = replace_function(cmd, var, self.vars[var])
+    def _resolve_vars(self, cmd: str, variables: Dict[str, str]) -> str:
+        for var in variables.keys():
+            if var.lower() in cmd.lower():
+                replace_function = _replace_var.get(type(variables[var]))
+                cmd = replace_function(cmd, var, variables[var])
         return cmd
 
     @abstractmethod
@@ -101,7 +107,20 @@ class AbstractConfig(ABC):
     def _actions_name(section_name: str) -> str:
         return AbstractConfig._create_subsection(section_name, AbstractConfig.actionSection)
 
+    @staticmethod
+    def _vars_name(section_name: str) -> str:
+        return AbstractConfig._create_subsection(section_name, AbstractConfig.varSection)
 
+
+def ireplace(old, new, text):
+    idx = 0
+    while idx < len(text):
+        index_l = text.lower().find(old.lower(), idx)
+        if index_l == -1:
+            return text
+        text = text[:index_l] + new + text[index_l + len(old):]
+        idx = index_l + len(new)
+    return text
 
 
 def _replace_list(cmd: str, var: str, val: list):
@@ -112,13 +131,13 @@ def _replace_list(cmd: str, var: str, val: list):
 
 
 def _replace_str(cmd: str, var: str, val: str):
-    return cmd.replace(var, val)
+    return ireplace(var, val, cmd)
 
 
 def _replace_volume(cmd: str, var: str, val: Volume):
-    tmp = cmd.replace(var + ".name", val.name)
-    tmp = tmp.replace(var + ".path", val.path)
-    tmp = tmp.replace(var, val.path)
+    tmp = _replace_str(cmd, var + ".name", val.name)
+    tmp = _replace_str(tmp,var + ".path", val.path)
+    tmp = _replace_str(tmp,var, val.path)
     return tmp
 
 

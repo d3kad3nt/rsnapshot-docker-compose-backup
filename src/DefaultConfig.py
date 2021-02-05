@@ -80,6 +80,9 @@ defaultConfigContent = """
 
 #This section contains settings that are used by the backup
 [{default_config_settings}]
+# This section contains settings like what actions should be enabled
+
+[{default_config_vars}]
 #This setting corresponds to the var with the same name and can be used as a prefix in the folder path
 backupprefixfolder = .
 # remoteSystem = user@127.0.0.1:
@@ -127,6 +130,7 @@ imagebackup = true
     default_config=DefaultConfig.defaultConfig,
     default_config_settings=DefaultConfig._settings_name(DefaultConfig.defaultConfig),
     default_config_actions=DefaultConfig._actions_name(DefaultConfig.defaultConfig),
+    default_config_vars=DefaultConfig._vars_name(DefaultConfig.defaultConfig),
     predefined_actions=DefaultConfig.predefined_actions,
     actions=DefaultConfig.predefined_actions_action,
     command=DefaultConfig.predefined_actions_command,
