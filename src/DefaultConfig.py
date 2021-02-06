@@ -85,7 +85,6 @@ defaultConfigContent = """
 [{default_config_vars}]
 #This setting corresponds to the var with the same name and can be used as a prefix in the folder path
 backupprefixfolder = .
-# remoteSystem = user@127.0.0.1:
 
 #This Section controls which actions should be enabled
 [{default_config_actions}]
@@ -102,30 +101,34 @@ imagebackup = true
 #The following is the definition of actions that can be used in the backup
 
 [{predefined_actions}.volumeBackup]
-{command} = backup\t$remoteSystem$volumes.path\t$backupPrefixFolder/$containerName/$volumes.name
+{command} = backup\t$volumes.path\t$backupPrefixFolder/$serviceName/$volumes.name
 {step} = backup
 
 [{predefined_actions}.yamlBackup]
-{command} = backup\t$remoteSystem$containerFolder/docker-compose.yml\t$backupPrefixFolder/$containerName/yaml
+{command} = backup\t$containerFolder\t$backupPrefixFolder/$serviceName/yaml\t+rsync_long_args=--include=*.yml,+rsync_long_args=--include=*.yaml
 {step} = runtime_backup
 
+[{predefined_actions}.projectDirBackup]
+{command} = backup\t$containerFolder\t$backupPrefixFolder/$serviceName/projectDir
+{step} = backup
+
 [{predefined_actions}.imageBackup]
-{command} = backup_script\t$remoteSystem/usr/bin/docker image save $image -o $containerName_image.tar\t$backupPrefixFolder/$containerName/image
+{command} = backup_script\t/usr/bin/docker image save $image -o $serviceName_image.tar\t$backupPrefixFolder/$serviceName/image
 {step} = runtime_backup
 
 [{predefined_actions}.logBackup]
-{command} = backup_script\t$remoteSystem/usr/bin/docker logs $containerName > $containerName_logs.log\t$backupPrefixFolder/$containerName/log
+{command} = backup_script\t/usr/bin/docker logs $containerID > $containerName_logs.log\t$backupPrefixFolder/$serviceName/log
 {step} = backup
 
 [{predefined_actions}.stopContainer]
 {actions} = stopContainer_stop, stopContainer_start
 
 [{predefined_actions}.stopContainer_stop]
-{command} = backup_exec\t$remoteSystem/usr/bin/docker-compose stop
+{command} = backup_exec\tcd $containerFolder; /usr/bin/docker-compose stop
 {step} = stop
 
 [{predefined_actions}.stopContainer_start]
-{command} = backup_exec\t$remoteSystem/usr/bin/docker-compose start
+{command} = backup_exec\tcd $containerFolder; /usr/bin/docker-compose start
 {step} = restart""".format(
     default_config=DefaultConfig.defaultConfig,
     default_config_settings=DefaultConfig._settings_name(DefaultConfig.defaultConfig),

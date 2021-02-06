@@ -9,7 +9,7 @@ class ContainerConfig(AbstractConfig):
     def __init__(self, container):
         self.defaultConfig: DefaultConfig = DefaultConfig.get_instance()
         super().__init__(container.file_name, container.name)
-        self.vars["$containerName"] = container.name
+        self.vars["$serviceName"] = container.name
         self.vars["$containerID"] = container.container_id
         self.vars["$containerFolder"] = container.folder
         self.vars["$volumes"] = container.volumes
