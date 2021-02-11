@@ -12,12 +12,10 @@ class DefaultConfig(AbstractConfig):
     __instance = None
     predefined_actions = "predefined_actions"
     predefined_actions_action = "actions"
-    predefined_actions_command = "command"
-    predefined_actions_step = "step"
     defaultConfig = "default_config"
     defaultConfigName = "backup.ini"
 
-    actions: Dict[str, List[Tuple[str, str]]] = {}
+    actions: Dict[str, Dict[str, str]] = {}
 
     @staticmethod
     def get_instance():
@@ -55,16 +53,18 @@ class DefaultConfig(AbstractConfig):
                 action_name = section[len(self.predefined_actions + "."):]
                 if config_file.has_option(section, self.predefined_actions_action):
                     sub_actions.append((section, action_name))
-                command = config_file.get(section, self.predefined_actions_command, fallback=None)
-                if command:
-                    step = config_file.get(section, self.predefined_actions_step, fallback="backup")
-                    self.actions[action_name] = [(step, command)]
+                commands = {}
+                for step in self.backupSteps:
+                    if config_file.has_option(section, step):
+                        commands[step] = config_file.get(section, step).strip() + "\n"
+                if commands:
+                    self.actions[action_name] = commands
         for section, action_name in sub_actions:
             if not self.actions.get(action_name):
-                self.actions[action_name] = []
+                self.actions[action_name] = {}
             actions = config_file.get(section, self.predefined_actions_action)
             for action in actions.split(" "):
-                self.actions[action_name].extend(self.actions[action.lower().strip(",")])
+                self.actions[action_name].update(self.actions[action.lower().strip(",")])
 
     def get_action(self, name: str) -> (str, str):
         return self.actions[name]
@@ -101,41 +101,30 @@ imagebackup = true
 #The following is the definition of actions that can be used in the backup
 
 [{predefined_actions}.volumeBackup]
-{command} = backup\t$volumes.path\t$backupPrefixFolder/$serviceName/$volumes.name
-{step} = backup
+backup = backup\t$volumes.path\t$backupPrefixFolder/$serviceName/$volumes.name
 
 [{predefined_actions}.yamlBackup]
-{command} = backup\t$projectFolder\t$backupPrefixFolder/$serviceName/yaml\t+rsync_long_args=--include=*.yml,+rsync_long_args=--include=*.yaml
-{step} = runtime_backup
+runtime_backup = backup\t$projectFolder\t$backupPrefixFolder/$serviceName/yaml\t+rsync_long_args=--include=*.yml,+rsync_long_args=--include=*.yaml
 
 [{predefined_actions}.projectDirBackup]
-{command} = backup\t$projectFolder\t$backupPrefixFolder/$serviceName/projectDir
-{step} = backup
+backup = backup\t$projectFolder\t$backupPrefixFolder/$serviceName/projectDir
 
 [{predefined_actions}.imageBackup]
-{command} = backup_script\t/usr/bin/docker image save $image -o $serviceName_image.tar\t$backupPrefixFolder/$serviceName/image
-{step} = runtime_backup
+runtime_backup = backup_script\t/usr/bin/docker image save $image -o $serviceName_image.tar\t$backupPrefixFolder/$serviceName/image
 
 [{predefined_actions}.logBackup]
-{command} = backup_script\t/usr/bin/docker logs $containerID > $serviceName_logs.log\t$backupPrefixFolder/$serviceName/log
-{step} = backup
+backup = backup_script\t/usr/bin/docker logs $containerID > $serviceName_logs.log\t$backupPrefixFolder/$serviceName/log
 
 [{predefined_actions}.stopContainer]
-{actions} = stopContainer_stop, stopContainer_start
+#{actions} = stopContainer_stop, stopContainer_start
+stop = backup_exec\tcd $projectFolder; /usr/bin/docker-compose stop
+restart = backup_exec\tcd $projectFolder; /usr/bin/docker-compose start
 
-[{predefined_actions}.stopContainer_stop]
-{command} = backup_exec\tcd $projectFolder; /usr/bin/docker-compose stop
-{step} = stop
-
-[{predefined_actions}.stopContainer_start]
-{command} = backup_exec\tcd $projectFolder; /usr/bin/docker-compose start
-{step} = restart""".format(
+""".format(
     default_config=DefaultConfig.defaultConfig,
     default_config_settings=DefaultConfig._settings_name(DefaultConfig.defaultConfig),
     default_config_actions=DefaultConfig._actions_name(DefaultConfig.defaultConfig),
     default_config_vars=DefaultConfig._vars_name(DefaultConfig.defaultConfig),
     predefined_actions=DefaultConfig.predefined_actions,
     actions=DefaultConfig.predefined_actions_action,
-    command=DefaultConfig.predefined_actions_command,
-    step=DefaultConfig.predefined_actions_step
 )
