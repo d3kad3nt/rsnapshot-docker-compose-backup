@@ -11,9 +11,10 @@ class ContainerConfig(AbstractConfig):
         super().__init__(container.file_name, container.name)
         self.vars["$serviceName"] = container.name
         self.vars["$containerID"] = container.container_id
-        self.vars["$containerFolder"] = container.folder
+        self.vars["$projectFolder"] = container.folder
         self.vars["$volumes"] = container.volumes
         self.vars["$image"] = container.image
+        self.vars["$projectName"] = container.project_name
         self.add_action_content()
 
     def _all_vars(self):

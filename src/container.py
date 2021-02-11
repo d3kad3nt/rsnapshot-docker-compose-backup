@@ -17,6 +17,7 @@ class Container:
         self.folder = folder
         self.name = name
         self.container_id = container_id
+        self.project_name = os.path.basename(folder)
         self.image = docker.image(container_id)
         self.file_name = os.path.join(self.folder, "backup.ini")
         self.volumes = docker.volumes(container_id)

@@ -105,11 +105,11 @@ imagebackup = true
 {step} = backup
 
 [{predefined_actions}.yamlBackup]
-{command} = backup\t$containerFolder\t$backupPrefixFolder/$serviceName/yaml\t+rsync_long_args=--include=*.yml,+rsync_long_args=--include=*.yaml
+{command} = backup\t$projectFolder\t$backupPrefixFolder/$serviceName/yaml\t+rsync_long_args=--include=*.yml,+rsync_long_args=--include=*.yaml
 {step} = runtime_backup
 
 [{predefined_actions}.projectDirBackup]
-{command} = backup\t$containerFolder\t$backupPrefixFolder/$serviceName/projectDir
+{command} = backup\t$projectFolder\t$backupPrefixFolder/$serviceName/projectDir
 {step} = backup
 
 [{predefined_actions}.imageBackup]
@@ -117,18 +117,18 @@ imagebackup = true
 {step} = runtime_backup
 
 [{predefined_actions}.logBackup]
-{command} = backup_script\t/usr/bin/docker logs $containerID > $containerName_logs.log\t$backupPrefixFolder/$serviceName/log
+{command} = backup_script\t/usr/bin/docker logs $containerID > $serviceName_logs.log\t$backupPrefixFolder/$serviceName/log
 {step} = backup
 
 [{predefined_actions}.stopContainer]
 {actions} = stopContainer_stop, stopContainer_start
 
 [{predefined_actions}.stopContainer_stop]
-{command} = backup_exec\tcd $containerFolder; /usr/bin/docker-compose stop
+{command} = backup_exec\tcd $projectFolder; /usr/bin/docker-compose stop
 {step} = stop
 
 [{predefined_actions}.stopContainer_start]
-{command} = backup_exec\tcd $containerFolder; /usr/bin/docker-compose start
+{command} = backup_exec\tcd $projectFolder; /usr/bin/docker-compose start
 {step} = restart""".format(
     default_config=DefaultConfig.defaultConfig,
     default_config_settings=DefaultConfig._settings_name(DefaultConfig.defaultConfig),
