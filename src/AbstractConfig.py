@@ -11,7 +11,6 @@ from src.volume import Volume
 class AbstractConfig(ABC):
 
     actionSection = "actions"
-    settingSection = "settings"
     varSection = "vars"
     backupOrder = [
         "runtime_backup",
@@ -26,7 +25,6 @@ class AbstractConfig(ABC):
 
     def __init__(self, config_path: str, name: str):
         self.enabled_actions: Dict[str, bool] = {}
-        self.settings: Dict[str, str] = {}
         self.backupSteps = {}
         self.vars = {}
         for step in self.backupOrder:
@@ -51,10 +49,6 @@ class AbstractConfig(ABC):
         for step in self.backupSteps.keys():
             if config_file.has_option(section_name, step):
                 self.backupSteps[step] = config_file.get(section_name, step).strip()+"\n"
-        setting_section = self._settings_name(section_name)
-        if config_file.has_section(setting_section):
-            for setting in config_file.options(setting_section):
-                self.settings[setting.lower()] = config_file.get(setting_section, setting)
         actions_section = self._actions_name(section_name)
         if config_file.has_section(actions_section):
             for action in config_file.options(actions_section):
@@ -75,33 +69,12 @@ class AbstractConfig(ABC):
         return cmd
 
     @abstractmethod
-    def setting(self, name: str) -> str:
-        pass
-
-    def has_setting(self, name: str):
-        try:
-            self.setting(name)
-            return True
-        except Exception:
-            return False
-
-    def setting_or_default(self, name: str, default_val: str = ""):
-        try:
-            return self.setting(name)
-        except Exception:
-            return default_val
-
-    @abstractmethod
     def get_step(self, step: str) -> str:
         pass
 
     @staticmethod
     def _create_subsection(super_section: str, sub_section: str):
         return "{}.{}".format(super_section, sub_section)
-
-    @staticmethod
-    def _settings_name(section_name: str) -> str:
-        return AbstractConfig._create_subsection(section_name, AbstractConfig.settingSection)
 
     @staticmethod
     def _actions_name(section_name: str) -> str:

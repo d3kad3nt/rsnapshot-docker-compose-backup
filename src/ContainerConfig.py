@@ -31,12 +31,6 @@ class ContainerConfig(AbstractConfig):
                 for line in backup_action.splitlines():
                     print(self._resolve_vars(line, self._all_vars()).strip("\n"))
 
-    def setting(self, name: str) -> str:
-        if name.lower() in self.settings:
-            return self.settings[name.lower()]
-        else:
-            return self.defaultConfig.setting(name)
-
     def get_step(self, step: str) -> str:
         if self.backupSteps.get(step, ""):
             return self.backupSteps.get(step, "")

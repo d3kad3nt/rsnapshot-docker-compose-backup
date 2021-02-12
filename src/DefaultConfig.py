@@ -37,9 +37,6 @@ class DefaultConfig(AbstractConfig):
         with open(self.filename, 'w') as configfile:
             configfile.write(defaultConfigContent)
 
-    def setting(self, name: str) -> str:
-        return self.settings[name.lower()]
-
     def get_step(self, step: str) -> str:
         return self.backupSteps.get(step, "")
 
@@ -77,10 +74,6 @@ defaultConfigContent = """
 [{default_config}]
 #Example:
 #run_backup=backup_script   echo "Hello" > helloWorld   test/
-
-#This section contains settings that are used by the backup
-[{default_config_settings}]
-# This section contains settings like what actions should be enabled
 
 [{default_config_vars}]
 #This setting corresponds to the var with the same name and can be used as a prefix in the folder path
@@ -122,7 +115,6 @@ restart = backup_exec\tcd $projectFolder; /usr/bin/docker-compose start
 
 """.format(
     default_config=DefaultConfig.defaultConfig,
-    default_config_settings=DefaultConfig._settings_name(DefaultConfig.defaultConfig),
     default_config_actions=DefaultConfig._actions_name(DefaultConfig.defaultConfig),
     default_config_vars=DefaultConfig._vars_name(DefaultConfig.defaultConfig),
     predefined_actions=DefaultConfig.predefined_actions,
