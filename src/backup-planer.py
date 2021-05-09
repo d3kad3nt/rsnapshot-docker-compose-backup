@@ -10,7 +10,7 @@ import dockerCompose
 from container import Container
 
 # Other imports
-from src.global_values import set_folder
+from src.global_values import set_folder, set_config_file
 
 """Finds all docker-compose dirs in current subfolders
 :returns: a list of all folders
@@ -21,8 +21,11 @@ def main() -> NoReturn:
     ap = argparse.ArgumentParser()
     ap.add_argument("-f", "--folder", required=False, help="Path to the root folder of all docker-compose folders",
                     default=os.getcwd())
+    ap.add_argument("-c", "--config", required=False,
+                    help="Path to the root config file, if it isn't in the root docker-compose folder", default="")
     args = vars(ap.parse_args())
     set_folder(args["folder"])
+    set_config_file(args["config"])
     docker_container: List[Container] = dockerCompose.find_running_container(args["folder"])
     for container in docker_container:
         container.backup()

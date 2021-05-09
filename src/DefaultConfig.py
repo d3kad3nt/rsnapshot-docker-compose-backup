@@ -26,7 +26,10 @@ class DefaultConfig(AbstractConfig):
     def __init__(self):
         if DefaultConfig.__instance is not None:
             raise Exception("This class is a singelton!")
-        self.filename = os.path.join(src.global_values.folder, self.defaultConfigName)
+        if src.global_values.config_file != "":
+            self.filename = src.global_values.config_file
+        else:
+            self.filename = os.path.join(src.global_values.folder, self.defaultConfigName)
         if not os.path.isfile(self.filename):
             self._create_default_config()
         super().__init__(self.filename, self.defaultConfig)
