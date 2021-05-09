@@ -35,8 +35,6 @@ class AbstractConfig(ABC):
 
     def _init_vars(self, config_path: str):
         self.vars["$dockerComposeFile"] = config_path
-        if "$backupPrefixFolder" not in self.vars:
-            self.vars["$backupPrefixFolder"] = "."
 
     def _load_config_file(self, config_path: str, section_name: str):
         section_name = section_name.lower()
