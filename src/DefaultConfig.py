@@ -94,6 +94,10 @@ volumebackup = true
 yamlbackup = true
 imagebackup = true
 
+#The following actions are disabled by default
+logbackup = false
+projectDirBackup = false
+
 #The following is the definition of actions that can be used in the backup
 
 [{predefined_actions}.volumeBackup]
