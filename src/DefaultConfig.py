@@ -113,7 +113,7 @@ backup = backup\t$projectFolder\t$backupPrefixFolder/$serviceName/projectDir
 runtime_backup = backup_script\t/usr/bin/docker image save $image -o $serviceName_image.tar\t$backupPrefixFolder/$serviceName/image
 
 [{predefined_actions}.logBackup]
-backup = backup_script\t/usr/bin/docker logs $containerID > $serviceName_logs.log\t$backupPrefixFolder/$serviceName/log
+backup = backup_script\t/usr/bin/docker logs $containerID > $serviceName_logs.log 2>&1\t$backupPrefixFolder/$serviceName/log
 
 [{predefined_actions}.stopContainer]
 #{actions} = stopContainer_stop, stopContainer_start
