@@ -10,8 +10,7 @@ from src.utils import CaseInsensitiveRe
 
 class DefaultConfig(AbstractConfig):
     __instance = None
-    predefined_actions = "predefined_actions"
-    predefined_actions_action = "actions"
+    actions = "actions"
     defaultConfig = "default_config"
     defaultConfigName = "backup.ini"
 
@@ -33,7 +32,7 @@ class DefaultConfig(AbstractConfig):
         if not os.path.isfile(self.filename):
             self._create_default_config()
         super().__init__(self.filename, self.defaultConfig)
-        self._load_predefined_actions()
+        self._load_actions()
         DefaultConfig.__instance = self
 
     def _create_default_config(self):
@@ -43,30 +42,21 @@ class DefaultConfig(AbstractConfig):
     def get_step(self, step: str) -> str:
         return self.backupSteps.get(step, "")
 
-    def _load_predefined_actions(self):
+    def _load_actions(self):
         config_file = configparser.ConfigParser(allow_no_value=True)
         config_file.SECTCRE = CaseInsensitiveRe(re.compile(r"\[ *(?P<header>[^]]+?) *]"))
         config_file.read(self.filename)
-        sub_actions: List[Tuple[str, str]] = []
         for section in config_file.sections():
-            if section.startswith(self.predefined_actions):
-                action_name = section[len(self.predefined_actions + "."):]
-                if config_file.has_option(section, self.predefined_actions_action):
-                    sub_actions.append((section, action_name))
+            if section.startswith(self.actions):
+                action_name = section[len(self.actions + "."):]
                 commands = {}
                 for step in self.backupSteps:
                     if config_file.has_option(section, step):
                         commands[step] = config_file.get(section, step).strip() + "\n"
                 if commands:
                     self.actions[action_name] = commands
-        for section, action_name in sub_actions:
-            if not self.actions.get(action_name):
-                self.actions[action_name] = {}
-            actions = config_file.get(section, self.predefined_actions_action)
-            for action in actions.split(" "):
-                self.actions[action_name].update(self.actions[action.lower().strip(",")])
 
-    def get_action(self, name: str) -> (str, str):
+    def get_action(self, name: str) -> Tuple[str, str]:
         return self.actions[name]
 
 
@@ -100,23 +90,22 @@ projectDirBackup = false
 
 #The following is the definition of actions that can be used in the backup
 
-[{predefined_actions}.volumeBackup]
+[{actions}.volumeBackup]
 backup = backup\t$volumes.path\t$backupPrefixFolder/$serviceName/$volumes.name
 
-[{predefined_actions}.yamlBackup]
+[{actions}.yamlBackup]
 runtime_backup = backup\t$projectFolder\t$backupPrefixFolder/$serviceName/yaml\t+rsync_long_args=--include=*.yml,+rsync_long_args=--include=*.yaml
 
-[{predefined_actions}.projectDirBackup]
+[{actions}.projectDirBackup]
 backup = backup\t$projectFolder\t$backupPrefixFolder/$serviceName/projectDir
 
-[{predefined_actions}.imageBackup]
+[{actions}.imageBackup]
 runtime_backup = backup_script\t/usr/bin/docker image save $image -o $serviceName_image.tar\t$backupPrefixFolder/$serviceName/image
 
-[{predefined_actions}.logBackup]
+[{actions}.logBackup]
 backup = backup_script\t/usr/bin/docker logs $containerID > $serviceName_logs.log 2>&1\t$backupPrefixFolder/$serviceName/log
 
-[{predefined_actions}.stopContainer]
-#{actions} = stopContainer_stop, stopContainer_start
+[{actions}.stopContainer]
 stop = backup_exec\tcd $projectFolder; /usr/bin/docker-compose stop
 restart = backup_exec\tcd $projectFolder; /usr/bin/docker-compose start
 
@@ -124,6 +113,5 @@ restart = backup_exec\tcd $projectFolder; /usr/bin/docker-compose start
     default_config=DefaultConfig.defaultConfig,
     default_config_actions=DefaultConfig._actions_name(DefaultConfig.defaultConfig),
     default_config_vars=DefaultConfig._vars_name(DefaultConfig.defaultConfig),
-    predefined_actions=DefaultConfig.predefined_actions,
-    actions=DefaultConfig.predefined_actions_action,
+    actions=DefaultConfig.actions,
 )
