@@ -1,9 +1,12 @@
+#!/usr/bin/env python3
+
 import ast
 import os
 from typing import List
 
 import astor
 
+shebang = "#!/usr/bin/env python3"
 imported = []
 imported_files = []
 
@@ -26,6 +29,8 @@ def already_imported(line):
 def package():
     name = "backup-docker-compose.py"
     with open(name, "w") as output:
+        # manually add shebang for python3
+        output.writelines([shebang, "\n\n"])
         import_file("backup-planer.py", output)
 
 
@@ -92,6 +97,8 @@ def main():
         source = "".join(sourceFile.readlines())
         dest = remove_type_hints(source)
         with open(dest_name, "w") as destFile:
+            # manually add shebang for python3
+            destFile.writelines([shebang, "\n\n"])
             destFile.write(dest)
 
 
