@@ -89,7 +89,7 @@ def main():
     source_name = "backup-docker-compose.py"
     dest_name = "backup-docker-compose-withoutTypes.py"
     with open(source_name, "r") as sourceFile:
-        source = "\n".join(sourceFile.readlines())
+        source = "".join(sourceFile.readlines())
         dest = remove_type_hints(source)
         with open(dest_name, "w") as destFile:
             destFile.write(dest)
