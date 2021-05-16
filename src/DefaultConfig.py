@@ -10,9 +10,9 @@ from src.utils import CaseInsensitiveRe
 
 class DefaultConfig(AbstractConfig):
     __instance = None
-    actions = "actions"
     defaultConfig = "default_config"
     defaultConfigName = "backup.ini"
+    actionSection = "actions"
 
     actions: Dict[str, Dict[str, str]] = {}
 
@@ -47,8 +47,8 @@ class DefaultConfig(AbstractConfig):
         config_file.SECTCRE = CaseInsensitiveRe(re.compile(r"\[ *(?P<header>[^]]+?) *]"))
         config_file.read(self.filename)
         for section in config_file.sections():
-            if section.startswith(self.actions):
-                action_name = section[len(self.actions + "."):]
+            if section.startswith(self.actionSection):
+                action_name = section[len(self.actionSection + "."):]
                 commands = {}
                 for step in self.backupSteps:
                     if config_file.has_option(section, step):
@@ -113,5 +113,5 @@ restart = backup_exec\tcd $projectFolder; /usr/bin/docker-compose start
     default_config=DefaultConfig.defaultConfig,
     default_config_actions=DefaultConfig._actions_name(DefaultConfig.defaultConfig),
     default_config_vars=DefaultConfig._vars_name(DefaultConfig.defaultConfig),
-    actions=DefaultConfig.actions,
+    actions=DefaultConfig.actionSection
 )
