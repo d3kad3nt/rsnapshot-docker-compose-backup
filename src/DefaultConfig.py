@@ -56,7 +56,7 @@ class DefaultConfig(AbstractConfig):
                 if commands:
                     self.actions[action_name] = commands
 
-    def get_action(self, name: str) -> Tuple[str, str]:
+    def get_action(self, name: str) -> dict[str, str]:
         return self.actions[name]
 
 
