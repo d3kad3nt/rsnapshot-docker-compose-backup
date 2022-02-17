@@ -43,7 +43,7 @@ class ContainerConfig(AbstractConfig):
         return merged_dict
 
     def add_action_content(self):
-        for action, enabled in self.get_enabled_actions().items():
+        for action, enabled in sorted(self.get_enabled_actions().items()):
             if enabled:
                 commands = self.defaultConfig.get_action(action)
                 for step in commands:

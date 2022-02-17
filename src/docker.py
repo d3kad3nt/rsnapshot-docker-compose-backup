@@ -27,7 +27,7 @@ def volumes(container_id: str) -> List[Volume]:
     for mount in container_info["Mounts"]:
         if mount['Type'] == "volume":
             result.append(Volume(mount['Name'], mount['Source']))
-    return result
+    return sorted(result)
 
 
 def get_column(column_nr: int, input_str: str):
