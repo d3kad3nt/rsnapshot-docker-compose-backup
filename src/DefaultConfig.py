@@ -12,7 +12,13 @@ class DefaultConfig(AbstractConfig):
     __instance = None
     defaultConfig = "default_config"
     defaultConfigName = "backup.ini"
+    settingsSection = "settings"
     actionSection = "actions"
+
+    #Settings
+    settings = {
+        "logTime": True,
+    }
 
     actions: Dict[str, Dict[str, str]] = {}
 
@@ -33,6 +39,7 @@ class DefaultConfig(AbstractConfig):
             self._create_default_config()
         super().__init__(self.filename, self.defaultConfig)
         self._load_actions()
+        self._load_settings()
         DefaultConfig.__instance = self
 
     def _create_default_config(self):
@@ -56,6 +63,15 @@ class DefaultConfig(AbstractConfig):
                 if commands:
                     self.actions[action_name] = commands
 
+    def _load_settings(self):
+        config_file = configparser.ConfigParser(allow_no_value=True)
+        config_file.SECTCRE = CaseInsensitiveRe(re.compile(r"\[ *(?P<header>[^]]+?) *]"))
+        config_file.read(self.filename)
+
+        for setting in self.settings.keys():
+            if config_file.has_option(self.settingsSection, setting):
+                self.settings[setting] = config_file.getboolean(self.settingsSection, setting)
+
     def get_action(self, name: str) -> dict[str, str]:
         return self.actions[name]
 
@@ -67,6 +83,12 @@ defaultConfigContent = """
 [{default_config}]
 #Example:
 #run_backup=backup_script   echo "Hello" > helloWorld   test/
+
+#This section contains settings that can be set. This section can only be used in the default config.
+[{default_config_settings}]
+#This outputs the Start and End Times for each backup command to the log. 
+#Rsnapshot doesn't log timestamps
+logTime = true
 
 [{default_config_vars}]
 #This setting corresponds to the var with the same name and can be used as a prefix in the folder path
@@ -113,5 +135,6 @@ restart = backup_exec\tcd $projectFolder; /usr/bin/docker-compose start
     default_config=DefaultConfig.defaultConfig,
     default_config_actions=DefaultConfig._actions_name(DefaultConfig.defaultConfig),
     default_config_vars=DefaultConfig._vars_name(DefaultConfig.defaultConfig),
-    actions=DefaultConfig.actionSection
+    actions=DefaultConfig.actionSection,
+    default_config_settings=DefaultConfig.settingsSection
 )

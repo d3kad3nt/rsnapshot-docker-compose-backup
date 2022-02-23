@@ -29,7 +29,22 @@ class ContainerConfig(AbstractConfig):
             if backup_action:
                 print("#{}".format(step))
                 for line in backup_action.splitlines():
-                    print(self._resolve_vars(line, self._all_vars()).strip("\n"))
+                    script_command = self._resolve_vars(line, self._all_vars()).strip("\n")
+                    single_commands = []
+                    if "\n" in script_command:
+                        single_commands = script_command.split("\n")
+                    else:
+                        single_commands.append(script_command)
+                    for command in single_commands:
+                        self._logTime()
+                        print(command)
+        self._logTime()
+
+    def _logTime(self):
+        log_time = self.defaultConfig.settings["logTime"]
+        if log_time:
+            print("backup_exec\ttime +%s")
+
 
     def get_step(self, step: str) -> str:
         if self.backupSteps.get(step, ""):
