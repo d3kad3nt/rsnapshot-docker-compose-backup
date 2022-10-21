@@ -4,3 +4,7 @@ venv/
 src/venv/
 src/__pycache__
 .idea/
+*.conf
+examples/
+src/backup-docker-compose.py
+src/backup-docker-compose-withoutTypes.py
