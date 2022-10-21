@@ -43,7 +43,7 @@ class ContainerConfig(AbstractConfig):
     def _logTime(self):
         log_time = self.defaultConfig.settings["logTime"]
         if log_time:
-            print("backup_exec\ttime +%s")
+            print("backup_exec\t/bin/date +%s")
 
 
     def get_step(self, step: str) -> str:
