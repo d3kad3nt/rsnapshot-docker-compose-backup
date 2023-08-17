@@ -10,8 +10,17 @@ from src.utils import command
 from concurrent import futures
 
 
+def get_binary() -> str:
+    if command("docker compose").returncode == 0:
+        return "docker compose"
+    elif command("docker-compose").returncode == 0:
+        return "docker-compose"
+    else:
+        raise Exception("Docker Compose is not installed")
+
+
 def get_container_id(container: str, path: str) -> str:
-    return command("docker-compose ps -q {}".format(container), path=path).stdout
+    return command("{} ps -q {}".format(get_binary(), container), path=path).stdout
 
 
 def container_runs(container_id):
@@ -35,7 +44,9 @@ def find_running_container(root_folder: str) -> List[Container]:
 
 
 def get_services(path: str) -> Tuple[List[Tuple[str, str]], str]:
-    service_name = command("docker-compose config --services", path=path).stdout.splitlines()
+    service_name = command(
+        "{} config --services".format(get_binary()), path=path
+    ).stdout.splitlines()
     services = []
     for service in service_name:
         container_id = get_container_id(service, path)[:12]
@@ -43,10 +54,9 @@ def get_services(path: str) -> Tuple[List[Tuple[str, str]], str]:
     return services, path
 
 
-"""Finds all docker-compose dirs in current sub folder
-:returns: a list of all folders
-"""
 def find_docker_dirs(root_folder: str = os.getcwd()) -> List[str]:
+    """Finds all docker-compose dirs in current sub folder
+    :returns: a list of all folders"""
     dirs: List[str] = []
     for treeElement in os.walk(root_folder):
         if "docker-compose.yml" in treeElement[2]:
