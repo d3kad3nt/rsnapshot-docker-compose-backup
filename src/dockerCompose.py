@@ -4,7 +4,7 @@ import os
 import re
 from typing import List, Tuple
 
-from container import Container
+from src.container import Container
 from src import docker
 from src.utils import command
 from concurrent import futures
@@ -23,7 +23,7 @@ def get_container_id(container: str, path: str) -> str:
     return command("{} ps -q {}".format(get_binary(), container), path=path).stdout
 
 
-def container_runs(container_id):
+def container_runs(container_id: str) -> bool:
     if docker.ps(container_id):
         return True
     else:
@@ -44,10 +44,10 @@ def find_running_container(root_folder: str) -> List[Container]:
 
 
 def get_services(path: str) -> Tuple[List[Tuple[str, str]], str]:
-    service_name = command(
+    service_name: List[str] = command(
         "{} config --services".format(get_binary()), path=path
     ).stdout.splitlines()
-    services = []
+    services: List[Tuple[str, str]] = []
     for service in service_name:
         container_id = get_container_id(service, path)[:12]
         services.append((service, container_id))
@@ -72,9 +72,9 @@ def get_column(column_nr: int, input_str: str):
     return re.sub(r"\s\s+", "  ", input_str).split("  ")[column_nr]
 
 
-def get_container(ps_out: str, state: str = None) -> List[str]:
-    all_container = ps_out.splitlines()[2:]
-    container = []
+def get_container(ps_out: str, state: str | None = None) -> List[str]:
+    all_container: List[str] = ps_out.splitlines()[2:]
+    container: List[str] = []
     if not all_container:
         return []
     for line in all_container:

@@ -79,7 +79,7 @@ class TypeHintRemover(ast.NodeTransformer):
         return node if node.module != 'typing' else None
 
 
-def remove_type_hints(source: str):
+def remove_type_hints(source: str) -> str:
     # parse the source code into an AST
     parsed_source = ast.parse(source)
     # remove all type annotations, function return type definitions

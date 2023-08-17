@@ -1,7 +1,7 @@
 import configparser
 import os
 import re
-from typing import Dict, Tuple, List
+from typing import Dict
 
 import src.global_values
 from src.AbstractConfig import AbstractConfig
@@ -23,9 +23,9 @@ class DefaultConfig(AbstractConfig):
     actions: Dict[str, Dict[str, str]] = {}
 
     @staticmethod
-    def get_instance():
+    def get_instance() -> "DefaultConfig":
         if DefaultConfig.__instance is None:
-            DefaultConfig()
+            DefaultConfig.__instance = DefaultConfig()
         return DefaultConfig.__instance
 
     def __init__(self):
@@ -40,7 +40,6 @@ class DefaultConfig(AbstractConfig):
         super().__init__(self.filename, self.defaultConfig)
         self._load_actions()
         self._load_settings()
-        DefaultConfig.__instance = self
 
     def _create_default_config(self):
         with open(self.filename, 'w') as configfile:
@@ -51,7 +50,7 @@ class DefaultConfig(AbstractConfig):
 
     def _load_actions(self):
         config_file = configparser.ConfigParser(allow_no_value=True)
-        config_file.SECTCRE = CaseInsensitiveRe(re.compile(r"\[ *(?P<header>[^]]+?) *]"))
+        config_file.SECTCRE = CaseInsensitiveRe(re.compile(r"\[ *(?P<header>[^]]+?) *]")) # type: ignore
         config_file.read(self.filename)
         for section in config_file.sections():
             if section.startswith(self.actionSection):
@@ -65,7 +64,7 @@ class DefaultConfig(AbstractConfig):
 
     def _load_settings(self):
         config_file = configparser.ConfigParser(allow_no_value=True)
-        config_file.SECTCRE = CaseInsensitiveRe(re.compile(r"\[ *(?P<header>[^]]+?) *]"))
+        config_file.SECTCRE = CaseInsensitiveRe(re.compile(r"\[ *(?P<header>[^]]+?) *]")) # type: ignore
         config_file.read(self.filename)
 
         for setting in self.settings.keys():
@@ -133,8 +132,8 @@ restart = backup_exec\tcd $projectFolder; /usr/bin/docker-compose start
 
 """.format(
     default_config=DefaultConfig.defaultConfig,
-    default_config_actions=DefaultConfig._actions_name(DefaultConfig.defaultConfig),
-    default_config_vars=DefaultConfig._vars_name(DefaultConfig.defaultConfig),
+    default_config_actions=DefaultConfig.actions_name(DefaultConfig.defaultConfig),
+    default_config_vars=DefaultConfig.vars_name(DefaultConfig.defaultConfig),
     actions=DefaultConfig.actionSection,
     default_config_settings=DefaultConfig.settingsSection
 )

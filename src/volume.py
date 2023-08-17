@@ -3,5 +3,5 @@ class Volume:
         self.name = name
         self.path = path
 
-    def __lt__(self, other):
+    def __lt__(self, other: "Volume") -> bool:
         return self.name < other.name

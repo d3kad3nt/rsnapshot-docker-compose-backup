@@ -4,20 +4,19 @@ import argparse
 # Imports for typing
 import os
 from typing import List
-from typing import NoReturn
 
-import dockerCompose
-from container import Container
+from src.container import Container
 
 # Other imports
 from src.global_values import set_folder, set_config_file
+from src import dockerCompose
 
 """Finds all docker-compose dirs in current subfolders
 :returns: a list of all folders
 """
 
 
-def main() -> NoReturn:
+def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("-f", "--folder", required=False, help="Path to the root folder of all docker-compose folders",
                     default=os.getcwd())
