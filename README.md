@@ -84,7 +84,7 @@ All keys and sections are case-insensitive.
         restart = backup_exec	cd $projectFolder; /usr/bin/docker-compose start
 
 ```
-####Project level config
+#### Project level config
 ```ini
 [Nextcloud]
     pre_backup=backup_exec  docker exec -u www-data nextcloud /var/www/html/occ maintenance:mode --on
