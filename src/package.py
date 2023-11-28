@@ -1,24 +1,26 @@
 #!/usr/bin/env python3
 
 import ast
+from io import TextIOWrapper
 import os
 from typing import List
 
 import astor
 
-shebang = "#!/usr/bin/env python3"
-imported = []
-imported_files = []
+SHEBANG = "#!/usr/bin/env python3"
+imported: list[str] = []
+imported_files: list[str] = []
+
 
 def find_python_files() -> List[str]:
     cwd = os.getcwd()
     return [file.strip(".py") for file in os.listdir(cwd)]
 
 
-files = find_python_files()
+files: List[str] = find_python_files()
 
 
-def already_imported(line):
+def already_imported(line: str):
     if line in imported:
         return True
     else:
@@ -28,17 +30,17 @@ def already_imported(line):
 
 def package():
     name = "backup-docker-compose.py"
-    with open(name, "w") as output:
+    with open(name, "w", encoding="UTF-8") as output:
         # manually add shebang for python3
-        output.writelines([shebang, "\n\n"])
+        output.writelines([SHEBANG, "\n\n"])
         import_file("backup-planer.py", output)
 
 
-def import_file(file: str, output):
+def import_file(file: str, output: TextIOWrapper):
     if file in imported_files:
         return
     imported_files.append(file)
-    with open(file, "r") as python_file:
+    with open(file, "r", encoding="UTF-8") as python_file:
         for line in python_file:
             if line.strip().startswith("from") or line.strip().startswith("import"):
                 statement = line.strip()
@@ -55,7 +57,6 @@ def import_file(file: str, output):
 
 
 class TypeHintRemover(ast.NodeTransformer):
-
     def visit_FunctionDef(self, node):
         # remove the return type definition
         node.returns = None
@@ -72,11 +73,11 @@ class TypeHintRemover(ast.NodeTransformer):
         return ast.Assign([node.target], node.value)
 
     def visit_Import(self, node):
-        node.names = [n for n in node.names if n.name != 'typing']
+        node.names = [n for n in node.names if n.name != "typing"]
         return node if node.names else None
 
     def visit_ImportFrom(self, node):
-        return node if node.module != 'typing' else None
+        return node if node.module != "typing" else None
 
 
 def remove_type_hints(source: str) -> str:
@@ -90,15 +91,14 @@ def remove_type_hints(source: str) -> str:
 
 
 def main():
-
     source_name = "backup-docker-compose.py"
     dest_name = "backup-docker-compose-withoutTypes.py"
-    with open(source_name, "r") as sourceFile:
+    with open(source_name, "r", encoding="UTF-8") as sourceFile:
         source = "".join(sourceFile.readlines())
         dest = remove_type_hints(source)
-        with open(dest_name, "w") as destFile:
+        with open(dest_name, "w", encoding="UTF-8") as destFile:
             # manually add shebang for python3
-            destFile.writelines([shebang, "\n\n"])
+            destFile.writelines([SHEBANG, "\n\n"])
             destFile.write(dest)
 
 

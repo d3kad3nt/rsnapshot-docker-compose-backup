@@ -4,8 +4,9 @@ import os
 
 from src import docker
 from src.volume import Volume
-from src.AbstractConfig import AbstractConfig
-from src.DefaultConfig import DefaultConfig
+from src.abstract_config import AbstractConfig
+from src.default_config import DefaultConfig
+
 
 class Container:
     folder: str
@@ -34,10 +35,10 @@ class Container:
     def __repr__(self):
         return "Container {} in folder {}".format(self.name, self.folder)
 
-class ContainerConfig(AbstractConfig):
 
-    def __init__(self, container : "Container"):
-        self.defaultConfig: DefaultConfig = DefaultConfig.get_instance()
+class ContainerConfig(AbstractConfig):
+    def __init__(self, container: "Container"):
+        self.default_config: DefaultConfig = DefaultConfig.get_instance()
         super().__init__(container.file_name, container.name)
         self.vars["$serviceName"] = container.name
         self.vars["$containerID"] = container.container_id
@@ -49,7 +50,7 @@ class ContainerConfig(AbstractConfig):
 
     def _all_vars(self):
         variables: Dict[str, str | list[Volume]] = {}
-        variables.update(self.defaultConfig.vars)
+        variables.update(self.default_config.vars)
         variables.update(self.vars)
         return variables
 
@@ -59,37 +60,38 @@ class ContainerConfig(AbstractConfig):
             if backup_action:
                 print("#{}".format(step))
                 for line in backup_action.splitlines():
-                    script_command = self._resolve_vars(line, self._all_vars()).strip("\n")
+                    script_command = self._resolve_vars(line, self._all_vars()).strip(
+                        "\n"
+                    )
                     single_commands: List[str] = []
                     if "\n" in script_command:
                         single_commands = script_command.split("\n")
                     else:
                         single_commands.append(script_command)
                     for command in single_commands:
-                        self._logTime()
+                        self._log_time()
                         print(command)
-        self._logTime()
+        self._log_time()
 
-    def _logTime(self):
-        log_time = self.defaultConfig.settings["logTime"]
+    def _log_time(self):
+        log_time = self.default_config.settings["logTime"]
         if log_time:
             print("backup_exec\t/bin/date +%s")
 
-
     def get_step(self, step: str) -> str:
-        if self.backupSteps.get(step, ""):
-            return self.backupSteps.get(step, "")
+        if self.backup_steps.get(step, ""):
+            return self.backup_steps.get(step, "")
         else:
-            return self.defaultConfig.get_step(step)
+            return self.default_config.get_step(step)
 
     def get_enabled_actions(self) -> Dict[str, bool]:
-        merged_dict = self.defaultConfig.enabled_actions.copy()
+        merged_dict = self.default_config.enabled_actions.copy()
         merged_dict.update(self.enabled_actions)
         return merged_dict
 
     def add_action_content(self):
         for action, enabled in sorted(self.get_enabled_actions().items()):
             if enabled:
-                commands = self.defaultConfig.get_action(action)
+                commands = self.default_config.get_action(action)
                 for step in commands:
-                    self.backupSteps[step] += commands[step].strip() + "\n"
+                    self.backup_steps[step] += commands[step].strip() + "\n"

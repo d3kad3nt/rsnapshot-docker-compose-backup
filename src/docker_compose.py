@@ -3,11 +3,11 @@
 import os
 import re
 from typing import List, Tuple
+from concurrent import futures
 
 from src.container import Container
 from src import docker
 from src.utils import command
-from concurrent import futures
 
 
 def get_binary() -> str:
@@ -58,9 +58,9 @@ def find_docker_dirs(root_folder: str = os.getcwd()) -> List[str]:
     """Finds all docker-compose dirs in current sub folder
     :returns: a list of all folders"""
     dirs: List[str] = []
-    for treeElement in os.walk(root_folder):
-        if "docker-compose.yml" in treeElement[2]:
-            dirs.append(treeElement[0])
+    for tree_element in os.walk(root_folder):
+        if "docker-compose.yml" in tree_element[2]:
+            dirs.append(tree_element[0])
     return dirs
 
 

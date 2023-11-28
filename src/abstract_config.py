@@ -24,10 +24,10 @@ class AbstractConfig(ABC):
 
     def __init__(self, config_path: str, name: str):
         self.enabled_actions: Dict[str, bool] = {}
-        self.backupSteps: Dict[str, str] = {}
-        self.vars: Dict[str, str| List[Volume]] = {}
+        self.backup_steps: Dict[str, str] = {}
+        self.vars: Dict[str, str | List[Volume]] = {}
         for step in self.backupOrder:
-            self.backupSteps[step] = ""
+            self.backup_steps[step] = ""
         self._load_config_file(config_path, name)
         self.name = name
         self._init_vars(config_path)
@@ -40,14 +40,14 @@ class AbstractConfig(ABC):
         config_file = configparser.ConfigParser(allow_no_value=True)
         config_file.SECTCRE = CaseInsensitiveRe(
             re.compile(r"\[ *(?P<header>[^]]+?) *]")
-        ) # type: ignore
+        )  # type: ignore
         if os.path.isfile(config_path):
             config_file.read(config_path)
             if not config_file.sections():
                 raise Exception("The Config for {} has no Sections".format(config_path))
-        for step in self.backupSteps.keys():
+        for step in self.backup_steps:
             if config_file.has_option(section_name, step):
-                self.backupSteps[step] = (
+                self.backup_steps[step] = (
                     config_file.get(section_name, step).strip() + "\n"
                 )
         actions_section = self.actions_name(section_name)
@@ -103,7 +103,7 @@ def ireplace(old: str, new: str, text: str) -> str:
     return text
 
 
-def _replace_list(cmd: str, var: str, val: list[list[Any]|str|Volume]) -> str:
+def _replace_list(cmd: str, var: str, val: list[list[Any] | str | Volume]) -> str:
     result: str = ""
     for i in val:
         result += str(_replace_var[type(i)](cmd, var, i)) + "\n"
@@ -121,4 +121,8 @@ def _replace_volume(cmd: str, var: str, val: Volume) -> str:
     return tmp
 
 
-_replace_var:Dict[type, Callable[..., str]] = {list: _replace_list, str: _replace_str, Volume: _replace_volume}
+_replace_var: Dict[type, Callable[..., str]] = {
+    list: _replace_list,
+    str: _replace_str,
+    Volume: _replace_volume,
+}

@@ -4,7 +4,7 @@ import re
 from typing import Dict
 
 import src.global_values
-from src.AbstractConfig import AbstractConfig
+from src.abstract_config import AbstractConfig
 from src.utils import CaseInsensitiveRe
 
 
@@ -15,7 +15,7 @@ class DefaultConfig(AbstractConfig):
     settingsSection = "settings"
     actionSection = "actions"
 
-    #Settings
+    # Settings
     settings = {
         "logTime": True,
     }
@@ -30,11 +30,13 @@ class DefaultConfig(AbstractConfig):
 
     def __init__(self):
         if DefaultConfig.__instance is not None:
-            raise Exception("This class is a singelton!")
+            raise Exception("This class is a singleton!")
         if src.global_values.config_file != "":
             self.filename = src.global_values.config_file
         else:
-            self.filename = os.path.join(src.global_values.folder, self.defaultConfigName)
+            self.filename = os.path.join(
+                src.global_values.folder, self.defaultConfigName
+            )
         if not os.path.isfile(self.filename):
             self._create_default_config()
         super().__init__(self.filename, self.defaultConfig)
@@ -42,21 +44,23 @@ class DefaultConfig(AbstractConfig):
         self._load_settings()
 
     def _create_default_config(self):
-        with open(self.filename, 'w') as configfile:
-            configfile.write(defaultConfigContent)
+        with open(self.filename, "w", encoding="UTF-8") as config_file:
+            config_file.write(defaultConfigContent)
 
     def get_step(self, step: str) -> str:
-        return self.backupSteps.get(step, "")
+        return self.backup_steps.get(step, "")
 
     def _load_actions(self):
         config_file = configparser.ConfigParser(allow_no_value=True)
-        config_file.SECTCRE = CaseInsensitiveRe(re.compile(r"\[ *(?P<header>[^]]+?) *]")) # type: ignore
+        config_file.SECTCRE = CaseInsensitiveRe(
+            re.compile(r"\[ *(?P<header>[^]]+?) *]")
+        )  # type: ignore
         config_file.read(self.filename)
         for section in config_file.sections():
             if section.startswith(self.actionSection):
-                action_name = section[len(self.actionSection + "."):]
+                action_name = section[len(self.actionSection + ".") :]
                 commands = {}
-                for step in self.backupSteps:
+                for step in self.backup_steps:
                     if config_file.has_option(section, step):
                         commands[step] = config_file.get(section, step).strip() + "\n"
                 if commands:
@@ -64,12 +68,16 @@ class DefaultConfig(AbstractConfig):
 
     def _load_settings(self):
         config_file = configparser.ConfigParser(allow_no_value=True)
-        config_file.SECTCRE = CaseInsensitiveRe(re.compile(r"\[ *(?P<header>[^]]+?) *]")) # type: ignore
+        config_file.SECTCRE = CaseInsensitiveRe(
+            re.compile(r"\[ *(?P<header>[^]]+?) *]")
+        )  # type: ignore
         config_file.read(self.filename)
 
-        for setting in self.settings.keys():
+        for setting in self.settings:
             if config_file.has_option(self.settingsSection, setting):
-                self.settings[setting] = config_file.getboolean(self.settingsSection, setting)
+                self.settings[setting] = config_file.getboolean(
+                    self.settingsSection, setting
+                )
 
     def get_action(self, name: str) -> dict[str, str]:
         return self.actions[name]
@@ -135,5 +143,5 @@ restart = backup_exec\tcd $projectFolder; /usr/bin/docker-compose start
     default_config_actions=DefaultConfig.actions_name(DefaultConfig.defaultConfig),
     default_config_vars=DefaultConfig.vars_name(DefaultConfig.defaultConfig),
     actions=DefaultConfig.actionSection,
-    default_config_settings=DefaultConfig.settingsSection
+    default_config_settings=DefaultConfig.settingsSection,
 )

@@ -25,6 +25,10 @@ class CaseInsensitiveMatch:
 
 def command(cmd: str, path: str = ".") -> subprocess.CompletedProcess[str]:
     res = subprocess.run(
-        cmd.split(" "), cwd=path, universal_newlines=True, stdout=subprocess.PIPE
+        cmd.split(" "),
+        cwd=path,
+        universal_newlines=True,
+        stdout=subprocess.PIPE,
+        check=False,
     )
     return res

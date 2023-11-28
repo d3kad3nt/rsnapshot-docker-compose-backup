@@ -7,7 +7,8 @@ from src.volume import Volume
 
 
 def inspect(container: str) -> Any:
-    # converts docker inspect to json and return only first container, because this works only with one container
+    # converts docker inspect to json and return only first container,
+    # because this works only with one container
     return json.loads(command("docker inspect {}".format(container)).stdout)[0]
 
 
