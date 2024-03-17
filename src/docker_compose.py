@@ -47,6 +47,8 @@ def get_services(path: str) -> Tuple[List[Tuple[str, str]], str]:
     service_name: List[str] = command(
         "{} config --services".format(get_binary()), path=path
     ).stdout.splitlines()
+    # Docker doesn't return it always in the same order
+    service_name.sort()
     services: List[Tuple[str, str]] = []
     for service in service_name:
         container_id = get_container_id(service, path)[:12]
