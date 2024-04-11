@@ -8,3 +8,4 @@ src/__pycache__
 examples/
 src/backup-docker-compose.py
 src/backup-docker-compose-withoutTypes.py
+dist/*

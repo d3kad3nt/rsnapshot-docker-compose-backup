@@ -1,0 +1,23 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+[project]
+name = "rsnapshot-docker-compose-backup"
+version = "0.9.5"
+authors = [
+  { name="Christpoph Wildhagen", email="git@christoph-wildhagen.de" },
+]
+description = "A config generator for rsnapshot"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/d3kad3nt/rsnapshot-docker-compose-backup"
+Issues = "https://github.com/d3kad3nt/rsnapshot-docker-compose-backup/issues"
+[tool.hatch.build.targets.wheel]
+packages = ["src/rsnapshot-docker-compose-backup"]
