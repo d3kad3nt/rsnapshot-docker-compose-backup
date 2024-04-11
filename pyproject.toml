@@ -15,7 +15,8 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
 ]
-
+[project.scripts]
+rsnapshot-docker-compose-backup = "rsnapshot_docker_compose_backup.backup_planer:main"
 [project.urls]
 Homepage = "https://github.com/d3kad3nt/rsnapshot-docker-compose-backup"
 Issues = "https://github.com/d3kad3nt/rsnapshot-docker-compose-backup/issues"
