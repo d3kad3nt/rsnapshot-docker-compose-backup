@@ -3,9 +3,9 @@ import os
 import re
 from typing import Dict
 
-import src.global_values
-from src.abstract_config import AbstractConfig
-from src.utils import CaseInsensitiveRe
+from rsnapshot_docker_compose_backup import global_values
+from rsnapshot_docker_compose_backup.abstract_config import AbstractConfig
+from rsnapshot_docker_compose_backup.utils import CaseInsensitiveRe
 
 
 class DefaultConfig(AbstractConfig):
@@ -31,11 +31,12 @@ class DefaultConfig(AbstractConfig):
     def __init__(self):
         if DefaultConfig.__instance is not None:
             raise Exception("This class is a singleton!")
-        if src.global_values.config_file != "":
-            self.filename = src.global_values.config_file
+        if global_values.config_file != "":
+            self.filename = global_values.config_file
         else:
             self.filename = os.path.join(
-                src.global_values.folder, self.defaultConfigName
+                global_values.folder,
+                self.defaultConfigName,
             )
         if not os.path.isfile(self.filename):
             self._create_default_config()

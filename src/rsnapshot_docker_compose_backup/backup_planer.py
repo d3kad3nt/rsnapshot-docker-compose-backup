@@ -6,11 +6,11 @@ import argparse
 import os
 from typing import List
 
-from src.container import Container
+from rsnapshot_docker_compose_backup.container import Container
 
 # Other imports
-from src.global_values import set_folder, set_config_file
-from src import docker_compose
+from rsnapshot_docker_compose_backup.global_values import set_folder, set_config_file
+from rsnapshot_docker_compose_backup import docker_compose
 
 
 def main() -> None:

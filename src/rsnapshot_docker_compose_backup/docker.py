@@ -2,8 +2,8 @@ import json
 import re
 from typing import List, Any
 
-from src.utils import command
-from src.volume import Volume
+from rsnapshot_docker_compose_backup.utils import command
+from rsnapshot_docker_compose_backup.volume import Volume
 
 
 def inspect(container: str) -> Any:

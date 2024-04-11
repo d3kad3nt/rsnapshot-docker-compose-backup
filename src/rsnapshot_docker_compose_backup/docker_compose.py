@@ -5,9 +5,9 @@ import re
 from typing import List, Tuple
 from concurrent import futures
 
-from src.container import Container
-from src import docker
-from src.utils import command
+from rsnapshot_docker_compose_backup.container import Container
+from rsnapshot_docker_compose_backup import docker
+from rsnapshot_docker_compose_backup.utils import command
 
 
 def get_binary() -> str:

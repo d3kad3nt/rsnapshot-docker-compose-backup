@@ -4,8 +4,8 @@ import re
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, List
 
-from src.utils import CaseInsensitiveRe
-from src.volume import Volume
+from rsnapshot_docker_compose_backup.utils import CaseInsensitiveRe
+from rsnapshot_docker_compose_backup.volume import Volume
 
 
 class AbstractConfig(ABC):
