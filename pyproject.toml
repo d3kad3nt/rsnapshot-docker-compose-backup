@@ -19,5 +19,3 @@ classifiers = [
 [project.urls]
 Homepage = "https://github.com/d3kad3nt/rsnapshot-docker-compose-backup"
 Issues = "https://github.com/d3kad3nt/rsnapshot-docker-compose-backup/issues"
-[tool.hatch.build.targets.wheel]
-packages = ["src/rsnapshot-docker-compose-backup"]
