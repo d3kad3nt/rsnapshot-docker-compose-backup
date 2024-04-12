@@ -2,10 +2,10 @@ from typing import Dict, List
 
 import os
 
-from src import docker
-from src.volume import Volume
-from src.abstract_config import AbstractConfig
-from src.default_config import DefaultConfig
+from rsnapshot_docker_compose_backup import docker
+from rsnapshot_docker_compose_backup.volume import Volume
+from rsnapshot_docker_compose_backup.abstract_config import AbstractConfig
+from rsnapshot_docker_compose_backup.default_config import DefaultConfig
 
 
 class Container:
