@@ -2,8 +2,11 @@ name: Build distribution
 
 # From https://packaging.python.org/en/latest/guides/publishing-package-distribution-releases-using-github-actions-ci-cd-workflows/
 # Removed pyPI publishing at the time, but that could also be added back in
-branches: release
-on: [push, pull_request]
+on:
+  push:
+    branches: ["release"]
+  pull_request:
+    branches: ["release"]
 
 jobs:
   build:
