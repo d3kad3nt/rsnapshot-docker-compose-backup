@@ -32,6 +32,8 @@ jobs:
     name: >-
       Sign the Python 🐍 distribution 📦 with Sigstore
       and upload them to GitHub Release
+    needs:
+      - build
     runs-on: ubuntu-latest
     permissions:
       contents: write # IMPORTANT: mandatory for making GitHub Releases
