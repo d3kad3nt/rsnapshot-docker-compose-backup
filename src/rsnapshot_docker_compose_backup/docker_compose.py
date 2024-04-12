@@ -60,9 +60,17 @@ def find_docker_dirs(root_folder: str = os.getcwd()) -> List[str]:
     """Finds all docker-compose dirs in current sub folder
     :returns: a list of all folders"""
     dirs: List[str] = []
+    docker_compose_files = [
+        "compose.yaml",
+        "compose.yml",
+        "docker-compose.yaml",
+        "docker-compose.yml",
+    ]
     for tree_element in os.walk(root_folder):
-        if "docker-compose.yml" in tree_element[2]:
-            dirs.append(tree_element[0])
+        for docker_compose_file in docker_compose_files:
+            if docker_compose_file in tree_element[2]:
+                dirs.append(tree_element[0])
+                break
     return dirs
 
 
