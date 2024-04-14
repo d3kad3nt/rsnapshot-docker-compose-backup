@@ -1,6 +1,6 @@
 # rsnapshot-docker-compose-backup
 
-This program can be used to back up docker-compose container with rsnapshot.
+This program can be used to create config to back up docker compose container with rsnapshot.
 
 ## Get Started
 
@@ -16,13 +16,13 @@ docker-compose-root/
       - ...  
   - ...
 ``` 
-The config file for this script has to be in the docker-compose-root.
+The config file for this script has to be in the docker compose root.
 
 ### Quick Start
 
 1. Execute the Script
 2. Examine Output
-3. Change newly generated backup.ini in docker-compose-root if necessary
+3. Change newly generated backup.ini in docker compose root directory if necessary
 4. Create backup.ini files in projectDirs that need special configuration
 
 ## Steps
