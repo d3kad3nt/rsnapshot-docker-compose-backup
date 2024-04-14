@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
+from dataclasses import dataclass
 import os
 import re
 from typing import List, Tuple
 from concurrent import futures
+import json
 
 from rsnapshot_docker_compose_backup.container import Container
 from rsnapshot_docker_compose_backup import docker
@@ -19,8 +21,18 @@ def get_binary() -> str:
         raise Exception("Docker Compose is not installed")
 
 
-def get_container_id(container: str, path: str) -> str:
-    return command("{} ps -q {}".format(get_binary(), container), path=path).stdout
+def get_container_id(service_name: str, path: str) -> str:
+    return command("{} ps -q {}".format(get_binary(), service_name), path=path).stdout[
+        :12
+    ]
+
+
+def get_container_name(service_name: str, path: str) -> str:
+    stdout = command(
+        "{} ps --format json {}".format(get_binary(), service_name),
+        path=path,
+    ).stdout
+    return json.loads(stdout)["Name"]
 
 
 def container_runs(container_id: str) -> bool:
@@ -34,25 +46,41 @@ def find_running_container(root_folder: str) -> List[Container]:
     all_container: List[Container] = []
     docker_dirs: List[str] = find_docker_dirs(root_folder)
     with futures.ProcessPoolExecutor() as pool:
-        for container_list, directory in pool.map(get_services, docker_dirs):
+        for service_list, directory in pool.map(get_services, docker_dirs):
             # container_list: List[str] = get_services(output)
-            for container, container_id in container_list:
-                # container_id = get_container_id(container, directory)[:12]
-                if container_id and container_runs(container_id):
-                    all_container.append(Container(directory, container, container_id))
+            for container_info in service_list:
+                if container_info.container_id and container_runs(
+                    container_info.container_id
+                ):
+                    all_container.append(
+                        Container(
+                            directory,
+                            container_info.service_name,
+                            container_info.container_name,
+                            container_info.container_id,
+                        )
+                    )
     return all_container
 
 
-def get_services(path: str) -> Tuple[List[Tuple[str, str]], str]:
+@dataclass
+class ContainerInfo:
+    service_name: str
+    container_name: str
+    container_id: str
+
+
+def get_services(path: str) -> Tuple[List[ContainerInfo], str]:
     service_name: List[str] = command(
         "{} config --services".format(get_binary()), path=path
     ).stdout.splitlines()
     # Docker doesn't return it always in the same order
     service_name.sort()
-    services: List[Tuple[str, str]] = []
+    services: List[ContainerInfo] = []
     for service in service_name:
-        container_id = get_container_id(service, path)[:12]
-        services.append((service, container_id))
+        container_id = get_container_id(service, path)
+        container_name = get_container_name(service, path)
+        services.append(ContainerInfo(service, container_name, container_id))
     return services, path
 
 
