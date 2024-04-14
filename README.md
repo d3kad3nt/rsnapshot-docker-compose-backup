@@ -117,7 +117,7 @@ This Section defines which of the actions that are defined in the global config 
 That can be done with the action Name as Key and `true` or `false` as value.
 
 The second subsection has the name `{main_section}.Vars` and is used to define variables that can be used in rsnapshot commands.
-Variables can be defined with `{var_name}={value}`. The Variables can only be used for simple text replacement and no complex actions. 
+Variables can be defined with `{var_name}={value}`. The Variables can only be used for simple text replacement and no complex actions. Some variables are predefined. They are listed in the default Variables section.
 
 In the **global config** is a second main section with the name `predefined_actions`. 
 This section contains actions that can be activated in the before explained `.Actions` section. 
@@ -127,3 +127,13 @@ Every action has an own section with the name `prefefined_actions.{action_name}`
 This section can contain RSnapshot commands like the other main section. 
 It is also possible that an action has subsections that are defined like this: `actions={one ore more actions}`. 
 These subsections can only be one level deep. 
+
+### Default Variables
+Some Variables are predefined and can be used in the backup.ini without being defined explicitly. These are the variables:
+
+- $serviceName: The name of the Service
+- $containerName: The name of the Container
+- $projectName: The name of the Project
+- $containerID: The ID of the Container
+- $projectFolder: The Path of the Project Folder
+- $volumes: A List of the volumes that are defined for the service. The backup commands are copied for each volume.
