@@ -14,9 +14,12 @@ class Container:
     config: "ContainerConfig"
     volumes: List[Volume]
 
-    def __init__(self, folder: str, service_name: str, container_id: str):
+    def __init__(
+        self, folder: str, service_name: str, container_name: str, container_id: str
+    ):
         self.folder = folder
         self.service_name = service_name
+        self.container_name = container_name
         self.container_id = container_id
         self.project_name = os.path.basename(folder)
         self.image = docker.image(container_id)
@@ -42,6 +45,7 @@ class ContainerConfig(AbstractConfig):
         super().__init__(container.file_name, container.service_name)
         self.vars["$serviceName"] = container.service_name
         self.vars["$containerID"] = container.container_id
+        self.vars["$containerName"] = container.container_name
         self.vars["$projectFolder"] = container.folder
         self.vars["$volumes"] = container.volumes
         self.vars["$image"] = container.image
