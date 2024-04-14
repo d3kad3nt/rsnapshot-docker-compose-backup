@@ -1,9 +1,9 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling","versioningit"]
 build-backend = "hatchling.build"
 [project]
 name = "rsnapshot-docker-compose-backup"
-version = "0.9.6"
+dynamic = ["version"]
 authors = [
   { name="Christpoph Wildhagen", email="git@christoph-wildhagen.de" },
 ]
@@ -20,3 +20,5 @@ rsnapshot-docker-compose-backup = "rsnapshot_docker_compose_backup.backup_planer
 [project.urls]
 Homepage = "https://github.com/d3kad3nt/rsnapshot-docker-compose-backup"
 Issues = "https://github.com/d3kad3nt/rsnapshot-docker-compose-backup/issues"
+[tool.hatch.version]
+source = "versioningit"
