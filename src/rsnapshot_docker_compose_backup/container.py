@@ -10,13 +10,13 @@ from rsnapshot_docker_compose_backup.default_config import DefaultConfig
 
 class Container:
     folder: str
-    name: str
+    service_name: str
     config: "ContainerConfig"
     volumes: List[Volume]
 
-    def __init__(self, folder: str, name: str, container_id: str):
+    def __init__(self, folder: str, service_name: str, container_id: str):
         self.folder = folder
-        self.name = name
+        self.service_name = service_name
         self.container_id = container_id
         self.project_name = os.path.basename(folder)
         self.image = docker.image(container_id)
@@ -25,22 +25,22 @@ class Container:
         self.config = ContainerConfig(self)
 
     def backup(self) -> None:
-        print("#Start {}".format(self.name))
+        print("#Start {}".format(self.service_name))
         self.config.output()
         print("\n")
 
     def __str__(self):
-        return "Container {} in folder {}".format(self.name, self.folder)
+        return "Container {} in folder {}".format(self.service_name, self.folder)
 
     def __repr__(self):
-        return "Container {} in folder {}".format(self.name, self.folder)
+        return "Container {} in folder {}".format(self.service_name, self.folder)
 
 
 class ContainerConfig(AbstractConfig):
     def __init__(self, container: "Container"):
         self.default_config: DefaultConfig = DefaultConfig.get_instance()
-        super().__init__(container.file_name, container.name)
-        self.vars["$serviceName"] = container.name
+        super().__init__(container.file_name, container.service_name)
+        self.vars["$serviceName"] = container.service_name
         self.vars["$containerID"] = container.container_id
         self.vars["$projectFolder"] = container.folder
         self.vars["$volumes"] = container.volumes

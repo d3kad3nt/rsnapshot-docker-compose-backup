@@ -34,12 +34,12 @@ def find_running_container(root_folder: str) -> List[Container]:
     all_container: List[Container] = []
     docker_dirs: List[str] = find_docker_dirs(root_folder)
     with futures.ProcessPoolExecutor() as pool:
-        for container_list, directory in pool.map(get_services, docker_dirs):
+        for service_list, directory in pool.map(get_services, docker_dirs):
             # container_list: List[str] = get_services(output)
-            for container, container_id in container_list:
+            for service, container_id in service_list:
                 # container_id = get_container_id(container, directory)[:12]
                 if container_id and container_runs(container_id):
-                    all_container.append(Container(directory, container, container_id))
+                    all_container.append(Container(directory, service, container_id))
     return all_container
 
 
