@@ -3,6 +3,7 @@
 import argparse
 
 # Imports for typing
+from dataclasses import dataclass
 import os
 from typing import List
 
@@ -13,7 +14,13 @@ from rsnapshot_docker_compose_backup.global_values import set_folder, set_config
 from rsnapshot_docker_compose_backup import docker_compose
 
 
-def main() -> None:
+@dataclass
+class ProgramArgs:
+    folder: str
+    config: str
+
+
+def parse_arguments() -> ProgramArgs:
     ap = argparse.ArgumentParser()
     ap.add_argument(
         "-f",
@@ -30,13 +37,22 @@ def main() -> None:
         default="",
     )
     args = vars(ap.parse_args())
-    set_folder(args["folder"])
-    set_config_file(args["config"])
+    return ProgramArgs(folder=args["folder"], config=args["config"])
+
+
+def run(args: ProgramArgs) -> None:
+    set_folder(args.folder)
+    set_config_file(args.config)
     docker_container: List[Container] = docker_compose.find_running_container(
-        args["folder"]
+        args.folder
     )
     for container in docker_container:
         container.backup()
+
+
+def main() -> None:
+    args: ProgramArgs = parse_arguments()
+    run(args)
 
 
 if __name__ == "__main__":
