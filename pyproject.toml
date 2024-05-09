@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 name = "rsnapshot-docker-compose-backup"
 dynamic = ["version"]
 authors = [
-  { name="Christpoph Wildhagen", email="git@christoph-wildhagen.de" },
+  { name="Christoph Wildhagen", email="git@christoph-wildhagen.de" },
 ]
 description = "A config generator for rsnapshot"
 readme = "README.md"
