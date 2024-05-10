@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 name = "rsnapshot-docker-compose-backup"
 dynamic = ["version"]
 authors = [
-  { name="Christpoph Wildhagen", email="git@christoph-wildhagen.de" },
+  { name="Christoph Wildhagen", email="git@christoph-wildhagen.de" },
 ]
 description = "A config generator for rsnapshot"
 readme = "README.md"
@@ -15,12 +15,10 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
 ]
-[project.optional-dependencies]
-dev = [
-  "testcontainers"
-]
 [project.scripts]
 rsnapshot-docker-compose-backup = "rsnapshot_docker_compose_backup.backup_planer:main"
 [project.urls]
 Homepage = "https://github.com/d3kad3nt/rsnapshot-docker-compose-backup"
 Issues = "https://github.com/d3kad3nt/rsnapshot-docker-compose-backup/issues"
+[tool.hatch.version]
+source = "versioningit"

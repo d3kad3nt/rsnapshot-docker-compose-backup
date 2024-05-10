@@ -1,6 +1,0 @@
-[version]
-source = "versioningit"
-[envs.default]
-features = [
-  "dev"
-]
