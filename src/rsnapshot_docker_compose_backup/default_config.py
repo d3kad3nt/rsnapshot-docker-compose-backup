@@ -18,6 +18,7 @@ class DefaultConfig(AbstractConfig):
     # Settings
     settings = {
         "logTime": True,
+        "onlyRunning": True,
     }
 
     actions: Dict[str, Dict[str, str]] = {}

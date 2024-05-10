@@ -49,15 +49,14 @@ def find_running_container(root_folder: str) -> List[Container]:
         for service_list, directory in pool.map(get_services, docker_dirs):
             # container_list: List[str] = get_services(output)
             for container_info in service_list:
-                if container_info.container_id and container_runs(
-                    container_info.container_id
-                ):
+                if container_info.container_id:
                     all_container.append(
                         Container(
-                            directory,
-                            container_info.service_name,
-                            container_info.container_name,
-                            container_info.container_id,
+                            folder=directory,
+                            service_name=container_info.service_name,
+                            container_name=container_info.container_name,
+                            container_id=container_info.container_id,
+                            running=container_runs(container_info.container_id),
                         )
                     )
     return all_container

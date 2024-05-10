@@ -15,7 +15,12 @@ class Container:
     volumes: List[Volume]
 
     def __init__(
-        self, folder: str, service_name: str, container_name: str, container_id: str
+        self,
+        folder: str,
+        service_name: str,
+        container_name: str,
+        container_id: str,
+        running: bool,
     ):
         self.folder = folder
         self.service_name = service_name
@@ -25,6 +30,7 @@ class Container:
         self.image = docker.image(container_id)
         self.file_name = os.path.join(self.folder, "backup.ini")
         self.volumes = docker.volumes(container_id)
+        self.isRunning = running
         self.config = ContainerConfig(self)
 
     def backup(self) -> None:
@@ -50,6 +56,7 @@ class ContainerConfig(AbstractConfig):
         self.vars["$volumes"] = container.volumes
         self.vars["$image"] = container.image
         self.vars["$projectName"] = container.project_name
+        self._isRunning = container.isRunning
         self.add_action_content()
 
     def _all_vars(self):
@@ -59,6 +66,9 @@ class ContainerConfig(AbstractConfig):
         return variables
 
     def output(self) -> None:
+        onlyRunning = self.default_config.settings["onlyRunning"]
+        if onlyRunning and not self._isRunning:
+            return
         for step in self.backupOrder:
             backup_action = self.get_step(step)
             if backup_action:
