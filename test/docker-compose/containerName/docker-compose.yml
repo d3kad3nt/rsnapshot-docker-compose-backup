@@ -1,4 +1,0 @@
-services:
-  ntfy:
-    container_name: test_name
-    image: httpd
