@@ -1,4 +1,8 @@
-# This Script is used to create a config file for rsnapshot that can be used to backup different docker-compose container.
+#!/usr/bin/env python3
+
+# This Script is used to create a config file for rsnapshot that can be used to backup
+# different docker-compose container.
+
 
 import argparse
 
@@ -40,19 +44,21 @@ def parse_arguments() -> ProgramArgs:
     return ProgramArgs(folder=args["folder"], config=args["config"])
 
 
-def run(args: ProgramArgs) -> None:
+def run(args: ProgramArgs) -> str:
     set_folder(args.folder)
     set_config_file(args.config)
     docker_container: List[Container] = docker_compose.find_running_container(
         args.folder
     )
+    result: list[str] = []
     for container in docker_container:
-        container.backup()
+        result.append(container.backup())
+    return "\n".join(result)
 
 
 def main() -> None:
     args: ProgramArgs = parse_arguments()
-    run(args)
+    print(run(args))
 
 
 if __name__ == "__main__":
