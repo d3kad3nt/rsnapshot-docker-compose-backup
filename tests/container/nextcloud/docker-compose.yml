@@ -1,0 +1,24 @@
+networks:
+  proxy:
+    external: true
+  mariadb:
+    external: true
+    name: nextcloud_mariadb
+
+services:
+  nextcloud:
+    container_name: nextcloud
+    image: nextcloud
+    expose:
+      - 80
+    volumes:
+      - nextcloud:/var/www/html
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    tmpfs:
+      - /tmp:exec
+    networks:
+      - mariadb
+
+volumes:
+  nextcloud:
