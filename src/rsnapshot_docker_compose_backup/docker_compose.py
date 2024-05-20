@@ -29,10 +29,11 @@ def get_container_id(service_name: str, path: str) -> str:
 
 def get_container_name(service_name: str, path: str) -> str:
     stdout = command(
-        "{} ps --format json {}".format(get_binary(), service_name),
+        "{} config --format json {}".format(get_binary(), service_name),
         path=path,
     ).stdout
-    return json.loads(stdout)["Name"]
+    print(f"stdout: {stdout} (End)")
+    return json.loads(stdout)["services"][service_name]["container_name"]
 
 
 def container_runs(container_id: str) -> bool:
