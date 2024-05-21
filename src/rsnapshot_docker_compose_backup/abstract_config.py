@@ -76,7 +76,7 @@ class AbstractConfig(ABC):
         pass
 
     @staticmethod
-    def _create_subsection(super_section: str, sub_section: str):
+    def _create_subsection(super_section: str, sub_section: str) -> str:
         return "{}.{}".format(super_section, sub_section)
 
     @staticmethod

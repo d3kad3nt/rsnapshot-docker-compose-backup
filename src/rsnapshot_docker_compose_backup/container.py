@@ -32,10 +32,10 @@ class Container:
         self.config.output()
         print("\n")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "Container {} in folder {}".format(self.service_name, self.folder)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "Container {} in folder {}".format(self.service_name, self.folder)
 
 
@@ -52,7 +52,7 @@ class ContainerConfig(AbstractConfig):
         self.vars["$projectName"] = container.project_name
         self.add_action_content()
 
-    def _all_vars(self):
+    def _all_vars(self) -> Dict[str, str | List[Volume]]:
         variables: Dict[str, str | list[Volume]] = {}
         variables.update(self.default_config.vars)
         variables.update(self.vars)
@@ -77,7 +77,7 @@ class ContainerConfig(AbstractConfig):
                         print(command)
         self._log_time()
 
-    def _log_time(self):
+    def _log_time(self) -> None:
         log_time = self.default_config.settings["logTime"]
         if log_time:
             print("backup_exec\t/bin/date +%s")
@@ -93,7 +93,7 @@ class ContainerConfig(AbstractConfig):
         merged_dict.update(self.enabled_actions)
         return merged_dict
 
-    def add_action_content(self):
+    def add_action_content(self) -> None:
         for action, enabled in sorted(self.get_enabled_actions().items()):
             if enabled:
                 commands = self.default_config.get_action(action)
