@@ -35,6 +35,6 @@ def get_column(column_nr: int, input_str: str) -> str:
     return re.sub(r"\s\s+", "  ", input_str).split("  ")[column_nr]
 
 
-def image(container_id: str):
+def image(container_id: str) -> str:
     container_info: str = ps(container_id)
     return get_column(1, container_info)

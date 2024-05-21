@@ -28,7 +28,7 @@ class DefaultConfig(AbstractConfig):
             DefaultConfig.__instance = DefaultConfig()
         return DefaultConfig.__instance
 
-    def __init__(self):
+    def __init__(self) -> None:
         if DefaultConfig.__instance is not None:
             raise Exception("This class is a singleton!")
         if global_values.config_file != "":
@@ -44,14 +44,14 @@ class DefaultConfig(AbstractConfig):
         self._load_actions()
         self._load_settings()
 
-    def _create_default_config(self):
+    def _create_default_config(self) -> None:
         with open(self.filename, "w", encoding="UTF-8") as config_file:
             config_file.write(defaultConfigContent)
 
     def get_step(self, step: str) -> str:
         return self.backup_steps.get(step, "")
 
-    def _load_actions(self):
+    def _load_actions(self) -> None:
         config_file = configparser.ConfigParser(allow_no_value=True)
         config_file.SECTCRE = CaseInsensitiveRe(
             re.compile(r"\[ *(?P<header>[^]]+?) *]")
@@ -67,7 +67,7 @@ class DefaultConfig(AbstractConfig):
                 if commands:
                     self.actions[action_name] = commands
 
-    def _load_settings(self):
+    def _load_settings(self) -> None:
         config_file = configparser.ConfigParser(allow_no_value=True)
         config_file.SECTCRE = CaseInsensitiveRe(
             re.compile(r"\[ *(?P<header>[^]]+?) *]")

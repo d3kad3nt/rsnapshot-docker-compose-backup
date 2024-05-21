@@ -32,7 +32,7 @@ def get_container_name(service_name: str, path: str) -> str:
         "{} ps --format json {}".format(get_binary(), service_name),
         path=path,
     ).stdout
-    return json.loads(stdout)["Name"]
+    return str(json.loads(stdout)["Name"])
 
 
 def container_runs(container_id: str) -> bool:
@@ -106,7 +106,7 @@ def get_running_container(ps_out: str) -> List[str]:
     return get_container(ps_out, state="UP")
 
 
-def get_column(column_nr: int, input_str: str):
+def get_column(column_nr: int, input_str: str) -> str:
     return re.sub(r"\s\s+", "  ", input_str).split("  ")[column_nr]
 
 
