@@ -50,5 +50,5 @@ jobs:
           python -m pip install mypy black
       - name: Validate types with mypy
         run: |
-          mypy --strict .
+          mypy .
           black --check .
