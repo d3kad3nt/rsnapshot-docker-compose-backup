@@ -36,6 +36,7 @@ def get_container_name(service_name: str, path: str) -> str:
     return str(json.loads(stdout)["services"][service_name]["container_name"])
 
 
+
 def container_runs(container_id: str) -> bool:
     if docker.ps(container_id):
         return True

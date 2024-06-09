@@ -1,4 +1,3 @@
-backup.ini
 *.cpython*.pyc
 venv/
 src/venv/

@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import os
 
@@ -33,10 +33,14 @@ class Container:
         self.isRunning = running
         self.config = ContainerConfig(self)
 
-    def backup(self) -> None:
-        print("#Start {}".format(self.service_name))
-        self.config.output()
-        print("\n")
+    def backup(self) -> str:
+        result: list[str] = []
+        result.append("#Start {}".format(self.service_name))
+        output = self.config.output()
+        if output is not None:
+            result.append(output)
+        result.append("")
+        return "\n".join(result)
 
     def __str__(self) -> str:
         return "Container {} in folder {}".format(self.service_name, self.folder)
@@ -65,14 +69,16 @@ class ContainerConfig(AbstractConfig):
         variables.update(self.vars)
         return variables
 
-    def output(self) -> None:
+    def output(self) -> Optional[str]:
         onlyRunning = self.default_config.settings["onlyRunning"]
         if onlyRunning and not self._isRunning:
             return
+        result: list[str] = []
+
         for step in self.backupOrder:
             backup_action = self.get_step(step)
             if backup_action:
-                print("#{}".format(step))
+                result.append("#{}".format(step))
                 for line in backup_action.splitlines():
                     script_command = self._resolve_vars(line, self._all_vars()).strip(
                         "\n"
@@ -83,14 +89,15 @@ class ContainerConfig(AbstractConfig):
                     else:
                         single_commands.append(script_command)
                     for command in single_commands:
-                        self._log_time()
-                        print(command)
-        self._log_time()
+                        self._log_time(result)
+                        result.append(command)
+        self._log_time(result)
+        return "".join(result)
 
-    def _log_time(self) -> None:
+    def _log_time(self, result: list[str]) -> None:
         log_time = self.default_config.settings["logTime"]
         if log_time:
-            print("backup_exec\t/bin/date +%s")
+            result.append("backup_exec\t/bin/date +%s")
 
     def get_step(self, step: str) -> str:
         if self.backup_steps.get(step, ""):
