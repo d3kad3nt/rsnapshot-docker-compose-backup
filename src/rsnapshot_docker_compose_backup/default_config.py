@@ -1,7 +1,7 @@
 import configparser
 import os
 import re
-from typing import Dict
+from typing import Dict, Optional
 
 from rsnapshot_docker_compose_backup import global_values
 from rsnapshot_docker_compose_backup.abstract_config import AbstractConfig
@@ -9,7 +9,7 @@ from rsnapshot_docker_compose_backup.utils import CaseInsensitiveRe
 
 
 class DefaultConfig(AbstractConfig):
-    __instance = None
+    __instance: Optional["DefaultConfig"] = None
     defaultConfig = "default_config"
     defaultConfigName = "backup.ini"
     settingsSection = "settings"
