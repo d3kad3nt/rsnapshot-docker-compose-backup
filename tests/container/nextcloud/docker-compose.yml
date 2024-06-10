@@ -1,11 +1,19 @@
 networks:
   proxy:
-    external: true
-  mariadb:
-    external: true
-    name: nextcloud_mariadb
+  nextcloud_mariadb:
 
 services:
+  mariaDB:
+    container_name: mariadb
+    image: mariadb
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql:/var/lib/mysql
+    restart: unless-stopped
+    networks:
+      - nextcloud_mariadb
   nextcloud:
     container_name: nextcloud
     image: nextcloud
@@ -18,7 +26,8 @@ services:
     tmpfs:
       - /tmp:exec
     networks:
-      - mariadb
+      - nextcloud_mariadb
 
 volumes:
   nextcloud:
+  mysql:

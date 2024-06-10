@@ -4,75 +4,87 @@ from pathlib import Path
 import subprocess
 from tempfile import TemporaryDirectory
 from typing import Any, Generator
+import shutil
 
 import pytest
 
 from rsnapshot_docker_compose_backup import backup_planer
 
+curr_dir = Path(os.path.dirname(os.path.realpath(__file__)))
+
 
 @pytest.fixture(name="setup_containers")
-def fixture_setup_containers() -> Generator[TemporaryDirectory[str], Any, None]:
+def fixture_setup_containers() -> Generator[Path, Any, None]:
     temp_dir = TemporaryDirectory()
-    yield temp_dir
+    compose_dir = curr_dir / "container"
+    temp_dir_path = Path(temp_dir.name) / "container"
+    shutil.copytree(compose_dir, temp_dir_path)
+    yield temp_dir_path
     temp_dir.cleanup()
 
 
 @pytest.fixture(name="setup_and_start_containers")
-def fixture_setup_and_start_containers() -> (
-    Generator[TemporaryDirectory[str], Any, None]
-):
+def fixture_setup_and_start_containers() -> Generator[Path, Any, None]:
     temp_dir = TemporaryDirectory()
-    start_containers(Path(temp_dir.name))
-    yield temp_dir
-    remove_containers(Path(temp_dir.name))
+    temp_dir_path = Path(temp_dir.name) / "container"
+    compose_dir = curr_dir / "container"
+    shutil.copytree(compose_dir, temp_dir_path)
+    start_containers(temp_dir_path)
+    yield temp_dir_path
+    remove_containers(temp_dir_path)
     temp_dir.cleanup()
 
 
-def start_containers(root_folder: Path):
+def start_containers(root_folder: Path) -> None:
     subfolders: list[Path] = [
         Path(f.path) for f in os.scandir(root_folder) if f.is_dir()
     ]
     for subfolder in subfolders:
-        subprocess.run("docker compose up -d", cwd=subfolder, check=True)
+        print(subfolder)
+        subprocess.run("docker compose up -d".split(), cwd=subfolder, check=True)
 
 
-def stop_containers(root_folder: Path):
+def stop_containers(root_folder: Path) -> None:
     subfolders: list[Path] = [
         Path(f.path) for f in os.scandir(root_folder) if f.is_dir()
     ]
     for subfolder in subfolders:
-        subprocess.run("docker compose stop", cwd=subfolder, check=True)
+        subprocess.run("docker compose stop".split(), cwd=subfolder, check=True)
 
 
-def remove_containers(root_folder: Path):
+def remove_containers(root_folder: Path) -> None:
     subfolders: list[Path] = [
         Path(f.path) for f in os.scandir(root_folder) if f.is_dir()
     ]
     for subfolder in subfolders:
         subprocess.run(
-            "docker compose rm --force --stop --volumes ", cwd=subfolder, check=True
+            "docker compose rm --force --stop --volumes ".split(),
+            cwd=subfolder,
+            check=True,
         )
 
 
-def test_running_containers(setup_and_start_containers: TemporaryDirectory[str]):
+def test_running_containers(setup_and_start_containers: Path) -> None:
     args = backup_planer.ProgramArgs(
-        folder=setup_and_start_containers.name,
+        folder=setup_and_start_containers,
         config=load_config_path("default_config"),
     )
-    assert load_expected_output("empty") == backup_planer.run(args)
+    output = backup_planer.run(args)
+    assert load_expected_output("all_running", setup_and_start_containers) == output
 
 
-def test_not_started_containers(setup_containers: TemporaryDirectory[str]):
+def test_not_started_containers(setup_containers: Path) -> None:
     args = backup_planer.ProgramArgs(
-        folder=setup_containers.name, config=load_config_path("default_config")
+        folder=setup_containers, config=load_config_path("default_config")
     )
-    assert load_expected_output("empty") == backup_planer.run(args)
+    assert load_expected_output("empty", setup_containers) == backup_planer.run(args)
 
 
-def load_expected_output(name: str) -> str:
-    return resources.read_text(package="tests.output", resource=f"{name}.log")
+def load_expected_output(name: str, container_folder: Path) -> str:
+    return resources.read_text(package="tests.output", resource=f"{name}.log").replace(
+        "${{container_folder}}", str(container_folder)
+    )
 
 
 def load_config_path(name: str) -> Path:
-    curr_dir = Path(os.path.dirname(os.path.realpath(__file__)))
-    return curr_dir / Path("config") / Path("name")
+    return curr_dir / Path("config") / Path(f"{name}.ini")
