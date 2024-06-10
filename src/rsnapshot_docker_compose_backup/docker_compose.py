@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 import os
+from pathlib import Path
 import re
 from typing import List, Tuple
 from concurrent import futures
@@ -21,20 +22,19 @@ def get_binary() -> str:
         raise Exception("Docker Compose is not installed")
 
 
-def get_container_id(service_name: str, path: str) -> str:
+def get_container_id(service_name: str, path: Path) -> str:
     return command("{} ps -q {}".format(get_binary(), service_name), path=path).stdout[
         :12
     ]
 
 
-def get_container_name(service_name: str, path: str) -> str:
+def get_container_name(service_name: str, path: Path) -> str:
     stdout = command(
         "{} config --format json {}".format(get_binary(), service_name),
         path=path,
     ).stdout
-    print(f"stdout: {stdout} (End)")
+    # print(f"stdout: {stdout} (End)")
     return str(json.loads(stdout)["services"][service_name]["container_name"])
-
 
 
 def container_runs(container_id: str) -> bool:
@@ -44,9 +44,9 @@ def container_runs(container_id: str) -> bool:
         return False
 
 
-def find_running_container(root_folder: str) -> List[Container]:
+def find_running_container(root_folder: Path) -> List[Container]:
     all_container: List[Container] = []
-    docker_dirs: List[str] = find_docker_dirs(root_folder)
+    docker_dirs: List[Path] = find_docker_dirs(root_folder)
     with futures.ProcessPoolExecutor() as pool:
         for service_list, directory in pool.map(get_services, docker_dirs):
             # container_list: List[str] = get_services(output)
@@ -71,7 +71,7 @@ class ContainerInfo:
     container_id: str
 
 
-def get_services(path: str) -> Tuple[List[ContainerInfo], str]:
+def get_services(path: Path) -> Tuple[List[ContainerInfo], Path]:
     service_name: List[str] = command(
         "{} config --services".format(get_binary()), path=path
     ).stdout.splitlines()
@@ -85,10 +85,10 @@ def get_services(path: str) -> Tuple[List[ContainerInfo], str]:
     return services, path
 
 
-def find_docker_dirs(root_folder: str = os.getcwd()) -> List[str]:
+def find_docker_dirs(root_folder: Path = Path(os.getcwd())) -> List[Path]:
     """Finds all docker-compose dirs in current sub folder
     :returns: a list of all folders"""
-    dirs: List[str] = []
+    dirs: List[Path] = []
     docker_compose_files = [
         "compose.yaml",
         "compose.yml",
@@ -98,7 +98,7 @@ def find_docker_dirs(root_folder: str = os.getcwd()) -> List[str]:
     for tree_element in os.walk(root_folder):
         for docker_compose_file in docker_compose_files:
             if docker_compose_file in tree_element[2]:
-                dirs.append(tree_element[0])
+                dirs.append(Path(tree_element[0]))
                 break
     return dirs
 

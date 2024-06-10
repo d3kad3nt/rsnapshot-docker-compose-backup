@@ -1,7 +1,9 @@
 from __future__ import annotations
+from pathlib import Path
 from re import Match, Pattern
 
 import subprocess
+from typing import Optional
 
 
 class CaseInsensitiveRe:
@@ -23,12 +25,20 @@ class CaseInsensitiveMatch:
         return self.match.group(name).lower()
 
 
-def command(cmd: str, path: str = ".") -> subprocess.CompletedProcess[str]:
-    res = subprocess.run(
-        cmd.split(" "),
-        cwd=path,
-        universal_newlines=True,
-        stdout=subprocess.PIPE,
-        check=False,
-    )
+def command(cmd: str, path: Optional[Path] = None) -> subprocess.CompletedProcess[str]:
+    if path is not None:
+        res = subprocess.run(
+            cmd.split(" "),
+            cwd=path,
+            universal_newlines=True,
+            stdout=subprocess.PIPE,
+            check=False,
+        )
+    else:
+        res = subprocess.run(
+            cmd.split(" "),
+            universal_newlines=True,
+            stdout=subprocess.PIPE,
+            check=False,
+        )
     return res

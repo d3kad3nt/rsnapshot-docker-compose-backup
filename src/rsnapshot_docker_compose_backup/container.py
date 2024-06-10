@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Dict, List, Optional
 
 import os
@@ -9,26 +10,26 @@ from rsnapshot_docker_compose_backup.default_config import DefaultConfig
 
 
 class Container:
-    folder: str
+    folder: Path
     service_name: str
     config: "ContainerConfig"
     volumes: List[Volume]
 
     def __init__(
         self,
-        folder: str,
+        folder: Path,
         service_name: str,
         container_name: str,
         container_id: str,
         running: bool,
     ):
-        self.folder = folder
+        self.folder: Path = folder
         self.service_name = service_name
         self.container_name = container_name
         self.container_id = container_id
         self.project_name = os.path.basename(folder)
         self.image = docker.image(container_id)
-        self.file_name = os.path.join(self.folder, "backup.ini")
+        self.file_name: Path = self.folder / "backup.ini"
         self.volumes = docker.volumes(container_id)
         self.isRunning = running
         self.config = ContainerConfig(self)
@@ -56,7 +57,7 @@ class ContainerConfig(AbstractConfig):
         self.vars["$serviceName"] = container.service_name
         self.vars["$containerID"] = container.container_id
         self.vars["$containerName"] = container.container_name
-        self.vars["$projectFolder"] = container.folder
+        self.vars["$projectFolder"] = str(container.folder)
         self.vars["$volumes"] = container.volumes
         self.vars["$image"] = container.image
         self.vars["$projectName"] = container.project_name
@@ -72,7 +73,7 @@ class ContainerConfig(AbstractConfig):
     def output(self) -> Optional[str]:
         onlyRunning = self.default_config.settings["onlyRunning"]
         if onlyRunning and not self._isRunning:
-            return
+            return None
         result: list[str] = []
 
         for step in self.backupOrder:
@@ -92,7 +93,7 @@ class ContainerConfig(AbstractConfig):
                         self._log_time(result)
                         result.append(command)
         self._log_time(result)
-        return "".join(result)
+        return "\n".join(result)
 
     def _log_time(self, result: list[str]) -> None:
         log_time = self.default_config.settings["logTime"]

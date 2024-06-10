@@ -1,5 +1,6 @@
 import configparser
 import os
+from pathlib import Path
 import re
 from typing import Dict, Optional
 
@@ -32,11 +33,10 @@ class DefaultConfig(AbstractConfig):
     def __init__(self) -> None:
         if DefaultConfig.__instance is not None:
             raise Exception("This class is a singleton!")
-        if global_values.config_file != "":
-            self.filename = global_values.config_file
+        if global_values.config_file is not None:
+            self.filename: Path = global_values.config_file
         else:
-            self.filename = os.path.join(
-                global_values.folder,
+            self.filename = global_values.folder / Path(
                 self.defaultConfigName,
             )
         if not os.path.isfile(self.filename):

@@ -9,6 +9,7 @@ import argparse
 # Imports for typing
 from dataclasses import dataclass
 import os
+from pathlib import Path
 from typing import List
 
 from rsnapshot_docker_compose_backup.container import Container
@@ -20,8 +21,8 @@ from rsnapshot_docker_compose_backup import docker_compose
 
 @dataclass
 class ProgramArgs:
-    folder: str
-    config: str
+    folder: Path
+    config: Path
 
 
 def parse_arguments() -> ProgramArgs:
