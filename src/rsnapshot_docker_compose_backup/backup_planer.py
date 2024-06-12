@@ -48,12 +48,12 @@ def parse_arguments() -> ProgramArgs:
 def run(args: ProgramArgs) -> str:
     set_folder(args.folder)
     set_config_file(args.config)
-    docker_container: List[Container] = docker_compose.find_running_container(
-        args.folder
-    )
+    docker_container: List[Container] = docker_compose.find_container(args.folder)
     result: list[str] = []
     for container in docker_container:
-        result.append(container.backup())
+        container_result = container.backup()
+        if container_result:
+            result.append(container_result)
     return "\n".join(result)
 
 

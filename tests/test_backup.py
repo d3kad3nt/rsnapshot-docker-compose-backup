@@ -98,12 +98,11 @@ class TestStoppedContainers:
             config=load_config_path("not_running"),
         )
         output = backup_planer.run(args)
-        assert (
-            load_expected_output(
-                "default_config_all_services", setup_and_start_containers
-            )
-            == output
+        print(output)
+        expected_output = load_expected_output(
+            "default_config_all_services", setup_and_start_containers
         )
+        assert expected_output == output
 
 
 def test_not_started_containers(setup_containers: Path) -> None:

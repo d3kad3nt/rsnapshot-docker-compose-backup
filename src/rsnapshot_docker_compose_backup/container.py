@@ -36,10 +36,11 @@ class Container:
 
     def backup(self) -> str:
         result: list[str] = []
-        result.append("#Start {}".format(self.service_name))
         output = self.config.output()
-        if output is not None:
-            result.append(output)
+        if output is None:
+            return ""
+        result.append("#Start {}".format(self.service_name))
+        result.append(output)
         result.append("")
         return "\n".join(result)
 

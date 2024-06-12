@@ -9,7 +9,6 @@ from concurrent import futures
 import json
 
 from rsnapshot_docker_compose_backup.container import Container
-from rsnapshot_docker_compose_backup import docker
 from rsnapshot_docker_compose_backup.utils import command
 
 
@@ -23,9 +22,9 @@ def get_binary() -> str:
 
 
 def get_container_id(service_name: str, path: Path) -> str:
-    return command("{} ps -q {}".format(get_binary(), service_name), path=path).stdout[
-        :12
-    ]
+    return command(
+        "{} ps --all -q {}".format(get_binary(), service_name), path=path
+    ).stdout[:12]
 
 
 def get_container_name(service_name: str, path: Path) -> str:
@@ -38,13 +37,21 @@ def get_container_name(service_name: str, path: Path) -> str:
 
 
 def container_runs(container_id: str) -> bool:
-    if docker.ps(container_id):
-        return True
-    else:
-        return False
+    status = command(
+        [
+            "docker",
+            "ps",
+            "-a",
+            "--format",
+            "'{{ .Status }}'",
+            "-f",
+            f"id={container_id}",
+        ]
+    )
+    return status.stdout.startswith("Up")
 
 
-def find_running_container(root_folder: Path) -> List[Container]:
+def find_container(root_folder: Path) -> List[Container]:
     all_container: List[Container] = []
     docker_dirs: List[Path] = find_docker_dirs(root_folder)
     with futures.ProcessPoolExecutor() as pool:
@@ -77,6 +84,7 @@ def get_services(path: Path) -> Tuple[List[ContainerInfo], Path]:
     ).stdout.splitlines()
     # Docker doesn't return it always in the same order
     service_name.sort()
+    print(service_name)
     services: List[ContainerInfo] = []
     for service in service_name:
         container_id = get_container_id(service, path)

@@ -13,13 +13,14 @@ def inspect(container: str) -> Any:
 
 
 def ps(container_id: str | None = None) -> str:
-    result = command("docker ps").stdout
+    result = command("docker ps -a").stdout
     if container_id:
         for line in ps().splitlines():
             if line.startswith(container_id[:11]):
                 return line
         return ""
     return result
+
 
 
 def volumes(container_id: str) -> List[Volume]:
