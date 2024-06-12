@@ -64,13 +64,46 @@ def remove_containers(root_folder: Path) -> None:
         )
 
 
-def test_running_containers(setup_and_start_containers: Path) -> None:
-    args = backup_planer.ProgramArgs(
-        folder=setup_and_start_containers,
-        config=load_config_path("default_config"),
-    )
-    output = backup_planer.run(args)
-    assert load_expected_output("all_running", setup_and_start_containers) == output
+class TestRunningContainers:
+
+    def test_default_config(self, setup_and_start_containers: Path) -> None:
+        args = backup_planer.ProgramArgs(
+            folder=setup_and_start_containers,
+            config=load_config_path("default_config"),
+        )
+        output = backup_planer.run(args)
+        assert (
+            load_expected_output(
+                "default_config_all_services", setup_and_start_containers
+            )
+            == output
+        )
+
+
+class TestStoppedContainers:
+
+    def test_only_running_enabled(self, setup_and_start_containers: Path) -> None:
+        stop_containers(setup_and_start_containers)
+        args = backup_planer.ProgramArgs(
+            folder=setup_and_start_containers,
+            config=load_config_path("default_config"),
+        )
+        output = backup_planer.run(args)
+        assert load_expected_output("empty", setup_and_start_containers) == output
+
+    def test_only_running_disabled(self, setup_and_start_containers: Path) -> None:
+        stop_containers(setup_and_start_containers)
+        args = backup_planer.ProgramArgs(
+            folder=setup_and_start_containers,
+            config=load_config_path("not_running"),
+        )
+        output = backup_planer.run(args)
+        assert (
+            load_expected_output(
+                "default_config_all_services", setup_and_start_containers
+            )
+            == output
+        )
 
 
 def test_not_started_containers(setup_containers: Path) -> None:
