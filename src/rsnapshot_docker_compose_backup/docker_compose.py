@@ -36,19 +36,19 @@ def get_container_name(service_name: str, path: Path) -> str:
     return str(json.loads(stdout)["services"][service_name]["container_name"])
 
 
-def container_runs(container_id: str) -> bool:
+def container_stopped(container_id: str) -> bool:
     status = command(
         [
             "docker",
             "ps",
             "-a",
             "--format",
-            "'{{ .Status }}'",
+            "{{ .Status }}",
             "-f",
             f"id={container_id}",
         ]
     )
-    return status.stdout.startswith("Up")
+    return status.stdout.startswith("Stopped")
 
 
 def find_container(root_folder: Path) -> List[Container]:
@@ -65,7 +65,7 @@ def find_container(root_folder: Path) -> List[Container]:
                             service_name=container_info.service_name,
                             container_name=container_info.container_name,
                             container_id=container_info.container_id,
-                            running=container_runs(container_info.container_id),
+                            running=not container_stopped(container_info.container_id),
                         )
                     )
     return all_container
@@ -84,7 +84,7 @@ def get_services(path: Path) -> Tuple[List[ContainerInfo], Path]:
     ).stdout.splitlines()
     # Docker doesn't return it always in the same order
     service_name.sort()
-    print(service_name)
+    # print(service_name)
     services: List[ContainerInfo] = []
     for service in service_name:
         container_id = get_container_id(service, path)
