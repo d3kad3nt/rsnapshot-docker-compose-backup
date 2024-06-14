@@ -9,6 +9,7 @@ import shutil
 import pytest
 
 from rsnapshot_docker_compose_backup import backup_planer
+from rsnapshot_docker_compose_backup.default_config import DefaultConfig
 
 curr_dir = Path(os.path.dirname(os.path.realpath(__file__)))
 
@@ -19,6 +20,7 @@ def fixture_setup_containers() -> Generator[Path, Any, None]:
     compose_dir = curr_dir / "container"
     temp_dir_path = Path(temp_dir.name) / "container"
     shutil.copytree(compose_dir, temp_dir_path)
+    DefaultConfig.reset()
     yield temp_dir_path
     temp_dir.cleanup()
 
@@ -30,6 +32,7 @@ def fixture_setup_and_start_containers() -> Generator[Path, Any, None]:
     compose_dir = curr_dir / "container"
     shutil.copytree(compose_dir, temp_dir_path)
     start_containers(temp_dir_path)
+    DefaultConfig.reset()
     yield temp_dir_path
     remove_containers(temp_dir_path)
     temp_dir.cleanup()
@@ -40,7 +43,7 @@ def start_containers(root_folder: Path) -> None:
         Path(f.path) for f in os.scandir(root_folder) if f.is_dir()
     ]
     for subfolder in subfolders:
-        print(subfolder)
+        # print(subfolder)
         subprocess.run("docker compose up -d".split(), cwd=subfolder, check=True)
 
 
@@ -98,7 +101,7 @@ class TestStoppedContainers:
             config=load_config_path("not_running"),
         )
         output = backup_planer.run(args)
-        print(output)
+        # print(output)
         expected_output = load_expected_output(
             "default_config_all_services", setup_and_start_containers
         )

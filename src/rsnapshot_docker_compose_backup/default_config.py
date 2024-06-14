@@ -26,9 +26,14 @@ class DefaultConfig(AbstractConfig):
 
     @staticmethod
     def get_instance() -> "DefaultConfig":
+        # print(f"Get Default Config, {DefaultConfig.__instance}")
         if DefaultConfig.__instance is None:
             DefaultConfig.__instance = DefaultConfig()
         return DefaultConfig.__instance
+
+    @staticmethod
+    def reset() -> None:
+        DefaultConfig.__instance = None
 
     def __init__(self) -> None:
         if DefaultConfig.__instance is not None:
@@ -74,12 +79,13 @@ class DefaultConfig(AbstractConfig):
             re.compile(r"\[ *(?P<header>[^]]+?) *]")
         )  # type: ignore
         config_file.read(self.filename)
-
+        # print(f"filename {self.filename}")
         for setting in self.settings:
             if config_file.has_option(self.settingsSection, setting):
                 self.settings[setting] = config_file.getboolean(
                     self.settingsSection, setting
                 )
+                # print(f"{setting} is set to {self.settings[setting]}")
 
     def get_action(self, name: str) -> dict[str, str]:
         return self.actions[name]

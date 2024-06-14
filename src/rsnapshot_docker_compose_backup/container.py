@@ -38,6 +38,7 @@ class Container:
         result: list[str] = []
         output = self.config.output()
         if output is None:
+            # print("output is none")
             return ""
         result.append("#Start {}".format(self.service_name))
         result.append(output)
@@ -74,6 +75,7 @@ class ContainerConfig(AbstractConfig):
     def output(self) -> Optional[str]:
         onlyRunning = self.default_config.settings["onlyRunning"]
         if onlyRunning and not self._isRunning:
+            # print("only running: {}".format(onlyRunning))
             return None
         result: list[str] = []
 
