@@ -48,7 +48,8 @@ def container_stopped(container_id: str) -> bool:
             f"id={container_id}",
         ]
     )
-    return status.stdout.startswith("Stopped")
+    # print(status.stdout)
+    return status.stdout.startswith("Exited")
 
 
 def find_container(root_folder: Path) -> List[Container]:
