@@ -22,7 +22,6 @@ def ps(container_id: str | None = None) -> str:
     return result
 
 
-
 def volumes(container_id: str) -> List[Volume]:
     result: List[Volume] = []
     container_info = inspect(container_id)
