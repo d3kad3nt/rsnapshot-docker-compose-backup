@@ -62,41 +62,42 @@ All keys and sections are case-insensitive.
 ```ini
 #Start of main section
 [default_config]
-    #Specific commands for each step
-    backup = backup	$projectFolder	$backupPrefixFolder/$serviceName/projectDir
-    
-    [default_config.actions]
-        stopContainer = true
-        volumeBackup = true
-        yamlBackup = false
-    [default_config.vars]
-        prefix = docker-compose
+#Specific commands for each step
+backup = backup	$projectFolder	$backupPrefixFolder/$serviceName/projectDir
+[default_config.settings]
+logTime = True
+[default_config.actions]
+stopContainer = true
+volumeBackup = true
+yamlBackup = false
+[default_config.vars]
+prefix = docker-compose
 
 [predefined_actions]
-    [predefined_actions.volumeBackup]
-        backup = backup	$volumes.path	$prefix/$serviceName/$volumes.name
+[predefined_actions.volumeBackup]
+backup = backup	$volumes.path	$prefix/$serviceName/$volumes.name
     
-    [predefined_actions.yamlBackup]
-        runtime_backup = backup	$projectFolder	$prefix/$serviceName/yaml	+rsync_long_args=--include=*.yml,+rsync_long_args=--include=*.yaml
-    
-    [predefined_actions.stopContainer]
-        stop = backup_exec	cd $projectFolder; /usr/bin/docker-compose stop
-        restart = backup_exec	cd $projectFolder; /usr/bin/docker-compose start
+[predefined_actions.yamlBackup]
+runtime_backup = backup	$projectFolder	$prefix/$serviceName/yaml	+rsync_long_args=--include=*.yml,+rsync_long_args=--include=*.yaml
+
+[predefined_actions.stopContainer]
+stop = backup_exec	cd $projectFolder; /usr/bin/docker-compose stop
+restart = backup_exec	cd $projectFolder; /usr/bin/docker-compose start
 
 ```
 #### Project level config
 ```ini
 [Nextcloud]
-    pre_backup=backup_exec  docker exec -u www-data nextcloud /var/www/html/occ maintenance:mode --on
-    post_backup=backup_exec docker exec -u www-data nextcloud /var/www/html/occ maintenance:mode --off
-    
-    [Nextcloud.Actions]
-        yamlBackup=true
-        stopContainer=false
+pre_backup=backup_exec  docker exec -u www-data nextcloud /var/www/html/occ maintenance:mode --on
+post_backup=backup_exec docker exec -u www-data nextcloud /var/www/html/occ maintenance:mode --off
+
+[Nextcloud.Actions]
+yamlBackup=true
+stopContainer=false
 [MariaDB]
-    runtime_backup=backup_script   $projectFolder/dump_database.sh    /backupDir
-    pre_stop=backup_exec  docker exec -u www-data nextcloud /var/www/html/occ maintenance:mode --on
-    post_restart=backup_exec docker exec -u www-data nextcloud /var/www/html/occ maintenance:mode --off
+runtime_backup=backup_script   $projectFolder/dump_database.sh    /backupDir
+pre_stop=backup_exec  docker exec -u www-data nextcloud /var/www/html/occ maintenance:mode --on
+post_restart=backup_exec docker exec -u www-data nextcloud /var/www/html/occ maintenance:mode --off
 ```
 ### Sections
 The **global config** file has to main sections:
@@ -111,13 +112,16 @@ It is possible to define commands that should be executed directly in this secti
 The commands are defined with the step, where they apply, as key and the rsnapshot command as value. 
 The command can be multiple lines long.
 
-The section also has different subsections.
-The most used subsection is called `{main_section}.Actions`. 
-This Section defines which of the actions that are defined in the global config should be activated or deactivated.
-That can be done with the action Name as Key and `true` or `false` as value.
-
-The second subsection has the name `{main_section}.Vars` and is used to define variables that can be used in rsnapshot commands.
+The section also has different subsections:
+- `{main_section}.Actions`: This Section defines which of the actions that are defined in the global config should be activated or deactivated. That can be done with the action Name as Key and `true` or `false` as value.
+- `{main_section}.Vars`: This Section is used to define variables that can be used in rsnapshot commands.
 Variables can be defined with `{var_name}={value}`. The Variables can only be used for simple text replacement and no complex actions. Some variables are predefined. They are listed in the default Variables section.
+- `{main_section}.Settings`: This Section is used to set settings. All supported settings are documented in the following table.
+
+| Setting | Description | Default Value | 
+| ----------- | ----------- | ----- |
+| logTime | If enabled adds backup steps to allow logging how long steps take | True |
+| onlyRunning | If enabled only creates backup config for containers that are currently running | True |
 
 In the **global config** is a second main section with the name `predefined_actions`. 
 This section contains actions that can be activated in the before explained `.Actions` section. 

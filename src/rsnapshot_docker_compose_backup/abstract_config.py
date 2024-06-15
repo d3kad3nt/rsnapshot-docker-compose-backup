@@ -1,5 +1,6 @@
 import configparser
 import os
+from pathlib import Path
 import re
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, List
@@ -22,7 +23,7 @@ class AbstractConfig(ABC):
         "post_restart",
     ]
 
-    def __init__(self, config_path: str, name: str):
+    def __init__(self, config_path: Path, name: str):
         self.enabled_actions: Dict[str, bool] = {}
         self.backup_steps: Dict[str, str] = {}
         self.vars: Dict[str, str | List[Volume]] = {}
@@ -30,12 +31,12 @@ class AbstractConfig(ABC):
             self.backup_steps[step] = ""
         self._load_config_file(config_path, name)
         self.name = name
-        self._init_vars(config_path)
+        self._init_vars(str(config_path))
 
     def _init_vars(self, config_path: str) -> None:
         self.vars["$dockerComposeFile"] = config_path
 
-    def _load_config_file(self, config_path: str, section_name: str) -> None:
+    def _load_config_file(self, config_path: Path, section_name: str) -> None:
         section_name = section_name.lower()
         config_file = configparser.ConfigParser(allow_no_value=True)
         config_file.SECTCRE = CaseInsensitiveRe(

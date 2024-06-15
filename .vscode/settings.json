@@ -1,3 +1,6 @@
 {
-	"cSpell.words": ["rsnapshot"]
+    "cSpell.words": ["rsnapshot"],
+    "python.testing.pytestArgs": ["tests", "--capture=no"],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
 }

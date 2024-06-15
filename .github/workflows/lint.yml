@@ -47,7 +47,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install mypy black
+          python -m pip install mypy black pytest
       - name: Validate types with mypy
         run: |
           mypy .

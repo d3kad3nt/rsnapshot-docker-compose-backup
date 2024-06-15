@@ -1,7 +1,8 @@
 import configparser
 import os
+from pathlib import Path
 import re
-from typing import Dict
+from typing import Dict, Optional
 
 from rsnapshot_docker_compose_backup import global_values
 from rsnapshot_docker_compose_backup.abstract_config import AbstractConfig
@@ -9,7 +10,7 @@ from rsnapshot_docker_compose_backup.utils import CaseInsensitiveRe
 
 
 class DefaultConfig(AbstractConfig):
-    __instance = None
+    __instance: Optional["DefaultConfig"] = None
     defaultConfig = "default_config"
     defaultConfigName = "backup.ini"
     settingsSection = "settings"
@@ -18,24 +19,29 @@ class DefaultConfig(AbstractConfig):
     # Settings
     settings = {
         "logTime": True,
+        "onlyRunning": True,
     }
 
     actions: Dict[str, Dict[str, str]] = {}
 
     @staticmethod
     def get_instance() -> "DefaultConfig":
+        # print(f"Get Default Config, {DefaultConfig.__instance}")
         if DefaultConfig.__instance is None:
             DefaultConfig.__instance = DefaultConfig()
         return DefaultConfig.__instance
 
+    @staticmethod
+    def reset() -> None:
+        DefaultConfig.__instance = None
+
     def __init__(self) -> None:
         if DefaultConfig.__instance is not None:
             raise Exception("This class is a singleton!")
-        if global_values.config_file != "":
-            self.filename = global_values.config_file
+        if global_values.config_file is not None:
+            self.filename: Path = global_values.config_file
         else:
-            self.filename = os.path.join(
-                global_values.folder,
+            self.filename = global_values.folder / Path(
                 self.defaultConfigName,
             )
         if not os.path.isfile(self.filename):
@@ -73,12 +79,13 @@ class DefaultConfig(AbstractConfig):
             re.compile(r"\[ *(?P<header>[^]]+?) *]")
         )  # type: ignore
         config_file.read(self.filename)
-
+        # print(f"filename {self.filename}")
         for setting in self.settings:
             if config_file.has_option(self.settingsSection, setting):
                 self.settings[setting] = config_file.getboolean(
                     self.settingsSection, setting
                 )
+                # print(f"{setting} is set to {self.settings[setting]}")
 
     def get_action(self, name: str) -> dict[str, str]:
         return self.actions[name]
