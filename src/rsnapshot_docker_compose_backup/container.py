@@ -40,8 +40,9 @@ class Container:
         if output is None:
             # print("output is none")
             return ""
-        result.append("#Start {}".format(self.service_name))
+        result.append("##Start backup for compose project {} - service {}".format(self.project_name, self.service_name))
         result.append(output)
+        result.append("##End backup for compose project {} - service {}".format(self.project_name, self.service_name))
         result.append("")
         return "\n".join(result)
 
