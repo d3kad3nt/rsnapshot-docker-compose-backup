@@ -11,11 +11,12 @@ on:
 
 jobs:
   multiversion:
+    name: flake8 checks
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
     steps:
       - uses: actions/checkout@v4
@@ -34,10 +35,8 @@ jobs:
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
   singleversion:
+    name: MyPy and Black checks
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python 3.12
@@ -49,6 +48,8 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install mypy black pytest
       - name: Validate types with mypy
-        run: |
-          mypy .
-          black --check .
+        run: mypy .
+      - name: Check formatting with black
+        # Run Job even if mypy fails. This would also run if a previous step failed, but that shouldn't happen
+        if: always()
+        run: black --check .
