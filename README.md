@@ -69,7 +69,7 @@ logTime = True
 [default_config.actions]
 stopContainer = true
 volumeBackup = true
-yamlBackup = false
+configBackup = false
 [default_config.vars]
 prefix = docker-compose
 
@@ -77,8 +77,8 @@ prefix = docker-compose
 [predefined_actions.volumeBackup]
 backup = backup	$volumes.path	$prefix/$serviceName/$volumes.name
     
-[predefined_actions.yamlBackup]
-runtime_backup = backup	$projectFolder	$prefix/$serviceName/yaml	+rsync_long_args=--include=*.yml,+rsync_long_args=--include=*.yaml
+[predefined_actions.configBackup]
+runtime_backup = backup_script	/usr/bin/docker compose config $serviceName > $serviceName_config.yaml	$backupPrefixFolder/$serviceName/config
 
 [predefined_actions.stopContainer]
 stop = backup_exec	cd $projectFolder; /usr/bin/docker-compose stop
@@ -92,7 +92,7 @@ pre_backup=backup_exec  docker exec -u www-data nextcloud /var/www/html/occ main
 post_backup=backup_exec docker exec -u www-data nextcloud /var/www/html/occ maintenance:mode --off
 
 [Nextcloud.Actions]
-yamlBackup=true
+configBackup=true
 stopContainer=false
 [MariaDB]
 runtime_backup=backup_script   $projectFolder/dump_database.sh    /backupDir

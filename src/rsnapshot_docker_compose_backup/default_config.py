@@ -117,8 +117,11 @@ stopcontainer = true
 #This action backups all volumes of the container
 volumebackup = true
 
-#This action saves the docker-compose.yml
-yamlbackup = true
+#This action saves the docker compose configuration of the container.
+#Please note that the suggested action parses, resolves and renders compose files in canonical format.
+#If you want to save the original yaml file you should enable the projectDirBackup setting.
+configbackup = true
+
 imagebackup = true
 
 #The following actions are disabled by default
@@ -130,8 +133,8 @@ projectDirBackup = false
 [{actions}.volumeBackup]
 backup = backup\t$volumes.path\t$backupPrefixFolder/$serviceName/$volumes.name
 
-[{actions}.yamlBackup]
-runtime_backup = backup\t$projectFolder\t$backupPrefixFolder/$serviceName/yaml\t+rsync_long_args=--include=*.yml,+rsync_long_args=--include=*.yaml
+[{actions}.configBackup]
+runtime_backup = backup_script\t/usr/bin/docker compose config $serviceName > $serviceName_config.yaml\t$backupPrefixFolder/$serviceName/config
 
 [{actions}.projectDirBackup]
 backup = backup\t$projectFolder\t$backupPrefixFolder/$serviceName/projectDir
