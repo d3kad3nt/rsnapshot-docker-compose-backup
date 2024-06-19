@@ -1,5 +1,7 @@
-import os
 from pathlib import Path
+from typing import Union
+
+import os
 
 from rsnapshot_docker_compose_backup.config.abstract_config import AbstractConfig
 from rsnapshot_docker_compose_backup.config.default_config import DefaultConfig
@@ -70,8 +72,8 @@ class ContainerConfig(AbstractConfig):
         self._is_running = container.is_running
         self.add_action_content()
 
-    def _all_vars(self) -> dict[str, str | list[Volume]]:
-        variables: dict[str, str | list[Volume]] = {}
+    def _all_vars(self) -> dict[str, Union[str, list[Volume]]]:
+        variables: dict[str, Union[str, list[Volume]]] = {}
         variables.update(self.default_config.vars)
         variables.update(self.vars)
         return variables

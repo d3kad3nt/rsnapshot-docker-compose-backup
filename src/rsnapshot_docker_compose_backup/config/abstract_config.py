@@ -107,7 +107,7 @@ def ireplace(old: str, new: str, text: str) -> str:
     return text
 
 
-def _replace_list(cmd: str, var: str, val: list[list[Any] | str | Volume]) -> str:
+def _replace_list(cmd: str, var: str, val: list[Union[list[Any], str, Volume]]) -> str:
     result: str = ""
     for i in val:
         result += str(_replace_var[type(i)](cmd, var, i)) + "\n"
