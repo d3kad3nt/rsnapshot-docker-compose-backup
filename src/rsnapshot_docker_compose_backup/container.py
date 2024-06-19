@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Optional, Union
 
 import os
 
@@ -13,7 +13,7 @@ class Container:
     folder: Path
     service_name: str
     config: "ContainerConfig"
-    volumes: List[Volume]
+    volumes: list[Volume]
 
     def __init__(
         self,
@@ -31,7 +31,7 @@ class Container:
         self.image = docker.image(container_id)
         self.file_name: Path = self.folder / "backup.ini"
         self.volumes = docker.volumes(container_id)
-        self.isRunning = running
+        self.is_running = running
         self.config = ContainerConfig(self)
 
     def backup(self) -> str:
@@ -72,19 +72,17 @@ class ContainerConfig(AbstractConfig):
         self.vars["$volumes"] = container.volumes
         self.vars["$image"] = container.image
         self.vars["$projectName"] = container.project_name
-        self._isRunning = container.isRunning
+        self._is_running = container.is_running
         self.add_action_content()
 
-    def _all_vars(self) -> Dict[str, str | List[Volume]]:
-        variables: Dict[str, str | list[Volume]] = {}
+    def _all_vars(self) -> dict[str, Union[str, list[Volume]]]:
+        variables: dict[str, Union[str, list[Volume]]] = {}
         variables.update(self.default_config.vars)
         variables.update(self.vars)
         return variables
 
     def output(self) -> Optional[str]:
-        onlyRunning = self.default_config.settings["onlyRunning"]
-        if onlyRunning and not self._isRunning:
-            # print("only running: {}".format(onlyRunning))
+        if self.default_config.settings["onlyRunning"] and not self._is_running:
             return None
         result: list[str] = []
 
@@ -96,7 +94,7 @@ class ContainerConfig(AbstractConfig):
                     script_command = self._resolve_vars(line, self._all_vars()).strip(
                         "\n"
                     )
-                    single_commands: List[str] = []
+                    single_commands: list[str] = []
                     if "\n" in script_command:
                         single_commands = script_command.split("\n")
                     else:
@@ -115,10 +113,9 @@ class ContainerConfig(AbstractConfig):
     def get_step(self, step: str) -> str:
         if self.backup_steps.get(step, ""):
             return self.backup_steps.get(step, "")
-        else:
-            return self.default_config.get_step(step)
+        return self.default_config.get_step(step)
 
-    def get_enabled_actions(self) -> Dict[str, bool]:
+    def get_enabled_actions(self) -> dict[str, bool]:
         merged_dict = self.default_config.enabled_actions.copy()
         merged_dict.update(self.enabled_actions)
         return merged_dict

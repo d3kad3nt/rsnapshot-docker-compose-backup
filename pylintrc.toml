@@ -107,7 +107,7 @@ persistent = true
 
 # Minimum Python version to use for version dependent checks. Will default to the
 # version used to run pylint.
-py-version = "3.10"
+py-version = "3.8"
 
 # Discover python modules and packages in the file system subtree.
 # recursive =
@@ -411,7 +411,7 @@ confidence = ["HIGH", "CONTROL_FLOW", "INFERENCE", "INFERENCE_FAILURE", "UNDEFIN
 # --enable=similarities". If you want to run only the classes checker, but have
 # no Warning level messages displayed, use "--disable=all --enable=classes
 # --disable=W".
-disable = [ "consider-using-augmented-assign", "consider-using-f-string", "missing-function-docstring", "missing-module-docstring", "missing-class-docstring"]
+disable = [ "consider-using-augmented-assign", "consider-using-f-string", "missing-function-docstring", "missing-module-docstring", "missing-class-docstring", "consider-using-assignment-expr", "consider-ternary-expression"]
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option

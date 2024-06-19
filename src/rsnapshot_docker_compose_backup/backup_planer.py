@@ -10,7 +10,6 @@ import argparse
 from dataclasses import dataclass
 import os
 from pathlib import Path
-from typing import List
 
 from rsnapshot_docker_compose_backup.container import Container
 
@@ -48,7 +47,7 @@ def parse_arguments() -> ProgramArgs:
 def run(args: ProgramArgs) -> str:
     set_folder(args.folder)
     set_config_file(args.config)
-    docker_container: List[Container] = docker_compose.find_container(args.folder)
+    docker_container: list[Container] = docker_compose.find_container(args.folder)
     result: list[str] = []
     for container in docker_container:
         container_result = container.backup()

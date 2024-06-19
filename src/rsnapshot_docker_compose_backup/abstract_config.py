@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 import re
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable, Union
 
 from rsnapshot_docker_compose_backup.utils import CaseInsensitiveRe
 from rsnapshot_docker_compose_backup.volume import Volume
@@ -24,9 +24,9 @@ class AbstractConfig(ABC):
     ]
 
     def __init__(self, config_path: Path, name: str):
-        self.enabled_actions: Dict[str, bool] = {}
-        self.backup_steps: Dict[str, str] = {}
-        self.vars: Dict[str, str | List[Volume]] = {}
+        self.enabled_actions: dict[str, bool] = {}
+        self.backup_steps: dict[str, str] = {}
+        self.vars: dict[str, Union[str, list[Volume]]] = {}
         for step in self.backupOrder:
             self.backup_steps[step] = ""
         self._load_config_file(config_path, name)
@@ -55,7 +55,7 @@ class AbstractConfig(ABC):
         if config_file.has_section(actions_section):
             for action in config_file.options(actions_section):
                 val = config_file.get(actions_section, action, fallback=None)
-                use = val is None or val.lower() in ["true"]
+                use = val is None or val.lower() in set("true")
                 self.enabled_actions[action] = use
         vars_section = self.vars_name(section_name)
         if config_file.has_section(vars_section):
@@ -63,7 +63,9 @@ class AbstractConfig(ABC):
                 val = config_file.get(vars_section, var)
                 self.vars["${}".format(var)] = val
 
-    def _resolve_vars(self, cmd: str, variables: Dict[str, str | list[Volume]]) -> str:
+    def _resolve_vars(
+        self, cmd: str, variables: dict[str, Union[str, list[Volume]]]
+    ) -> str:
         for var in variables.keys():
             if var.lower() in cmd.lower():
                 replace_function = _replace_var.get(type(variables[var]))
@@ -104,7 +106,7 @@ def ireplace(old: str, new: str, text: str) -> str:
     return text
 
 
-def _replace_list(cmd: str, var: str, val: list[list[Any] | str | Volume]) -> str:
+def _replace_list(cmd: str, var: str, val: list[Union[list[Any], str, Volume]]) -> str:
     result: str = ""
     for i in val:
         result += str(_replace_var[type(i)](cmd, var, i)) + "\n"
@@ -122,7 +124,7 @@ def _replace_volume(cmd: str, var: str, val: Volume) -> str:
     return tmp
 
 
-_replace_var: Dict[type, Callable[..., str]] = {
+_replace_var: dict[type, Callable[..., str]] = {
     list: _replace_list,
     str: _replace_str,
     Volume: _replace_volume,

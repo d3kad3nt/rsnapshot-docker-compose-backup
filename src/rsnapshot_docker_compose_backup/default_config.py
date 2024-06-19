@@ -2,7 +2,7 @@ import configparser
 import os
 from pathlib import Path
 import re
-from typing import Dict, Optional
+from typing import Optional
 
 from rsnapshot_docker_compose_backup import global_values
 from rsnapshot_docker_compose_backup.abstract_config import AbstractConfig
@@ -22,7 +22,7 @@ class DefaultConfig(AbstractConfig):
         "onlyRunning": True,
     }
 
-    actions: Dict[str, Dict[str, str]] = {}
+    actions: dict[str, dict[str, str]] = {}
 
     @staticmethod
     def get_instance() -> "DefaultConfig":
