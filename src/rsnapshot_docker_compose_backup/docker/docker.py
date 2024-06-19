@@ -1,6 +1,6 @@
 import json
 import re
-from typing import Any
+from typing import Any, Optional
 
 from rsnapshot_docker_compose_backup.structure.volume import Volume
 from rsnapshot_docker_compose_backup.utils import command
@@ -12,7 +12,7 @@ def inspect(container: str) -> Any:
     return json.loads(command(f"docker inspect {container}").stdout)[0]
 
 
-def ps(container_id: str | None = None) -> str:
+def ps(container_id: Optional[str] = None) -> str:
     result = command("docker ps -a").stdout
     if container_id:
         for line in ps().splitlines():
