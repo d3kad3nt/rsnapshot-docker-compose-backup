@@ -1,11 +1,13 @@
 import configparser
+from importlib import resources
 import os
 from pathlib import Path
 import re
+import sys
 from typing import Optional
 
 from rsnapshot_docker_compose_backup import global_values
-from rsnapshot_docker_compose_backup.abstract_config import AbstractConfig
+from rsnapshot_docker_compose_backup.config.abstract_config import AbstractConfig
 from rsnapshot_docker_compose_backup.utils import CaseInsensitiveRe
 
 
@@ -51,8 +53,19 @@ class DefaultConfig(AbstractConfig):
         self._load_settings()
 
     def _create_default_config(self) -> None:
-        with open(self.filename, "w", encoding="UTF-8") as config_file:
-            config_file.write(defaultConfigContent)
+        with resources.open_text(
+            "rsnapshot_docker_compose_backup.config", "backup.ini"
+        ) as default_backup_ini:
+            default_config = default_backup_ini.read().format(
+                default_config=self.defaultConfig,
+                default_config_actions=self.actions_name(self.defaultConfig),
+                default_config_vars=self.vars_name(self.defaultConfig),
+                actions=self.actionSection,
+                default_config_settings=self.settingsSection,
+            )
+
+            with open(self.filename, "w", encoding="UTF-8") as config_file:
+                config_file.write(default_config)
 
     def get_step(self, step: str) -> str:
         return self.backup_steps.get(step, "")
@@ -68,7 +81,7 @@ class DefaultConfig(AbstractConfig):
                 action_name = section[len(self.actionSection + ".") :]
                 commands = {}
                 for step in self.backup_steps:
-                    if config_file.has_option(section, step):
+                    if config_file.has_option(section.lower(), step):
                         commands[step] = config_file.get(section, step).strip() + "\n"
                 if commands:
                     self.actions[action_name] = commands
@@ -89,67 +102,3 @@ class DefaultConfig(AbstractConfig):
 
     def get_action(self, name: str) -> dict[str, str]:
         return self.actions[name]
-
-
-defaultConfigContent = """
-#This is the default config of the rsnapshot-docker-compose-backup program.
-
-#This section can contain rsnapshot commands that are executed in the different steps of the container backup
-[{default_config}]
-#Example:
-#run_backup=backup_script   echo "Hello" > helloWorld   test/
-
-#This section contains settings that can be set. This section can only be used in the default config.
-[{default_config_settings}]
-#This outputs the Start and End Times for each backup command to the log. 
-#Rsnapshot doesn't log timestamps
-logTime = true
-
-[{default_config_vars}]
-#This setting corresponds to the var with the same name and can be used as a prefix in the folder path
-backupprefixfolder = .
-
-#This Section controls which actions should be enabled
-[{default_config_actions}]
-#This action stops the container before copying the volumes and starts it after it finished.
-stopcontainer = true
-
-#This action backups all volumes of the container
-volumebackup = true
-
-#This action saves the docker-compose.yml
-yamlbackup = true
-imagebackup = true
-
-#The following actions are disabled by default
-logbackup = false
-projectDirBackup = false
-
-#The following is the definition of actions that can be used in the backup
-
-[{actions}.volumeBackup]
-backup = backup\t$volumes.path\t$backupPrefixFolder/$serviceName/$volumes.name
-
-[{actions}.yamlBackup]
-runtime_backup = backup\t$projectFolder\t$backupPrefixFolder/$serviceName/yaml\t+rsync_long_args=--include=*.yml,+rsync_long_args=--include=*.yaml
-
-[{actions}.projectDirBackup]
-backup = backup\t$projectFolder\t$backupPrefixFolder/$serviceName/projectDir
-
-[{actions}.imageBackup]
-runtime_backup = backup_script\t/usr/bin/docker image save $image -o $serviceName_image.tar\t$backupPrefixFolder/$serviceName/image
-
-[{actions}.logBackup]
-backup = backup_script\t/usr/bin/docker logs $containerID > $serviceName_logs.log 2>&1\t$backupPrefixFolder/$serviceName/log
-
-[{actions}.stopContainer]
-stop = backup_exec\tcd $projectFolder; /usr/bin/docker-compose stop
-restart = backup_exec\tcd $projectFolder; /usr/bin/docker-compose start
-
-""".format(
-    default_config=DefaultConfig.defaultConfig,
-    default_config_actions=DefaultConfig.actions_name(DefaultConfig.defaultConfig),
-    default_config_vars=DefaultConfig.vars_name(DefaultConfig.defaultConfig),
-    actions=DefaultConfig.actionSection,
-    default_config_settings=DefaultConfig.settingsSection,
-)

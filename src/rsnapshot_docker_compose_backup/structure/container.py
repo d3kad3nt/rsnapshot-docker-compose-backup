@@ -3,10 +3,10 @@ from typing import Optional, Union
 
 import os
 
-from rsnapshot_docker_compose_backup import docker
-from rsnapshot_docker_compose_backup.volume import Volume
-from rsnapshot_docker_compose_backup.abstract_config import AbstractConfig
-from rsnapshot_docker_compose_backup.default_config import DefaultConfig
+from rsnapshot_docker_compose_backup.docker import docker
+from rsnapshot_docker_compose_backup.structure.volume import Volume
+from rsnapshot_docker_compose_backup.config.abstract_config import AbstractConfig
+from rsnapshot_docker_compose_backup.config.default_config import DefaultConfig
 
 
 class Container:

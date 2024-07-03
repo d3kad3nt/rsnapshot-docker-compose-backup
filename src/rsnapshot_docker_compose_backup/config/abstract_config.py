@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Callable, Union
 
 from rsnapshot_docker_compose_backup.utils import CaseInsensitiveRe
-from rsnapshot_docker_compose_backup.volume import Volume
+from rsnapshot_docker_compose_backup.structure.volume import Volume
 
 
 class AbstractConfig(ABC):

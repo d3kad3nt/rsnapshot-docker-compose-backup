@@ -3,7 +3,7 @@ import re
 from typing import Any, Optional
 
 from rsnapshot_docker_compose_backup.utils import command
-from rsnapshot_docker_compose_backup.volume import Volume
+from rsnapshot_docker_compose_backup.structure.volume import Volume
 
 
 def inspect(container: str) -> Any:

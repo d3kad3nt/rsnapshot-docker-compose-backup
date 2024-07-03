@@ -11,11 +11,11 @@ from dataclasses import dataclass
 import os
 from pathlib import Path
 
-from rsnapshot_docker_compose_backup.container import Container
+from rsnapshot_docker_compose_backup.structure.container import Container
 
 # Other imports
 from rsnapshot_docker_compose_backup.global_values import set_folder, set_config_file
-from rsnapshot_docker_compose_backup import docker_compose
+from rsnapshot_docker_compose_backup.docker import docker_compose
 
 
 @dataclass

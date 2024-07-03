@@ -8,7 +8,7 @@ from concurrent import futures
 import json
 from typing import Optional
 
-from rsnapshot_docker_compose_backup.container import Container
+from rsnapshot_docker_compose_backup.structure.container import Container
 from rsnapshot_docker_compose_backup.utils import command
 
 

@@ -1,4 +1,4 @@
-#Start heimdall
+##Start backup for compose project heimdall - service heimdall
 #runtime_backup
 backup_exec	/bin/date +%s
 backup_script	/usr/bin/docker image save linuxserver/heimdall -o heimdall_image.tar	./heimdall/image
@@ -14,8 +14,9 @@ backup	/var/lib/docker/volumes/heimdall_heimdall/_data	./heimdall/heimdall_heimd
 backup_exec	/bin/date +%s
 backup_exec	cd ${{container_folder}}/heimdall; /usr/bin/docker-compose start
 backup_exec	/bin/date +%s
+##End backup for compose project heimdall - service heimdall
 
-#Start mariaDB
+##Start backup for compose project nextcloud - service mariaDB
 #runtime_backup
 backup_exec	/bin/date +%s
 backup_exec	/bin/mkdir $tmpFolder;${{container_folder}}/nextcloud/dump_database.sh>$tmpFolder/db.dump
@@ -34,8 +35,9 @@ backup_exec	/usr/bin/docker exec -u www-data nextcloud /var/www/html/occ mainten
 backup_exec	/bin/date +%s
 backup_exec /usr/bin/docker exec -u www-data nextcloud /var/www/html/occ maintenance:mode --off
 backup_exec	/bin/date +%s
+##End backup for compose project nextcloud - service mariaDB
 
-#Start nextcloud
+##Start backup for compose project nextcloud - service nextcloud
 #runtime_backup
 backup_exec	/bin/date +%s
 backup_script	/usr/bin/docker image save nextcloud -o nextcloud_image.tar	./nextcloud/image
@@ -51,3 +53,4 @@ backup	/var/lib/docker/volumes/nextcloud_nextcloud/_data	./nextcloud/nextcloud_n
 backup_exec	/bin/date +%s
 backup_exec	/usr/bin/docker exec -u www-data nextcloud /var/www/html/occ maintenance:mode --off
 backup_exec	/bin/date +%s
+##End backup for compose project nextcloud - service nextcloud
