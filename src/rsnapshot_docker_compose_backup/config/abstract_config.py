@@ -55,7 +55,7 @@ class AbstractConfig(ABC):
         if config_file.has_section(actions_section):
             for action in config_file.options(actions_section):
                 val = config_file.get(actions_section, action, fallback=None)
-                use = val is None or val.lower() in set("true")
+                use = val is None or val.lower() in {"true"}
                 self.enabled_actions[action] = use
         vars_section = self.vars_name(section_name)
         if config_file.has_section(vars_section):
