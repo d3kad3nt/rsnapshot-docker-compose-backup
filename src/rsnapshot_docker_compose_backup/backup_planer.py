@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from rsnapshot_docker_compose_backup.docker import docker_compose
+from rsnapshot_docker_compose_backup.docker import docker
 from rsnapshot_docker_compose_backup.global_values import set_config_file, set_folder
 
 if TYPE_CHECKING:
@@ -50,7 +50,7 @@ def parse_arguments() -> ProgramArgs:
 def run(args: ProgramArgs) -> str:
     set_folder(args.folder)
     set_config_file(args.config)
-    docker_container: list[Container] = docker_compose.find_container(args.folder)
+    docker_container: list[Container] = docker.find_container(args.folder)
     result: list[str] = []
     for container in docker_container:
         container_result = container.backup()
