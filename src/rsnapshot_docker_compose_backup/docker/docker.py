@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import re
+import socket
 from typing import Any, Optional
 
 from rsnapshot_docker_compose_backup.structure.container import Container
@@ -39,6 +40,64 @@ def volumes(container_id: str) -> list[Volume]:
 def image(container_id: str) -> str:
     container_info: str = ps(container_id)
     return get_column(1, container_info)
+
+
+@dataclass
+class HttpResponse:
+    protocol_version: str
+    status_code: int
+    status_text: str
+    headers: dict[str, str]
+    json_body: Any
+
+
+class Api:
+
+    _docker_socket: Optional[socket.socket] = None
+
+    @staticmethod
+    def get(endpoint: str) -> HttpResponse:
+        docker_socket = None
+        if docker_socket is None:
+            print("new socket")
+            docker_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            docker_socket.connect("/run/docker.sock")
+        else:
+            print("reuse socket")
+        docker_socket.send(
+            f"GET {endpoint} HTTP/1.1\r\nHost:docker.sock\r\n\r\n".encode("utf-8")
+        )
+        return Api._parse_response(docker_socket)
+
+    @staticmethod
+    def _parse_response(sock: socket.socket) -> HttpResponse:
+        message_start = b""
+        while not message_start.endswith(b"\r\n\r\n"):
+            chunk = sock.recv(1)
+            message_start = message_start + chunk
+        lines: list[str] = message_start.decode("utf-8").splitlines()
+        status_line = lines[0]
+        protocol_version = status_line.split(" ")[0]
+        status_code = int(status_line.split(" ")[1])
+        status_text = " ".join(status_line.split(" ")[2:])
+        headers: dict[str, str] = {}
+        for line in lines[1:]:
+            split = line.split(":")
+            if len(split) == 2:
+                headers[split[0]] = split[1]
+        body_length = int(headers["Content-Length"])
+        body = sock.recv(body_length).decode("utf-8")
+        return HttpResponse(
+            protocol_version=protocol_version,
+            status_code=status_code,
+            status_text=status_text,
+            headers=headers,
+            json_body=json.loads(body),
+        )
+
+
+def get_version() -> str:
+    return str(Api.get("/version").json_body["Version"])
 
 
 def get_binary() -> str:
