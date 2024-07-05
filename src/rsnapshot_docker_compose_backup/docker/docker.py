@@ -1,12 +1,13 @@
 from concurrent import futures
 from dataclasses import dataclass
+from enum import Enum, auto
 import json
 import os
 from pathlib import Path
 import re
 import socket
 from typing import Any, Optional
-
+import urllib.parse
 from rsnapshot_docker_compose_backup.structure.container import Container
 from rsnapshot_docker_compose_backup.utils import command
 from rsnapshot_docker_compose_backup.structure.volume import Volume
@@ -18,14 +19,56 @@ def inspect(container: str) -> Any:
     return json.loads(command("docker inspect {}".format(container)).stdout)[0]
 
 
-def ps(container_id: Optional[str] = None) -> str:
-    result = command("docker ps -a").stdout
-    if container_id:
-        for line in ps().splitlines():
-            if line.startswith(container_id[:11]):
-                return line
-        return ""
-    return result
+class ContainerState(Enum):
+    CREATED = auto()
+    RESTARTING = auto()
+    RUNNING = auto()
+    REMOVING = auto()
+    PAUSED = auto()
+    EXITED = auto()
+    DEAD = auto()
+
+    @staticmethod
+    def get_value(value: str) -> "ContainerState":
+        for member in ContainerState:
+            if member.name.lower() == value.lower():
+                return member
+        raise ValueError("Unknown Value: " + value)
+
+
+@dataclass
+class docker_inspect:
+    id: str
+    names: list[str]
+    image: str
+    imageId: str
+    state: ContainerState
+    mounts: list[str]
+
+
+@dataclass
+class docker_ps:
+    container_info: list[docker_inspect]
+
+
+def ps(container_id: Optional[str] = None) -> docker_ps:
+    parameter = {"all": "true"}
+    if container_id is not None:
+        parameter["filters"] = '{"id": ["' + container_id + '"]}'
+    response = Api().get("/containers/json", query_parameter=parameter)
+    container_info_list: list[docker_inspect] = []
+    for container_info in response.json_body:
+        container_info_list.append(
+            docker_inspect(
+                id=container_info["Id"],
+                names=container_info["Names"],
+                image=container_info["Image"],
+                imageId=container_info["ImageID"],
+                state=ContainerState.get_value(container_info["State"]),
+                mounts=container_info["Mounts"],
+            )
+        )
+    return docker_ps(container_info=container_info_list)
 
 
 def volumes(container_id: str) -> list[Volume]:
@@ -38,8 +81,8 @@ def volumes(container_id: str) -> list[Volume]:
 
 
 def image(container_id: str) -> str:
-    container_info: str = ps(container_id)
-    return get_column(1, container_info)
+    container_info: docker_ps = ps(container_id)
+    return container_info.container_info[0].image
 
 
 @dataclass
@@ -55,19 +98,44 @@ class Api:
 
     _docker_socket: Optional[socket.socket] = None
 
-    @staticmethod
-    def get(endpoint: str) -> HttpResponse:
-        docker_socket = None
-        if docker_socket is None:
-            print("new socket")
-            docker_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-            docker_socket.connect("/run/docker.sock")
-        else:
-            print("reuse socket")
-        docker_socket.send(
-            f"GET {endpoint} HTTP/1.1\r\nHost:docker.sock\r\n\r\n".encode("utf-8")
-        )
-        return Api._parse_response(docker_socket)
+    def __init__(
+        self, socket_connection: str = "unix:///run/docker.sock", version: str = "v1.46"
+    ) -> None:
+        self.docker_socket = self._open_socket(socket_connection)
+        self.version = version
+
+    def _open_socket(self, socket_connection: str) -> socket.socket:
+        if not socket_connection.startswith("unix://"):
+            raise ValueError("Only Unix Sockets are supported")
+        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        sock.connect(socket_connection.removeprefix("unix://"))
+        return sock
+
+    def get(
+        self,
+        endpoint: str,
+        *,
+        query_parameter: Optional[dict[str, str]] = None,
+        header: Optional[dict[str, str]] = None,
+    ) -> HttpResponse:
+        path = f"/{self.version}{endpoint}"
+        if query_parameter is not None:
+            parameter: list[str] = []
+            for name, value in query_parameter.items():
+                parameter.append(f"{name}={urllib.parse.quote_plus(value)}")
+            path = path + "?" + "&".join(parameter)
+            # path = path + "?" + urllib.parse.quote_plus("&".join(parameter))
+        print(path)
+        request = [
+            f"GET {path} HTTP/1.1",
+            "Host:docker.sock",
+        ]
+        if header is not None:
+            for name, value in header.items():
+                request.append(f"{name}:{value}")
+        request.append("\r\n")
+        self.docker_socket.send("\r\n".join(request).encode("utf-8"))
+        return self._parse_response(self.docker_socket)
 
     @staticmethod
     def _parse_response(sock: socket.socket) -> HttpResponse:
@@ -80,6 +148,9 @@ class Api:
         protocol_version = status_line.split(" ")[0]
         status_code = int(status_line.split(" ")[1])
         status_text = " ".join(status_line.split(" ")[2:])
+        if status_code >= 400:
+            print(sock.recv(100))
+            raise ValueError(status_text)
         headers: dict[str, str] = {}
         for line in lines[1:]:
             split = line.split(":")
@@ -97,7 +168,7 @@ class Api:
 
 
 def get_version() -> str:
-    return str(Api.get("/version").json_body["Version"])
+    return str(Api().get("/version").json_body["Version"])
 
 
 def get_binary() -> str:
