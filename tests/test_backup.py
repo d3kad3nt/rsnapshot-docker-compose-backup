@@ -9,7 +9,7 @@ import shutil
 import pytest
 
 from rsnapshot_docker_compose_backup import backup_planer
-from rsnapshot_docker_compose_backup.default_config import DefaultConfig
+from rsnapshot_docker_compose_backup.config.default_config import DefaultConfig
 
 curr_dir = Path(os.path.dirname(os.path.realpath(__file__)))
 
