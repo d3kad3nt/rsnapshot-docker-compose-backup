@@ -1,12 +1,11 @@
 from dataclasses import dataclass
 from enum import Enum, auto
-import json
 from pathlib import Path
-import socket
 from typing import Any, Optional
-import urllib.parse
+
 from rsnapshot_docker_compose_backup.structure.container import Container
 from rsnapshot_docker_compose_backup.structure.volume import Volume
+from rsnapshot_docker_compose_backup.utils.dockerApiClient import Api
 
 
 class ContainerState(Enum):
@@ -101,14 +100,14 @@ class DockerInspect:
         )
 
 
-def inspect(container_id: str) -> DockerInspect:
+def inspect_container(container_id: str) -> DockerInspect:
     # converts docker inspect to json and return only first container,
     # because this works only with one container
     response = Api().get(f"/containers/{container_id}/json")
     return DockerInspect.from_json(response.json_body)
 
 
-def ps(socket_connection: Optional[str] = None) -> list[DockerInspect]:
+def get_container(socket_connection: Optional[str] = None) -> list[DockerInspect]:
     parameter = {"all": "true"}
     if socket_connection is None:
         api = Api()
@@ -127,122 +126,9 @@ def _volumes(mounts: list[DockerMount]) -> list[Volume]:
     return sorted(result)
 
 
-@dataclass
-class HttpResponse:
-    protocol_version: str
-    status_code: int
-    status_text: str
-    headers: dict[str, str]
-    json_body: Any
-
-
-class Api:
-
-    _docker_socket: Optional[socket.socket] = None
-
-    def __init__(
-        self, socket_connection: str = "unix:///run/docker.sock", version: str = "v1.46"
-    ) -> None:
-        self.docker_socket = self._open_socket(socket_connection)
-        self.version = version
-
-    def _open_socket(self, socket_connection: str) -> socket.socket:
-        if socket_connection.startswith("unix://"):
-            sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-            sock.connect(socket_connection.removeprefix("unix://"))
-            return sock
-        if socket_connection.startswith("http://"):
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            parts = socket_connection.removeprefix("http://").split(":")
-            host = parts[0]
-            port = 80
-            if len(parts) == 2:
-                port = int(parts[1])
-            print(f"connect to {host}, {port}")
-            sock.connect((host, port))
-            return sock
-        raise ValueError("Only Unix and http Sockets are supported")
-
-    def get(
-        self,
-        endpoint: str,
-        *,
-        query_parameter: Optional[dict[str, str]] = None,
-        header: Optional[dict[str, str]] = None,
-    ) -> HttpResponse:
-        path = f"/{self.version}{endpoint}"
-        if query_parameter is not None:
-            parameter: list[str] = []
-            for name, value in query_parameter.items():
-                parameter.append(f"{name}={urllib.parse.quote_plus(value)}")
-            path = path + "?" + "&".join(parameter)
-        request = [
-            f"GET {path} HTTP/1.1",
-            "Host:docker.sock",
-        ]
-        if header is not None:
-            for name, value in header.items():
-                request.append(f"{name}:{value}")
-        request.append("\r\n")
-        self.docker_socket.send("\r\n".join(request).encode("utf-8"))
-        return self._parse_response(self.docker_socket)
-
-    @staticmethod
-    def _parse_response(sock: socket.socket) -> HttpResponse:
-        message_start = b""
-        while not message_start.endswith(b"\r\n\r\n"):
-            message_start = message_start + sock.recv(1)
-        lines: list[str] = message_start.decode("utf-8").splitlines()
-        status_line = lines[0]
-        protocol_version = status_line.split(" ")[0]
-        status_code = int(status_line.split(" ")[1])
-        status_text = " ".join(status_line.split(" ")[2:])
-        if status_code >= 400:
-            raise ValueError(status_text)
-        headers: dict[str, str] = {}
-        for line in lines[1:]:
-            split = line.split(":")
-            if len(split) == 2:
-                headers[split[0]] = split[1].strip()
-        if "Content-Length" in headers:
-            body_length = int(headers["Content-Length"])
-            body = sock.recv(body_length).decode("utf-8")
-        elif (
-            "Transfer-Encoding" in headers and headers["Transfer-Encoding"] == "chunked"
-        ):
-            body = ""
-            while True:
-                chunk = b""
-                while not chunk.endswith(b"\r\n"):
-                    chunk += sock.recv(1)
-                length = int(chunk.decode("utf-8"), 16)
-                if length == 0:
-                    break
-                body = body + sock.recv(length).decode("utf-8")
-                sock.recv(2)  # Skip ending \r\n
-        else:
-            raise ValueError(headers)
-        return HttpResponse(
-            protocol_version=protocol_version,
-            status_code=status_code,
-            status_text=status_text,
-            headers=headers,
-            json_body=json.loads(body),
-        )
-
-
-def get_version(socket_connection: Optional[str] = None) -> str:
-    if socket_connection is not None:
-        api = Api(socket_connection=socket_connection)
-    else:
-        api = Api()
-    response = api.get("/version")
-    return str(response.json_body["Version"])
-
-
-def find_container() -> list[Container]:
+def get_compose_container() -> list[Container]:
     container_list: list[Container] = []
-    for container in ps():
+    for container in get_container():
         if "com.docker.compose.project" in container.labels:
             print(container.names[0])
             print(container.state)

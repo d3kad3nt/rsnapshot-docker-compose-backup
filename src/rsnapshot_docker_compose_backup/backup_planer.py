@@ -15,7 +15,7 @@ from rsnapshot_docker_compose_backup.structure.container import Container
 
 # Other imports
 from rsnapshot_docker_compose_backup.global_values import set_folder, set_config_file
-from rsnapshot_docker_compose_backup.docker import docker
+from rsnapshot_docker_compose_backup import docker
 
 
 @dataclass
@@ -47,7 +47,7 @@ def parse_arguments() -> ProgramArgs:
 def run(args: ProgramArgs) -> str:
     set_folder(args.folder)
     set_config_file(args.config)
-    docker_container: list[Container] = docker.find_container()
+    docker_container: list[Container] = docker.get_compose_container()
     result: list[str] = []
     for container in docker_container:
         container_result = container.backup()
