@@ -51,11 +51,18 @@ class docker_ps:
     container_info: list[docker_inspect]
 
 
-def ps(container_id: Optional[str] = None) -> docker_ps:
+def ps(
+    container_id: Optional[str] = None, socket_connection: Optional[str] = None
+) -> docker_ps:
     parameter = {"all": "true"}
     if container_id is not None:
         parameter["filters"] = '{"id": ["' + container_id + '"]}'
-    response = Api().get("/containers/json", query_parameter=parameter)
+    if socket_connection is None:
+        api = Api()
+    else:
+        api = Api(socket_connection=socket_connection)
+    response = api.get("/containers/json", query_parameter=parameter)
+    print(response.json_body)
     container_info_list: list[docker_inspect] = []
     for container_info in response.json_body:
         container_info_list.append(
@@ -175,8 +182,14 @@ class Api:
         )
 
 
-def get_version() -> str:
-    return str(Api().get("/version").json_body["Version"])
+def get_version(socket_connection: Optional[str] = None) -> str:
+    if socket_connection is not None:
+        api = Api(socket_connection=socket_connection)
+    else:
+        api = Api()
+    response = api.get("/version")
+    print(response)
+    return str(response.json_body["Version"])
 
 
 def get_binary() -> str:
