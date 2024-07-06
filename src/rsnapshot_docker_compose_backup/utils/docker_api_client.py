@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 import json
 import socket
-from typing import Any, Optional
+from typing import Any, Dict, List, Optional
 import urllib.parse
 
 
@@ -10,7 +10,7 @@ class HttpResponse:
     protocol_version: str
     status_code: int
     status_text: str
-    headers: dict[str, str]
+    headers: Dict[str, str]
     json_body: Any
 
 
@@ -27,11 +27,11 @@ class Api:
     def _open_socket(self, socket_connection: str) -> socket.socket:
         if socket_connection.startswith("unix://"):
             sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-            sock.connect(socket_connection.removeprefix("unix://"))
+            sock.connect(socket_connection.lstrip("unix://"))
             return sock
         if socket_connection.startswith("http://"):
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            parts = socket_connection.removeprefix("http://").split(":")
+            parts = socket_connection.lstrip("http://").split(":")
             host = parts[0]
             port = 80
             if len(parts) == 2:
@@ -45,12 +45,12 @@ class Api:
         self,
         endpoint: str,
         *,
-        query_parameter: Optional[dict[str, str]] = None,
-        header: Optional[dict[str, str]] = None,
+        query_parameter: Optional[Dict[str, str]] = None,
+        header: Optional[Dict[str, str]] = None,
     ) -> HttpResponse:
         path = f"/{self.version}{endpoint}"
         if query_parameter is not None:
-            parameter: list[str] = []
+            parameter: List[str] = []
             for name, value in query_parameter.items():
                 parameter.append(f"{name}={urllib.parse.quote_plus(value)}")
             path = path + "?" + "&".join(parameter)
@@ -71,7 +71,7 @@ class Api:
         message_start = b""
         while not message_start.endswith(b"\r\n\r\n"):
             message_start = message_start + sock.recv(1)
-        lines: list[str] = message_start.decode("utf-8").splitlines()
+        lines: List[str] = message_start.decode("utf-8").splitlines()
         # Parse statusline
         status_line = lines[0]
         protocol_version = status_line.split(" ")[0]
@@ -80,7 +80,7 @@ class Api:
         if status_code >= 400:
             raise ValueError(status_text)
         # Read headers
-        headers: dict[str, str] = {}
+        headers: Dict[str, str] = {}
         for line in lines[1:]:
             split = line.split(":")
             if len(split) == 2:

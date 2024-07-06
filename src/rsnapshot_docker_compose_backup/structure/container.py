@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional, Union
+from typing import Dict, List, Optional, Union
 
 import os
 
@@ -18,7 +18,7 @@ class Container:
         container_name: str,
         container_id: str,
         running: bool,
-        volumes: list[Volume],
+        volumes: List[Volume],
         image: str,
     ):
         self.folder: Path = folder
@@ -33,7 +33,7 @@ class Container:
         self.config = ContainerConfig(self)
 
     def backup(self) -> str:
-        result: list[str] = []
+        result: List[str] = []
         output = self.config.output()
         if output is None:
             # print("output is none")
@@ -78,8 +78,8 @@ class ContainerConfig(AbstractConfig):
         self._is_running = container.is_running
         self.add_action_content()
 
-    def _all_vars(self) -> dict[str, Union[str, list[Volume]]]:
-        variables: dict[str, Union[str, list[Volume]]] = {}
+    def _all_vars(self) -> Dict[str, Union[str, List[Volume]]]:
+        variables: Dict[str, Union[str, List[Volume]]] = {}
         variables.update(self.default_config.vars)
         variables.update(self.vars)
         return variables
@@ -87,7 +87,7 @@ class ContainerConfig(AbstractConfig):
     def output(self) -> Optional[str]:
         if self.default_config.settings["onlyRunning"] and not self._is_running:
             return None
-        result: list[str] = []
+        result: List[str] = []
 
         for step in self.backupOrder:
             backup_action = self.get_step(step)
@@ -97,7 +97,7 @@ class ContainerConfig(AbstractConfig):
                     script_command = self._resolve_vars(line, self._all_vars()).strip(
                         "\n"
                     )
-                    single_commands: list[str] = []
+                    single_commands: List[str] = []
                     if "\n" in script_command:
                         single_commands = script_command.split("\n")
                     else:
@@ -108,7 +108,7 @@ class ContainerConfig(AbstractConfig):
         self._log_time(result)
         return "\n".join(result)
 
-    def _log_time(self, result: list[str]) -> None:
+    def _log_time(self, result: List[str]) -> None:
         log_time = self.default_config.settings["logTime"]
         if log_time:
             result.append("backup_exec\t/bin/date +%s")
@@ -118,7 +118,7 @@ class ContainerConfig(AbstractConfig):
             return self.backup_steps.get(step, "")
         return self.default_config.get_step(step)
 
-    def get_enabled_actions(self) -> dict[str, bool]:
+    def get_enabled_actions(self) -> Dict[str, bool]:
         merged_dict = self.default_config.enabled_actions.copy()
         merged_dict.update(self.enabled_actions)
         return merged_dict

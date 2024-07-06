@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum, auto
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Dict, List, Optional
 
 from rsnapshot_docker_compose_backup.structure.container import Container
 from rsnapshot_docker_compose_backup.structure.volume import Volume
@@ -78,12 +78,12 @@ class DockerMount:
 @dataclass
 class DockerInspect:
     id: str
-    names: list[str]
+    names: List[str]
     image: str
     image_id: str
     state: ContainerState
-    mounts: list[DockerMount]
-    labels: dict[str, str]
+    mounts: List[DockerMount]
+    labels: Dict[str, str]
 
     @staticmethod
     def from_json(json_data: Any) -> "DockerInspect":
@@ -107,7 +107,7 @@ def inspect_container(container_id: str) -> DockerInspect:
     return DockerInspect.from_json(response.json_body)
 
 
-def get_container(socket_connection: Optional[str] = None) -> list[DockerInspect]:
+def get_container(socket_connection: Optional[str] = None) -> List[DockerInspect]:
     parameter = {"all": "true"}
     if socket_connection is None:
         api = Api()
@@ -117,8 +117,8 @@ def get_container(socket_connection: Optional[str] = None) -> list[DockerInspect
     return [DockerInspect.from_json(x) for x in response.json_body]
 
 
-def _volumes(mounts: list[DockerMount]) -> list[Volume]:
-    result: list[Volume] = []
+def _volumes(mounts: List[DockerMount]) -> List[Volume]:
+    result: List[Volume] = []
     for mount in mounts:
         if mount.type == DockerMountType.VOLUME:
             assert mount.name is not None
@@ -126,8 +126,8 @@ def _volumes(mounts: list[DockerMount]) -> list[Volume]:
     return sorted(result)
 
 
-def get_compose_container() -> list[Container]:
-    container_list: list[Container] = []
+def get_compose_container() -> List[Container]:
+    container_list: List[Container] = []
     for container in get_container():
         if "com.docker.compose.project" in container.labels:
             print(container.names[0])

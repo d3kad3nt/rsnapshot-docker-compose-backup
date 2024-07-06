@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 import subprocess
 from tempfile import TemporaryDirectory
-from typing import Any, Generator
+from typing import Any, Generator, List
 import shutil
 
 import pytest
@@ -39,7 +39,7 @@ def fixture_setup_and_start_containers() -> Generator[Path, Any, None]:
 
 
 def start_containers(root_folder: Path) -> None:
-    subfolders: list[Path] = [
+    subfolders: List[Path] = [
         Path(f.path) for f in os.scandir(root_folder) if f.is_dir()
     ]
     for subfolder in subfolders:
@@ -48,7 +48,7 @@ def start_containers(root_folder: Path) -> None:
 
 
 def stop_containers(root_folder: Path) -> None:
-    subfolders: list[Path] = [
+    subfolders: List[Path] = [
         Path(f.path) for f in os.scandir(root_folder) if f.is_dir()
     ]
     for subfolder in subfolders:
@@ -56,7 +56,7 @@ def stop_containers(root_folder: Path) -> None:
 
 
 def remove_containers(root_folder: Path) -> None:
-    subfolders: list[Path] = [
+    subfolders: List[Path] = [
         Path(f.path) for f in os.scandir(root_folder) if f.is_dir()
     ]
     for subfolder in subfolders:

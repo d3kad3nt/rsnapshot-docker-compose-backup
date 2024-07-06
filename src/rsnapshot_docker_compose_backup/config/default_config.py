@@ -3,7 +3,7 @@ from importlib import resources
 import os
 from pathlib import Path
 import re
-from typing import Optional
+from typing import Dict, Optional
 
 from rsnapshot_docker_compose_backup import global_values
 from rsnapshot_docker_compose_backup.config.abstract_config import AbstractConfig
@@ -23,7 +23,7 @@ class DefaultConfig(AbstractConfig):
         "onlyRunning": True,
     }
 
-    actions: dict[str, dict[str, str]] = {}
+    actions: Dict[str, Dict[str, str]] = {}
 
     @staticmethod
     def get_instance() -> "DefaultConfig":
@@ -99,5 +99,5 @@ class DefaultConfig(AbstractConfig):
                 )
                 # print(f"{setting} is set to {self.settings[setting]}")
 
-    def get_action(self, name: str) -> dict[str, str]:
+    def get_action(self, name: str) -> Dict[str, str]:
         return self.actions[name]
