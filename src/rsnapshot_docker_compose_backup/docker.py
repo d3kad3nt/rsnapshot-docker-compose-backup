@@ -5,7 +5,7 @@ from typing import Any, Optional
 
 from rsnapshot_docker_compose_backup.structure.container import Container
 from rsnapshot_docker_compose_backup.structure.volume import Volume
-from rsnapshot_docker_compose_backup.utils.dockerApiClient import Api
+from rsnapshot_docker_compose_backup.utils.docker_api_client import Api
 
 
 class ContainerState(Enum):
