@@ -54,5 +54,5 @@ jobs:
         if: always()
         run: black --check .
       - name: Run unit tests
-        run: pytest test/unit/
+        run: pytest tests/unit/
         if: always()
