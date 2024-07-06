@@ -30,7 +30,6 @@ class AbstractConfig(ABC):
         for step in self.backupOrder:
             self.backup_steps[step] = ""
         self._load_config_file(config_path, name)
-        self.name = name
         self._init_vars(str(config_path))
 
     def _init_vars(self, config_path: str) -> None:
@@ -117,10 +116,10 @@ def _replace_str(cmd: str, var: str, val: str) -> str:
     return ireplace(var, val, cmd)
 
 
-def _replace_volume(cmd: str, var: str, val: Volume) -> str:
-    tmp = _replace_str(cmd, var + ".name", val.name)
-    tmp = _replace_str(tmp, var + ".path", val.path)
-    tmp = _replace_str(tmp, var, val.path)
+def _replace_volume(cmd: str, var: str, volume: Volume) -> str:
+    tmp = _replace_str(cmd, var + ".name", volume.name)
+    tmp = _replace_str(tmp, var + ".path", volume.path)
+    tmp = _replace_str(tmp, var, volume.path)
     return tmp
 
 

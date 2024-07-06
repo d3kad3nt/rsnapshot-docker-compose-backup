@@ -143,6 +143,9 @@ def get_compose_container() -> List[Container]:
                     service_name=container.labels["com.docker.compose.service"],
                     volumes=_volumes(container.mounts),
                     image=container.image,
+                    docker_compose_file=Path(
+                        container.labels["com.docker.compose.project.config_files"]
+                    ),  # TODO check if this can be multiple files
                 )
             )
     return sorted(container_list)
