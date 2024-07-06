@@ -7,7 +7,7 @@ from typing import ClassVar, Optional
 
 from rsnapshot_docker_compose_backup import global_values
 from rsnapshot_docker_compose_backup.config.abstract_config import AbstractConfig
-from rsnapshot_docker_compose_backup.utils import CaseInsensitiveRe
+from rsnapshot_docker_compose_backup.utils.utils import CaseInsensitiveRe
 
 
 class DefaultConfig(AbstractConfig):

@@ -6,8 +6,8 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+from rsnapshot_docker_compose_backup.utils.utils import CaseInsensitiveRe
 from rsnapshot_docker_compose_backup.structure.volume import Volume
-from rsnapshot_docker_compose_backup.utils import CaseInsensitiveRe
 
 
 class AbstractConfig(ABC):
