@@ -105,11 +105,21 @@ class Api:
         self.version = version
 
     def _open_socket(self, socket_connection: str) -> socket.socket:
-        if not socket_connection.startswith("unix://"):
-            raise ValueError("Only Unix Sockets are supported")
-        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        sock.connect(socket_connection.removeprefix("unix://"))
-        return sock
+        if socket_connection.startswith("unix://"):
+            sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            sock.connect(socket_connection.removeprefix("unix://"))
+            return sock
+        if socket_connection.startswith("http://"):
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            parts = socket_connection.removeprefix("http://").split(":")
+            host = parts[0]
+            port = 80
+            if len(parts) == 2:
+                port = int(parts[1])
+            print(f"connect to {host}, {port}")
+            sock.connect((host, port))
+            return sock
+        raise ValueError("Only Unix and http Sockets are supported")
 
     def get(
         self,
@@ -124,8 +134,6 @@ class Api:
             for name, value in query_parameter.items():
                 parameter.append(f"{name}={urllib.parse.quote_plus(value)}")
             path = path + "?" + "&".join(parameter)
-            # path = path + "?" + urllib.parse.quote_plus("&".join(parameter))
-        print(path)
         request = [
             f"GET {path} HTTP/1.1",
             "Host:docker.sock",
