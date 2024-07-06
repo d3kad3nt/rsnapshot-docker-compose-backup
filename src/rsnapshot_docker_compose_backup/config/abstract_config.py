@@ -31,7 +31,6 @@ class AbstractConfig(ABC):
         for step in self.backup_order:
             self.backup_steps[step] = ""
         self._load_config_file(config_path, name)
-        self.name = name
         self._init_vars(str(config_path))
 
     def _init_vars(self, config_path: str) -> None:
