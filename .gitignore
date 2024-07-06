@@ -5,4 +5,5 @@ src/__pycache__
 .idea/
 *.conf
 examples/
-dist/*
+dist/
+.coverage
