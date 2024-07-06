@@ -116,7 +116,7 @@ def test_not_started_containers(setup_containers: Path) -> None:
 
 def load_expected_output(name: str, container_folder: Path) -> str:
     return (
-        resources.files("tests.output")
+        resources.files("tests.integration.output")
         .joinpath(f"{name}.log")
         .read_text(encoding="utf-8")
         .replace("${{container_folder}}", str(container_folder))
