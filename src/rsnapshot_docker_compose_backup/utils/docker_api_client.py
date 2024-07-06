@@ -27,11 +27,11 @@ class Api:
     def _open_socket(self, socket_connection: str) -> socket.socket:
         if socket_connection.startswith("unix://"):
             sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-            sock.connect(socket_connection.lstrip("unix://"))
+            sock.connect(socket_connection[7:])  # Remove 'unix://'
             return sock
         if socket_connection.startswith("http://"):
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            parts = socket_connection.lstrip("http://").split(":")
+            parts = socket_connection[7:].split(":")  # Remove 'unix://'
             host = parts[0]
             port = 80
             if len(parts) == 2:
