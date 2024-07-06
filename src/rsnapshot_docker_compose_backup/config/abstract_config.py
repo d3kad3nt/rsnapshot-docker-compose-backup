@@ -5,7 +5,7 @@ import re
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Union
 
-from rsnapshot_docker_compose_backup.utils.utils import CaseInsensitiveRe
+from rsnapshot_docker_compose_backup.utils.regex import CaseInsensitiveRe
 from rsnapshot_docker_compose_backup.structure.volume import Volume
 
 
