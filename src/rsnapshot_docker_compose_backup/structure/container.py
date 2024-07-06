@@ -10,28 +10,27 @@ from rsnapshot_docker_compose_backup.structure.volume import Volume
 
 
 class Container:
-    folder: Path
-    service_name: str
-    config: "ContainerConfig"
-    volumes: list[Volume]
 
     def __init__(
         self,
+        *,
         folder: Path,
         service_name: str,
         container_name: str,
         container_id: str,
         *,
         running: bool,
+        volumes: list[Volume],
+        image: str,
     ):
         self.folder: Path = folder
         self.service_name = service_name
         self.container_name = container_name
         self.container_id = container_id
         self.project_name = os.path.basename(folder)
-        self.image = docker.image(container_id)
+        self.image = image
         self.file_name: Path = self.folder / "backup.ini"
-        self.volumes = docker.volumes(container_id)
+        self.volumes = volumes
         self.is_running = running
         self.config = ContainerConfig(self)
 
@@ -56,6 +55,11 @@ class Container:
 
     def __repr__(self) -> str:
         return f"Container {self.service_name} in folder {self.folder}"
+
+    def __lt__(self, other: "Container") -> bool:
+        if self.project_name != other.project_name:
+            return self.project_name < other.project_name
+        return self.service_name < other.service_name
 
 
 class ContainerConfig(AbstractConfig):
