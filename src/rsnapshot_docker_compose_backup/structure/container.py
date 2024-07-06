@@ -31,7 +31,10 @@ class Container:
         self.volumes = volumes
         self.is_running = running
         self.docker_compose_file: Path = docker_compose_file
-        self.config = ContainerConfig(
+
+    def backup(self) -> str:
+        result: List[str] = []
+        config = ContainerConfig(
             {
                 "$serviceName": self.service_name,
                 "$containerID": self.container_id,
@@ -46,10 +49,7 @@ class Container:
             service_name=self.service_name,
             config_file=self.backup_config,
         )
-
-    def backup(self) -> str:
-        result: List[str] = []
-        output = self.config.output()
+        output = config.output()
         if output is None:
             # print("output is none")
             return ""
