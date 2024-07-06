@@ -107,7 +107,7 @@ def ireplace(old: str, new: str, text: str) -> str:
     return text
 
 
-def _replace_list(cmd: str, var: str, val: list[Union[list[Any], str, Volume]]) -> str:
+def _replace_list(cmd: str, var: str, val: List[Union[List[Any], str, Volume]]) -> str:
     result: str = ""
     for i in val:
         result += str(_replace_var[type(i)](cmd, var, i)) + "\n"
@@ -124,7 +124,7 @@ def _replace_volume(cmd: str, var: str, val: Volume) -> str:
     return _replace_str(tmp, var, val.path)
 
 
-_replace_var: dict[type, Callable[..., str]] = {
+_replace_var: Dict[type, Callable[..., str]] = {
     list: _replace_list,
     str: _replace_str,
     Volume: _replace_volume,
