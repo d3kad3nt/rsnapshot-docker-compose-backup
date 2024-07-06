@@ -117,9 +117,9 @@ def test_not_started_containers(setup_containers: Path) -> None:
 
 
 def load_expected_output(name: str, container_folder: Path) -> str:
-    return resources.read_text(package="tests.output", resource=f"{name}.log").replace(
-        "${{container_folder}}", str(container_folder)
-    )
+    return resources.read_text(
+        package="tests.integration.output", resource=f"{name}.log"
+    ).replace("${{container_folder}}", str(container_folder))
 
 
 def load_config_path(name: str) -> Path:
