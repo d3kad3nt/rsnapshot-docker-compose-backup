@@ -3,6 +3,7 @@ import json
 import threading
 import time
 from typing import Any
+
 from rsnapshot_docker_compose_backup.docker import docker
 
 
@@ -12,7 +13,6 @@ class ApiRequestHandler(BaseHTTPRequestHandler):
     next_status = 400
 
     def do_GET(self):
-        print("test")
         self.send_response(ApiRequestHandler.next_status)
         self.send_header("Content-type", "application/json")
         self.send_header("Content-Length", str(len(ApiRequestHandler.next_response)))
@@ -20,17 +20,15 @@ class ApiRequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(ApiRequestHandler.next_response)
 
 
-def run_server(responses: list[tuple[int, dict[str, Any]]]):
+def run_server(responses: list[tuple[int, dict[str, Any] | list[Any]]]):
     server_address = ("localhost", 8000)
     httpd = HTTPServer(server_address, ApiRequestHandler)
     i = 0
     while i < len(responses):
         print(f"serve response {i+1} / {len(responses)}")
         ApiRequestHandler.next_response = json.dumps(responses[i][1]).encode("utf-8")
-        print(ApiRequestHandler.next_response)
         ApiRequestHandler.next_status = int(responses[i][0])
         httpd.handle_request()
-        print("served request")
         i += 1
 
 
@@ -139,11 +137,9 @@ def test_ps() -> None:
             )
         ]
     )
-    response = docker.ps(
-        container_id="8dfafdbc3a40", socket_connection="http://localhost:8000"
-    )
-    print(response)
-    assert response.container_info[0].id == "8dfafdbc3a40"
+    response = docker.ps(socket_connection="http://localhost:8000")
+    assert response[0].id == "8dfafdbc3a40"
+    assert response[1].image == "ubuntu:latest"
 
 
 def test_version() -> None:
