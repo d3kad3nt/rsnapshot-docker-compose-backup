@@ -156,8 +156,7 @@ class Api:
     def _parse_response(sock: socket.socket) -> HttpResponse:
         message_start = b""
         while not message_start.endswith(b"\r\n\r\n"):
-            chunk = sock.recv(1)
-            message_start = message_start + chunk
+            message_start = message_start + sock.recv(1)
         lines: list[str] = message_start.decode("utf-8").splitlines()
         status_line = lines[0]
         protocol_version = status_line.split(" ")[0]
@@ -170,9 +169,27 @@ class Api:
         for line in lines[1:]:
             split = line.split(":")
             if len(split) == 2:
-                headers[split[0]] = split[1]
-        body_length = int(headers["Content-Length"])
-        body = sock.recv(body_length).decode("utf-8")
+                headers[split[0]] = split[1].strip()
+        if "Content-Length" in headers:
+            body_length = int(headers["Content-Length"])
+            body = sock.recv(body_length).decode("utf-8")
+        elif (
+            "Transfer-Encoding" in headers and headers["Transfer-Encoding"] == "chunked"
+        ):
+            body = ""
+            while True:
+                chunk = b""
+                while not chunk.endswith(b"\r\n"):
+                    chunk += sock.recv(1)
+                print(chunk)
+                length = int(chunk.decode("utf-8"), 16)
+                print(length)
+                if length == 0:
+                    break
+                body = body + sock.recv(length).decode("utf-8")
+                sock.recv(2)  # Skip ending \r\n
+        else:
+            raise ValueError(headers)
         return HttpResponse(
             protocol_version=protocol_version,
             status_code=status_code,
