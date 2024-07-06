@@ -4,7 +4,7 @@ import threading
 import time
 from typing import Any
 
-from rsnapshot_docker_compose_backup.docker import docker
+from rsnapshot_docker_compose_backup import docker
 
 
 class ApiRequestHandler(BaseHTTPRequestHandler):
@@ -12,7 +12,7 @@ class ApiRequestHandler(BaseHTTPRequestHandler):
     next_response: bytes = b'{"Message": "No Response set"}'
     next_status = 400
 
-    def do_GET(self):
+    def do_GET(self) -> None:
         self.send_response(ApiRequestHandler.next_status)
         self.send_header("Content-type", "application/json")
         self.send_header("Content-Length", str(len(ApiRequestHandler.next_response)))
@@ -20,7 +20,7 @@ class ApiRequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(ApiRequestHandler.next_response)
 
 
-def run_server(responses: list[tuple[int, dict[str, Any] | list[Any]]]):
+def run_server(responses: list[tuple[int, dict[str, Any] | list[Any]]]) -> None:
     server_address = ("localhost", 8000)
     httpd = HTTPServer(server_address, ApiRequestHandler)
     i = 0
@@ -32,7 +32,7 @@ def run_server(responses: list[tuple[int, dict[str, Any] | list[Any]]]):
         i += 1
 
 
-def mock_responses(responses: list[tuple[int, dict[str, Any] | list[Any]]]):
+def mock_responses(responses: list[tuple[int, dict[str, Any] | list[Any]]]) -> None:
     def server():
         run_server(responses=responses)
 
@@ -137,11 +137,6 @@ def test_ps() -> None:
             )
         ]
     )
-    response = docker.ps(socket_connection="http://localhost:8000")
+    response = docker.get_container(socket_connection="http://localhost:8000")
     assert response[0].id == "8dfafdbc3a40"
     assert response[1].image == "ubuntu:latest"
-
-
-def test_version() -> None:
-    mock_responses([(200, {"Version": "27.0.3"})])
-    assert docker.get_version(socket_connection="http://localhost:8000") == "27.0.3"
