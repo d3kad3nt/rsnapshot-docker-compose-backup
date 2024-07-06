@@ -1,22 +1,12 @@
-from concurrent import futures
 from dataclasses import dataclass
 from enum import Enum, auto
 import json
-import os
 from pathlib import Path
-import re
 import socket
 from typing import Any, Optional
 import urllib.parse
 from rsnapshot_docker_compose_backup.structure.container import Container
-from rsnapshot_docker_compose_backup.utils import command
 from rsnapshot_docker_compose_backup.structure.volume import Volume
-
-
-def inspect(container: str) -> Any:
-    # converts docker inspect to json and return only first container,
-    # because this works only with one container
-    return json.loads(command("docker inspect {}".format(container)).stdout)[0]
 
 
 class ContainerState(Enum):
@@ -29,67 +19,112 @@ class ContainerState(Enum):
     DEAD = auto()
 
     @staticmethod
-    def get_value(value: str) -> "ContainerState":
+    def from_str(value: str) -> "ContainerState":
         for member in ContainerState:
             if member.name.lower() == value.lower():
                 return member
-        raise ValueError("Unknown Value: " + value)
+        raise ValueError("Unknown State: " + value)
+
+
+class DockerMountType(Enum):
+    VOLUME = auto()
+    BIND = auto()
+    NOT_SET = auto()
+
+    @staticmethod
+    def from_str(value: str) -> "DockerMountType":
+        for member in DockerMountType:
+            if member.name.lower() == value.lower():
+                return member
+        raise ValueError("Unknown Type: " + value)
 
 
 @dataclass
-class docker_inspect:
+class DockerMount:
+    name: Optional[str]
+    type: DockerMountType
+    source: str
+    destination: str
+    driver: Optional[str]
+    mode: str
+    rw: bool
+    propagation: str
+
+    @staticmethod
+    def from_json(json_data: Any) -> "DockerMount":
+        if "Name" in json_data:
+            name = json_data["Name"]
+        else:
+            name = None
+        if "Driver" in json_data:
+            driver = json_data["Driver"]
+        else:
+            driver = None
+        if "Type" in json_data:
+            mount_type = DockerMountType.from_str(json_data["Type"])
+        else:
+            mount_type = DockerMountType.NOT_SET
+        return DockerMount(
+            name=name,
+            type=mount_type,
+            source=json_data["Source"],
+            destination=json_data["Destination"],
+            driver=driver,
+            mode=json_data["Mode"],
+            rw=json_data["RW"],
+            propagation=json_data["Propagation"],
+        )
+
+
+@dataclass
+class DockerInspect:
     id: str
     names: list[str]
     image: str
-    imageId: str
+    image_id: str
     state: ContainerState
-    mounts: list[str]
+    mounts: list[DockerMount]
+    labels: dict[str, str]
+
+    @staticmethod
+    def from_json(json_data: Any) -> "DockerInspect":
+        print(json_data["Names"])
+        print(json_data["State"])
+        return DockerInspect(
+            id=json_data["Id"],
+            names=[x.lstrip("/") for x in json_data["Names"]],
+            image=json_data["Image"],
+            image_id=json_data["ImageID"],
+            state=ContainerState.from_str(json_data["State"]),
+            mounts=[DockerMount.from_json(x) for x in json_data["Mounts"]],
+            labels=json_data["Labels"],
+        )
 
 
-@dataclass
-class docker_ps:
-    container_info: list[docker_inspect]
+def inspect(container_id: str) -> DockerInspect:
+    # converts docker inspect to json and return only first container,
+    # because this works only with one container
+    response = Api().get(f"/containers/{container_id}/json")
+    return DockerInspect.from_json(response.json_body)
 
 
-def ps(
-    container_id: Optional[str] = None, socket_connection: Optional[str] = None
-) -> docker_ps:
+def ps(socket_connection: Optional[str] = None) -> list[DockerInspect]:
     parameter = {"all": "true"}
-    if container_id is not None:
-        parameter["filters"] = '{"id": ["' + container_id + '"]}'
     if socket_connection is None:
         api = Api()
     else:
         api = Api(socket_connection=socket_connection)
     response = api.get("/containers/json", query_parameter=parameter)
-    print(response.json_body)
-    container_info_list: list[docker_inspect] = []
-    for container_info in response.json_body:
-        container_info_list.append(
-            docker_inspect(
-                id=container_info["Id"],
-                names=container_info["Names"],
-                image=container_info["Image"],
-                imageId=container_info["ImageID"],
-                state=ContainerState.get_value(container_info["State"]),
-                mounts=container_info["Mounts"],
-            )
-        )
-    return docker_ps(container_info=container_info_list)
+    return [DockerInspect.from_json(x) for x in response.json_body]
 
 
-def volumes(container_id: str) -> list[Volume]:
+def _volumes(mounts: list[DockerMount]) -> list[Volume]:
     result: list[Volume] = []
-    container_info = inspect(container_id)
-    for mount in container_info["Mounts"]:
-        if mount["Type"] == "volume":
-            result.append(Volume(mount["Name"], mount["Source"]))
+    for mount in mounts:
+        if mount.type == DockerMountType.VOLUME:
+            assert mount.name is not None
+            result.append(Volume(mount.name, mount.source))
     return sorted(result)
-
-
-def image(container_id: str) -> str:
-    container_info: docker_ps = ps(container_id)
-    return container_info.container_info[0].image
 
 
 @dataclass
@@ -163,7 +198,6 @@ class Api:
         status_code = int(status_line.split(" ")[1])
         status_text = " ".join(status_line.split(" ")[2:])
         if status_code >= 400:
-            print(sock.recv(100))
             raise ValueError(status_text)
         headers: dict[str, str] = {}
         for line in lines[1:]:
@@ -181,9 +215,7 @@ class Api:
                 chunk = b""
                 while not chunk.endswith(b"\r\n"):
                     chunk += sock.recv(1)
-                print(chunk)
                 length = int(chunk.decode("utf-8"), 16)
-                print(length)
                 if length == 0:
                     break
                 body = body + sock.recv(length).decode("utf-8")
@@ -205,125 +237,26 @@ def get_version(socket_connection: Optional[str] = None) -> str:
     else:
         api = Api()
     response = api.get("/version")
-    print(response)
     return str(response.json_body["Version"])
 
 
-def get_binary() -> str:
-    if command("docker compose").returncode == 0:
-        return "docker compose"
-    if command("docker-compose").returncode == 0:
-        return "docker-compose"
-
-    raise Exception("Docker Compose is not installed")
-
-
-def get_container_id(service_name: str, path: Path) -> str:
-    return command(
-        "{} ps --all -q {}".format(get_binary(), service_name), path=path
-    ).stdout[:12]
-
-
-def get_container_name(service_name: str, path: Path) -> str:
-    stdout = command(
-        "{} config --format json {}".format(get_binary(), service_name),
-        path=path,
-    ).stdout
-    # print(f"stdout: {stdout} (End)")
-    return str(json.loads(stdout)["services"][service_name]["container_name"])
-
-
-def container_stopped(container_id: str) -> bool:
-    status = command(
-        [
-            "docker",
-            "ps",
-            "-a",
-            "--format",
-            "{{ .Status }}",
-            "-f",
-            f"id={container_id}",
-        ]
-    )
-    # print(status.stdout)
-    return status.stdout.startswith("Exited")
-
-
-def find_container(root_folder: Path) -> list[Container]:
-    all_container: list[Container] = []
-    docker_dirs: list[Path] = find_docker_dirs(root_folder)
-    with futures.ProcessPoolExecutor() as pool:
-        for service_list, directory in pool.map(get_services, docker_dirs):
-            # container_list: list[str] = get_services(output)
-            for container_info in service_list:
-                if container_info.container_id:
-                    all_container.append(
-                        Container(
-                            folder=directory,
-                            service_name=container_info.service_name,
-                            container_name=container_info.container_name,
-                            container_id=container_info.container_id,
-                            running=not container_stopped(container_info.container_id),
-                        )
-                    )
-    return all_container
-
-
-@dataclass
-class ContainerInfo:
-    service_name: str
-    container_name: str
-    container_id: str
-
-
-def get_services(path: Path) -> tuple[list[ContainerInfo], Path]:
-    service_name: list[str] = command(
-        "{} config --services".format(get_binary()), path=path
-    ).stdout.splitlines()
-    # Docker doesn't return it always in the same order
-    service_name.sort()
-    # print(service_name)
-    services: list[ContainerInfo] = []
-    for service in service_name:
-        container_id = get_container_id(service, path)
-        container_name = get_container_name(service, path)
-        services.append(ContainerInfo(service, container_name, container_id))
-    return services, path
-
-
-def find_docker_dirs(root_folder: Path = Path(os.getcwd())) -> list[Path]:
-    """Finds all docker-compose dirs in current sub folder
-    :returns: a list of all folders"""
-    dirs: list[Path] = []
-    docker_compose_files = [
-        "compose.yaml",
-        "compose.yml",
-        "docker-compose.yaml",
-        "docker-compose.yml",
-    ]
-    for tree_element in os.walk(root_folder):
-        for docker_compose_file in docker_compose_files:
-            if docker_compose_file in tree_element[2]:
-                dirs.append(Path(tree_element[0]))
-                break
-    return dirs
-
-
-def get_running_container(ps_out: str) -> list[str]:
-    return get_container(ps_out, state="UP")
-
-
-def get_column(column_nr: int, input_str: str) -> str:
-    return re.sub(r"\s\s+", "  ", input_str).split("  ")[column_nr]
-
-
-def get_container(ps_out: str, state: Optional[str] = None) -> list[str]:
-    all_container: list[str] = ps_out.splitlines()[2:]
-    container: list[str] = []
-    if not all_container:
-        return []
-    for line in all_container:
-        up = get_column(2, line).upper()
-        if not state or up == state.upper():
-            container.append(get_column(0, line))
-    return container
+def find_container() -> list[Container]:
+    container_list: list[Container] = []
+    for container in ps():
+        if "com.docker.compose.project" in container.labels:
+            print(container.names[0])
+            print(container.state)
+            container_list.append(
+                Container(
+                    folder=Path(
+                        container.labels["com.docker.compose.project.working_dir"]
+                    ),
+                    container_id=container.id,
+                    container_name=container.names[0],  # TODO convert to list
+                    running=container.state != ContainerState.EXITED,
+                    service_name=container.labels["com.docker.compose.service"],
+                    volumes=_volumes(container.mounts),
+                    image=container.image,
+                )
+            )
+    return sorted(container_list)

@@ -75,6 +75,7 @@ class TestRunningContainers:
             config=load_config_path("default_config"),
         )
         output = backup_planer.run(args)
+        # print(output)
         assert (
             load_expected_output(
                 "default_config_all_services", setup_and_start_containers
