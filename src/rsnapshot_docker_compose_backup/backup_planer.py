@@ -8,7 +8,7 @@ import argparse
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import List
 
 from rsnapshot_docker_compose_backup.structure.container import Container
 
@@ -50,8 +50,8 @@ def parse_arguments() -> ProgramArgs:
 def run(args: ProgramArgs) -> str:
     set_folder(args.folder)
     set_config_file(args.config)
-    docker_container: list[Container] = docker.get_compose_container()
-    result: list[str] = []
+    docker_container: List[Container] = docker.get_compose_container()
+    result: List[str] = []
     for container in docker_container:
         container_result = container.backup()
         if container_result:

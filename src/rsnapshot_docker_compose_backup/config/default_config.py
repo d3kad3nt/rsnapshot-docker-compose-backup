@@ -100,5 +100,5 @@ class DefaultConfig(AbstractConfig):
                 )
                 # print(f"{setting} is set to {self.settings[setting]}")
 
-    def get_action(self, name: str) -> dict[str, str]:
+    def get_action(self, name: str) -> Dict[str, str]:
         return self.actions[name]
