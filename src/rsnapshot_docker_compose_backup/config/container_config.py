@@ -10,7 +10,7 @@ from rsnapshot_docker_compose_backup.config.default_config import DefaultConfig
 class ContainerConfig(AbstractConfig):
     def __init__(
         self,
-        container_vars: Dict[str, Union[str, list[Volume]]],
+        container_vars: Dict[str, Union[str, List[Volume]]],
         is_running: bool,
         config_file: Path,
         service_name: str,
