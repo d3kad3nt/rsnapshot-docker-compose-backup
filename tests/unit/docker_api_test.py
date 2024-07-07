@@ -334,6 +334,77 @@ postgres_container: dict[str, Any] = {
     },
 }
 
+mariadb_container: dict[str, Any] = {
+    "compose_ps": {
+        "Id": "38bc5ec7316e3722e4cfe632add2c92906f2ca86a8ed2bf6e1d65d7356a0a3f2",
+        "Names": ["/mariadb-maraidb-1"],
+        "Image": "mariadb",
+        "ImageID": "sha256:4486d64c9c3b538b6dee6bcd5ea0ac5f74ea5e3cafc71181a54ec678ae0370aa",
+        "Command": "docker-entrypoint.sh mariadbd",
+        "Created": 1720384955,
+        "Ports": [{"PrivatePort": 3306, "Type": "tcp"}],
+        "Labels": {
+            "com.docker.compose.config-hash": "cc177b7cde84d71b09914c04791d6b9468def23e6542a350865396737cb95d21",
+            "com.docker.compose.container-number": "1",
+            "com.docker.compose.depends_on": "",
+            "com.docker.compose.image": "sha256:4486d64c9c3b538b6dee6bcd5ea0ac5f74ea5e3cafc71181a54ec678ae0370aa",
+            "com.docker.compose.oneoff": "False",
+            "com.docker.compose.project": "mariadb",
+            "com.docker.compose.project.config_files": "/tmp/compose/mariadb/docker-compose.yml",
+            "com.docker.compose.project.working_dir": "/tmp/compose/mariadb",
+            "com.docker.compose.replace": "47a517268708567174b09a5f057e079926ee5772bb130542ed07fc889914e773",
+            "com.docker.compose.service": "maraidb",
+            "com.docker.compose.version": "2.28.1",
+            "org.opencontainers.image.authors": "MariaDB Community",
+            "org.opencontainers.image.base.name": "docker.io/library/ubuntu:noble",
+            "org.opencontainers.image.description": "MariaDB Database for relational SQL",
+            "org.opencontainers.image.documentation": "https://hub.docker.com/_/mariadb/",
+            "org.opencontainers.image.licenses": "GPL-2.0",
+            "org.opencontainers.image.ref.name": "ubuntu",
+            "org.opencontainers.image.source": "https://github.com/MariaDB/mariadb-docker",
+            "org.opencontainers.image.title": "MariaDB Database",
+            "org.opencontainers.image.url": "https://github.com/MariaDB/mariadb-docker",
+            "org.opencontainers.image.vendor": "MariaDB Community",
+            "org.opencontainers.image.version": "11.4.2",
+        },
+        "State": "running",
+        "Status": "Up 39 seconds",
+        "HostConfig": {"NetworkMode": "mariadb_default"},
+        "NetworkSettings": {
+            "Networks": {
+                "mariadb_default": {
+                    "IPAMConfig": None,
+                    "Links": None,
+                    "Aliases": None,
+                    "MacAddress": "02:42:ac:15:00:02",
+                    "DriverOpts": None,
+                    "NetworkID": "6028c4b4d1f352e835f3f2c8100109d7b38f46208efbe74be743ce03ce5a672d",
+                    "EndpointID": "c44b7c8af24e3001ff2f0bc978ef13f05327a24bd74ce6792837c2be5df256e0",
+                    "Gateway": "172.21.0.1",
+                    "IPAddress": "172.21.0.2",
+                    "IPPrefixLen": 16,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "DNSNames": None,
+                }
+            }
+        },
+        "Mounts": [
+            {
+                "Type": "volume",
+                "Name": "7122382a6fa637a5a0c5430e11bc2825b8c7bb7a1afdc12f2f6fb080c0ca14c6",
+                "Source": "/var/lib/docker/volumes/7122382a6fa637a5a0c5430e11bc2825b8c7bb7a1afdc12f2f6fb080c0ca14c6/_data",
+                "Destination": "/var/lib/mysql",
+                "Driver": "local",
+                "Mode": "z",
+                "RW": True,
+                "Propagation": "",
+            }
+        ],
+    }
+}
+
 
 def test_get_container() -> None:
     mock_responses(
@@ -366,3 +437,48 @@ def test_inspect_container() -> None:
     )
     assert response.image == "postgres"
     assert response.id.startswith("5bd36e44a3b8")
+
+
+def test_get_compose_container() -> None:
+    mock_responses(
+        [
+            (
+                200,
+                [
+                    postgres_container["compose_ps"],
+                    mariadb_container["compose_ps"],
+                    ubuntu_container["default_ps"],
+                ],
+            )
+        ]
+    )
+    response = docker.get_compose_container(socket_connection="http://localhost:8000")
+    assert len(response) == 2
+    assert response[0].project_name == "mariadb"
+    assert response[1].project_name == "postgres"
+
+
+def test_get_compose_container_fixed_order() -> None:
+    mock_responses(
+        [
+            (
+                200,
+                [
+                    postgres_container["compose_ps"],
+                    mariadb_container["compose_ps"],
+                    ubuntu_container["default_ps"],
+                ],
+            ),
+            (
+                200,
+                [
+                    mariadb_container["compose_ps"],
+                    ubuntu_container["default_ps"],
+                    postgres_container["compose_ps"],
+                ],
+            ),
+        ]
+    )
+    response1 = docker.get_compose_container(socket_connection="http://localhost:8000")
+    response2 = docker.get_compose_container(socket_connection="http://localhost:8000")
+    assert response1 == response2
