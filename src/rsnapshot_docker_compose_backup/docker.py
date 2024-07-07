@@ -78,7 +78,7 @@ class DockerMount:
 @dataclass
 class DockerInspect:
     id: str
-    names: List[str]
+    name: str
     image: str
     image_id: str
     state: ContainerState
@@ -87,23 +87,40 @@ class DockerInspect:
 
     @staticmethod
     def from_json(json_data: Any) -> "DockerInspect":
-        print(json_data["Names"])
-        print(json_data["State"])
+
+        if "Names" in json_data:  # /containers/json format
+            if len(json_data["Names"]) > 1:
+                raise ValueError("Container has more than one name: " + json_data)
+            name = json_data["Names"][0]
+            image = json_data["Image"]
+            image_id = json_data["ImageID"]
+            state = ContainerState.from_str(json_data["State"])
+            labels = json_data["Labels"]
+        else:  # /containers/{id}/json format
+            name = json_data["Name"]
+            image_id = json_data["Image"]
+            image = json_data["Config"]["Image"]
+            state = ContainerState.from_str(json_data["State"]["Status"])
+            labels = json_data["Config"]["Labels"]
         return DockerInspect(
             id=json_data["Id"],
-            names=[x.lstrip("/") for x in json_data["Names"]],
-            image=json_data["Image"],
-            image_id=json_data["ImageID"],
-            state=ContainerState.from_str(json_data["State"]),
+            name=name[1:],
+            image=image,
+            image_id=image_id,
+            state=state,
             mounts=[DockerMount.from_json(x) for x in json_data["Mounts"]],
-            labels=json_data["Labels"],
+            labels=labels,
         )
 
 
-def inspect_container(container_id: str) -> DockerInspect:
-    # converts docker inspect to json and return only first container,
-    # because this works only with one container
-    response = Api().get(f"/containers/{container_id}/json")
+def inspect_container(
+    container_id: str, socket_connection: Optional[str] = None
+) -> DockerInspect:
+    if socket_connection is None:
+        api = Api()
+    else:
+        api = Api(socket_connection=socket_connection)
+    response = api.get(f"/containers/{container_id}/json")
     return DockerInspect.from_json(response.json_body)
 
 
@@ -130,15 +147,13 @@ def get_compose_container() -> List[Container]:
     container_list: List[Container] = []
     for container in get_container():
         if "com.docker.compose.project" in container.labels:
-            print(container.names[0])
-            print(container.state)
             container_list.append(
                 Container(
                     folder=Path(
                         container.labels["com.docker.compose.project.working_dir"]
                     ),
                     container_id=container.id,
-                    container_name=container.names[0],  # TODO convert to list
+                    container_name=container.name,
                     running=container.state != ContainerState.EXITED,
                     service_name=container.labels["com.docker.compose.service"],
                     volumes=_volumes(container.mounts),
