@@ -1,8 +1,8 @@
 from rsnapshot_docker_compose_backup import docker
 from tests.unit.docker_api_util import mock_responses
-from typing import Any
+from typing import Any, Dict
 
-ubuntu_container: dict[str, Any] = {
+ubuntu_container: Dict[str, Any] = {
     "default_ps": {
         "Id": "8dfafdbc3a40",
         "Names": ["/boring_feynman"],
@@ -53,7 +53,7 @@ ubuntu_container: dict[str, Any] = {
     },
 }
 
-postgres_container: dict[str, Any] = {
+postgres_container: Dict[str, Any] = {
     "compose_ps": {
         "Id": "5bd36e44a3b8a955821594e440aeac530b84e3f19e262b240c5b6ccc123a9efb",
         "Names": ["/postgres-postgres-1"],
@@ -334,7 +334,7 @@ postgres_container: dict[str, Any] = {
     },
 }
 
-mariadb_container: dict[str, Any] = {
+mariadb_container: Dict[str, Any] = {
     "compose_ps": {
         "Id": "38bc5ec7316e3722e4cfe632add2c92906f2ca86a8ed2bf6e1d65d7356a0a3f2",
         "Names": ["/mariadb-maraidb-1"],
