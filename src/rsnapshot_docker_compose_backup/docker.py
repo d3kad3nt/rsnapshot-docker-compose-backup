@@ -143,9 +143,9 @@ def _volumes(mounts: List[DockerMount]) -> List[Volume]:
     return sorted(result)
 
 
-def get_compose_container() -> List[Container]:
+def get_compose_container(socket_connection: Optional[str] = None) -> List[Container]:
     container_list: List[Container] = []
-    for container in get_container():
+    for container in get_container(socket_connection=socket_connection):
         if "com.docker.compose.project" in container.labels:
             container_list.append(
                 Container(
