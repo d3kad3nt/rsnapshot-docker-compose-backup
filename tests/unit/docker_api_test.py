@@ -350,3 +350,19 @@ def test_get_container() -> None:
     response = docker.get_container(socket_connection="http://localhost:8000")
     assert response[1].image == "postgres"
     assert response[0].id.startswith("8dfafdbc3a40")
+
+
+def test_inspect_container() -> None:
+    mock_responses(
+        [
+            (
+                200,
+                postgres_container["compose_inspect"],
+            )
+        ]
+    )
+    response = docker.inspect_container(
+        "5bd36e44a3b8", socket_connection="http://localhost:8000"
+    )
+    assert response.image == "postgres"
+    assert response.id.startswith("5bd36e44a3b8")
