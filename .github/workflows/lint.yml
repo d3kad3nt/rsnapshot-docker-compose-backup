@@ -48,7 +48,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install mypy black pytest
       - name: Validate types with mypy
-        run: mypy --python-version 3.8 .
+        run: mypy .
       - name: Check formatting with black
         # Run Job even if mypy fails. This would also run if a previous step failed, but that shouldn't happen
         if: always()
