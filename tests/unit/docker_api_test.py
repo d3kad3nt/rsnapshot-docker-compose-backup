@@ -1,3 +1,4 @@
+from pathlib import Path
 from rsnapshot_docker_compose_backup import docker
 from tests.unit.docker_api_util import mock_responses
 from typing import Any, Dict
@@ -452,7 +453,9 @@ def test_get_compose_container() -> None:
             )
         ]
     )
-    response = docker.get_compose_container(socket_connection="http://localhost:8000")
+    response = docker.get_compose_container(
+        Path("/tmp"), socket_connection="http://localhost:8000"
+    )
     assert len(response) == 2
     assert response[0].project_name == "mariadb"
     assert response[1].project_name == "postgres"
@@ -479,6 +482,29 @@ def test_get_compose_container_fixed_order() -> None:
             ),
         ]
     )
-    response1 = docker.get_compose_container(socket_connection="http://localhost:8000")
-    response2 = docker.get_compose_container(socket_connection="http://localhost:8000")
+    response1 = docker.get_compose_container(
+        Path("/tmp"), socket_connection="http://localhost:8000"
+    )
+    response2 = docker.get_compose_container(
+        Path("/tmp"), socket_connection="http://localhost:8000"
+    )
     assert response1 == response2
+
+
+def test_get_compose_container_wrong_path() -> None:
+    mock_responses(
+        [
+            (
+                200,
+                [
+                    postgres_container["compose_ps"],
+                    mariadb_container["compose_ps"],
+                    ubuntu_container["default_ps"],
+                ],
+            )
+        ]
+    )
+    response = docker.get_compose_container(
+        Path("/home"), socket_connection="http://localhost:8000"
+    )
+    assert len(response) == 0
