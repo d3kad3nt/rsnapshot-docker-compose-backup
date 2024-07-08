@@ -48,7 +48,7 @@ def parse_arguments() -> ProgramArgs:
 def run(args: ProgramArgs) -> str:
     set_folder(args.folder)
     set_config_file(args.config)
-    docker_container: List[Container] = docker.get_compose_container()
+    docker_container: List[Container] = docker.get_compose_container(args.folder)
     result: List[str] = []
     for container in docker_container:
         container_result = container.backup()
