@@ -143,24 +143,26 @@ def _volumes(mounts: List[DockerMount]) -> List[Volume]:
     return sorted(result)
 
 
-def get_compose_container(socket_connection: Optional[str] = None) -> List[Container]:
+def get_compose_container(
+    root_folder: Path, socket_connection: Optional[str] = None
+) -> List[Container]:
     container_list: List[Container] = []
     for container in get_container(socket_connection=socket_connection):
         if "com.docker.compose.project" in container.labels:
-            container_list.append(
-                Container(
-                    folder=Path(
-                        container.labels["com.docker.compose.project.working_dir"]
-                    ),
-                    container_id=container.id,
-                    container_name=container.name,
-                    running=container.state != ContainerState.EXITED,
-                    service_name=container.labels["com.docker.compose.service"],
-                    volumes=_volumes(container.mounts),
-                    image=container.image,
-                    docker_compose_file=Path(
-                        container.labels["com.docker.compose.project.config_files"]
-                    ),  # TODO check if this can be multiple files
+            workdir = Path(container.labels["com.docker.compose.project.working_dir"])
+            if str(workdir).startswith(str(root_folder)):
+                container_list.append(
+                    Container(
+                        folder=workdir,
+                        container_id=container.id,
+                        container_name=container.name,
+                        running=container.state != ContainerState.EXITED,
+                        service_name=container.labels["com.docker.compose.service"],
+                        volumes=_volumes(container.mounts),
+                        image=container.image,
+                        docker_compose_file=Path(
+                            container.labels["com.docker.compose.project.config_files"]
+                        ),  # TODO check if this can be multiple files
+                    )
                 )
-            )
     return sorted(container_list)
