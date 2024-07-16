@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from http import client
 import json
 import socket
 from typing import Any, Dict, List, Optional
@@ -8,7 +9,6 @@ import urllib.parse
 
 @dataclass
 class HttpResponse:
-    protocol_version: str
     status_code: int
     status_text: str
     headers: Dict[str, str]
@@ -29,15 +29,7 @@ class Api:
         if socket_connection.startswith("unix://"):
             return Api.SocketConnection(socket_connection)
         if socket_connection.startswith("http://"):
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            parts = socket_connection[7:].split(":")  # Remove 'unix://'
-            host = parts[0]
-            port = 80
-            if len(parts) == 2:
-                port = int(parts[1])
-            print(f"connect to {host}, {port}")
-            sock.connect((host, port))
-            return sock
+            return Api.HttpConnection(socket_connection)
         raise ValueError("Only Unix and http Sockets are supported")
 
     def get(
@@ -53,9 +45,7 @@ class Api:
             for name, value in query_parameter.items():
                 parameter.append(f"{name}={urllib.parse.quote_plus(value)}")
             path = path + "?" + "&".join(parameter)
-        return self._current_connection.get(
-            path=path, query_parameter=query_parameter, header=header
-        )
+        return self._current_connection.get(path=path, header=header)
 
     class Connection(ABC):
 
@@ -64,7 +54,6 @@ class Api:
             self,
             path: str,
             *,
-            query_parameter: Optional[Dict[str, str]] = None,
             header: Optional[Dict[str, str]] = None,
         ) -> HttpResponse:
             pass
@@ -79,7 +68,6 @@ class Api:
             self,
             path: str,
             *,
-            query_parameter: Optional[Dict[str, str]] = None,
             header: Optional[Dict[str, str]] = None,
         ) -> HttpResponse:
 
@@ -102,7 +90,6 @@ class Api:
             lines: List[str] = message_start.decode("utf-8").splitlines()
             # Parse statusline
             status_line = lines[0]
-            protocol_version = status_line.split(" ")[0]
             status_code = int(status_line.split(" ")[1])
             status_text = " ".join(status_line.split(" ")[2:])
             if status_code >= 400:
@@ -134,7 +121,6 @@ class Api:
             else:
                 raise ValueError(headers)
             return HttpResponse(
-                protocol_version=protocol_version,
                 status_code=status_code,
                 status_text=status_text,
                 headers=headers,
@@ -143,6 +129,26 @@ class Api:
 
     class HttpConnection(Connection):
 
-        pass
+        def __init__(self, socket_connection: str) -> None:
+            self.httpConnection = client.HTTPConnection(
+                socket_connection[7:]
+            )  # Remove 'http://'
 
-        
+        def get(
+            self,
+            path: str,
+            *,
+            header: Optional[Dict[str, str]] = None,
+        ) -> HttpResponse:
+
+            self.httpConnection.request("GET", path)
+            response = self.httpConnection.getresponse()
+            headers: Dict[str, str] = {}
+            for curr_header in response.getheaders():
+                headers[curr_header[0]] = curr_header[1]
+            return HttpResponse(
+                status_code=response.getcode(),
+                status_text="",
+                headers=headers,
+                json_body=json.loads(response.read()),
+            )
