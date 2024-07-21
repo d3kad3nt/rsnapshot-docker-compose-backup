@@ -3,7 +3,6 @@ from importlib import resources
 import os
 from pathlib import Path
 import re
-import sys
 from typing import Optional
 
 from rsnapshot_docker_compose_backup import global_values
