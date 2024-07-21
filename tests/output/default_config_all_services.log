@@ -1,0 +1,56 @@
+##Start backup for compose project heimdall - service heimdall
+#runtime_backup
+backup_exec	/bin/date +%s
+backup_script	/usr/bin/docker image save linuxserver/heimdall -o heimdall_image.tar	./heimdall/image
+backup_exec	/bin/date +%s
+backup	${{container_folder}}/heimdall	./heimdall/yaml	+rsync_long_args=--include=*.yml,+rsync_long_args=--include=*.yaml
+#stop
+backup_exec	/bin/date +%s
+backup_exec	cd ${{container_folder}}/heimdall; /usr/bin/docker-compose stop
+#backup
+backup_exec	/bin/date +%s
+backup	/var/lib/docker/volumes/heimdall_heimdall/_data	./heimdall/heimdall_heimdall
+#restart
+backup_exec	/bin/date +%s
+backup_exec	cd ${{container_folder}}/heimdall; /usr/bin/docker-compose start
+backup_exec	/bin/date +%s
+##End backup for compose project heimdall - service heimdall
+
+##Start backup for compose project nextcloud - service mariaDB
+#runtime_backup
+backup_exec	/bin/date +%s
+backup_exec	/bin/mkdir $tmpFolder;${{container_folder}}/nextcloud/dump_database.sh>$tmpFolder/db.dump
+backup_exec	/bin/date +%s
+backup	$tmpFolder	mariaDB/databaseDump
+backup_exec	/bin/date +%s
+backup_exec	/bin/rm -rf $tmpFolder
+backup_exec	/bin/date +%s
+backup_script	/usr/bin/docker image save mariadb -o mariaDB_image.tar	./mariaDB/image
+backup_exec	/bin/date +%s
+backup	${{container_folder}}/nextcloud	./mariaDB/yaml	+rsync_long_args=--include=*.yml,+rsync_long_args=--include=*.yaml
+#pre_backup
+backup_exec	/bin/date +%s
+backup_exec	/usr/bin/docker exec -u www-data nextcloud /var/www/html/occ maintenance:mode --on
+#post_backup
+backup_exec	/bin/date +%s
+backup_exec /usr/bin/docker exec -u www-data nextcloud /var/www/html/occ maintenance:mode --off
+backup_exec	/bin/date +%s
+##End backup for compose project nextcloud - service mariaDB
+
+##Start backup for compose project nextcloud - service nextcloud
+#runtime_backup
+backup_exec	/bin/date +%s
+backup_script	/usr/bin/docker image save nextcloud -o nextcloud_image.tar	./nextcloud/image
+backup_exec	/bin/date +%s
+backup	${{container_folder}}/nextcloud	./nextcloud/yaml	+rsync_long_args=--include=*.yml,+rsync_long_args=--include=*.yaml
+#pre_backup
+backup_exec	/bin/date +%s
+backup_exec	/usr/bin/docker exec -u www-data nextcloud /var/www/html/occ maintenance:mode --on
+#backup
+backup_exec	/bin/date +%s
+backup	/var/lib/docker/volumes/nextcloud_nextcloud/_data	./nextcloud/nextcloud_nextcloud	+rsync_long_args=--exclude=_data/data/appdata_oc9quf33l2w2/preview/
+#post_backup
+backup_exec	/bin/date +%s
+backup_exec	/usr/bin/docker exec -u www-data nextcloud /var/www/html/occ maintenance:mode --off
+backup_exec	/bin/date +%s
+##End backup for compose project nextcloud - service nextcloud

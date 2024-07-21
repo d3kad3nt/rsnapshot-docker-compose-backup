@@ -1,14 +1,19 @@
-folder: str
-config_file: str
+import os
+from pathlib import Path
+from typing import Optional
 
 
-def set_folder(path: str) -> None:
+folder: Path = Path(os.getcwd())
+config_file: Optional[Path] = None
+
+
+def set_folder(path: Path) -> None:
     # pylint: disable=global-statement
     global folder
     folder = path
 
 
-def set_config_file(file: str) -> None:
+def set_config_file(file: Path) -> None:
     # pylint: disable=global-statement
     global config_file
     config_file = file

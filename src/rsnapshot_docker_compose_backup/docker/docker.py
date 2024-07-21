@@ -1,9 +1,9 @@
 import json
 import re
-from typing import List, Any
+from typing import Any, Optional
 
 from rsnapshot_docker_compose_backup.utils import command
-from rsnapshot_docker_compose_backup.volume import Volume
+from rsnapshot_docker_compose_backup.structure.volume import Volume
 
 
 def inspect(container: str) -> Any:
@@ -12,8 +12,8 @@ def inspect(container: str) -> Any:
     return json.loads(command("docker inspect {}".format(container)).stdout)[0]
 
 
-def ps(container_id: str | None = None) -> str:
-    result = command("docker ps").stdout
+def ps(container_id: Optional[str] = None) -> str:
+    result = command("docker ps -a").stdout
     if container_id:
         for line in ps().splitlines():
             if line.startswith(container_id[:11]):
@@ -22,8 +22,8 @@ def ps(container_id: str | None = None) -> str:
     return result
 
 
-def volumes(container_id: str) -> List[Volume]:
-    result: List[Volume] = []
+def volumes(container_id: str) -> list[Volume]:
+    result: list[Volume] = []
     container_info = inspect(container_id)
     for mount in container_info["Mounts"]:
         if mount["Type"] == "volume":
@@ -35,6 +35,6 @@ def get_column(column_nr: int, input_str: str) -> str:
     return re.sub(r"\s\s+", "  ", input_str).split("  ")[column_nr]
 
 
-def image(container_id: str):
+def image(container_id: str) -> str:
     container_info: str = ps(container_id)
     return get_column(1, container_info)
