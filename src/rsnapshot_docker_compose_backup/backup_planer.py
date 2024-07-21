@@ -10,6 +10,7 @@ import argparse
 from dataclasses import dataclass
 import os
 from pathlib import Path
+from typing import Optional
 
 from rsnapshot_docker_compose_backup.structure.container import Container
 
@@ -21,7 +22,7 @@ from rsnapshot_docker_compose_backup.docker import docker_compose
 @dataclass
 class ProgramArgs:
     folder: Path
-    config: Path
+    config: Optional[Path]
 
 
 def parse_arguments() -> ProgramArgs:
@@ -38,10 +39,14 @@ def parse_arguments() -> ProgramArgs:
         "--config",
         required=False,
         help="Path to the root config file, if it isn't in the root docker-compose folder",
-        default="",
+        default=None,
     )
     args = vars(ap.parse_args())
-    return ProgramArgs(folder=args["folder"], config=args["config"])
+    if args["config"] is not None:
+        config_file = Path(args["config"])
+    else:
+        config_file = None
+    return ProgramArgs(folder=Path(args["folder"]), config=config_file)
 
 
 def run(args: ProgramArgs) -> str:
