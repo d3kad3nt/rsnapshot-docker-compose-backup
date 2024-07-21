@@ -3,9 +3,9 @@ import os
 from pathlib import Path
 import re
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Union
+from typing import Any, Callable, Dict, List, Union
 
-from rsnapshot_docker_compose_backup.utils import CaseInsensitiveRe
+from rsnapshot_docker_compose_backup.utils.regex import CaseInsensitiveRe
 from rsnapshot_docker_compose_backup.structure.volume import Volume
 
 
@@ -24,13 +24,12 @@ class AbstractConfig(ABC):
     ]
 
     def __init__(self, config_path: Path, name: str):
-        self.enabled_actions: dict[str, bool] = {}
-        self.backup_steps: dict[str, str] = {}
-        self.vars: dict[str, Union[str, list[Volume]]] = {}
+        self.enabled_actions: Dict[str, bool] = {}
+        self.backup_steps: Dict[str, str] = {}
+        self.vars: Dict[str, Union[str, List[Volume]]] = {}
         for step in self.backupOrder:
             self.backup_steps[step] = ""
         self._load_config_file(config_path, name)
-        self.name = name
         self._init_vars(str(config_path))
 
     def _init_vars(self, config_path: str) -> None:
@@ -64,7 +63,7 @@ class AbstractConfig(ABC):
                 self.vars["${}".format(var)] = val
 
     def _resolve_vars(
-        self, cmd: str, variables: dict[str, Union[str, list[Volume]]]
+        self, cmd: str, variables: Dict[str, Union[str, List[Volume]]]
     ) -> str:
         for var in variables.keys():
             if var.lower() in cmd.lower():
@@ -106,7 +105,7 @@ def ireplace(old: str, new: str, text: str) -> str:
     return text
 
 
-def _replace_list(cmd: str, var: str, val: list[Union[list[Any], str, Volume]]) -> str:
+def _replace_list(cmd: str, var: str, val: List[Union[List[Any], str, Volume]]) -> str:
     result: str = ""
     for i in val:
         result += str(_replace_var[type(i)](cmd, var, i)) + "\n"
@@ -117,14 +116,14 @@ def _replace_str(cmd: str, var: str, val: str) -> str:
     return ireplace(var, val, cmd)
 
 
-def _replace_volume(cmd: str, var: str, val: Volume) -> str:
-    tmp = _replace_str(cmd, var + ".name", val.name)
-    tmp = _replace_str(tmp, var + ".path", val.path)
-    tmp = _replace_str(tmp, var, val.path)
+def _replace_volume(cmd: str, var: str, volume: Volume) -> str:
+    tmp = _replace_str(cmd, var + ".name", volume.name)
+    tmp = _replace_str(tmp, var + ".path", volume.path)
+    tmp = _replace_str(tmp, var, volume.path)
     return tmp
 
 
-_replace_var: dict[type, Callable[..., str]] = {
+_replace_var: Dict[type, Callable[..., str]] = {
     list: _replace_list,
     str: _replace_str,
     Volume: _replace_volume,

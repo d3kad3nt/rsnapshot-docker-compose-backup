@@ -22,3 +22,7 @@ Homepage = "https://github.com/d3kad3nt/rsnapshot-docker-compose-backup"
 Issues = "https://github.com/d3kad3nt/rsnapshot-docker-compose-backup/issues"
 [tool.hatch.version]
 source = "versioningit"
+[tool.pytest.ini_options]
+pythonpath = [
+  "src"
+]

@@ -53,3 +53,6 @@ jobs:
         # Run Job even if mypy fails. This would also run if a previous step failed, but that shouldn't happen
         if: always()
         run: black --check .
+      - name: Run unit tests
+        run: pytest tests/unit/
+        if: always()
