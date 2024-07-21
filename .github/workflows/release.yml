@@ -13,25 +13,40 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.9"
-      - name: Install pypa/build
-        run: python3 -m pip install build --user
+      - name: Install Hatch
+        uses: pypa/hatch@install
       - name: Build a binary wheel and a source tarball
-        run: python3 -m build
+        run: hatch build
       - name: Store the distribution packages
         uses: actions/upload-artifact@v4
         with:
           name: python-package-distributions
           path: dist/
+  publish-to-pypi:
+    name: >-
+      Publish Python 🐍 distribution 📦 to PyPI
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/rsnapshot-docker-compose-backup
+    permissions:
+      id-token: write # IMPORTANT: mandatory for trusted publishing
+    steps:
+      - name: Download all the dists
+        uses: actions/download-artifact@v3
+        with:
+          name: python-package-distributions
+          path: dist/
+      - name: Publish distribution 📦 to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
   github-release:
     name: >-
       Sign the Python 🐍 distribution 📦 with Sigstore
       and upload them to GitHub Release
     needs:
-      - build
+      - publish-to-pypi
     runs-on: ubuntu-latest
     permissions:
       contents: write # IMPORTANT: mandatory for making GitHub Releases
