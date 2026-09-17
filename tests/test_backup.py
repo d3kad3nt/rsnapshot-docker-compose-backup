@@ -76,12 +76,10 @@ class TestRunningContainers:
             config=load_config_path("default_config"),
         )
         output = backup_planer.run(args)
-        assert (
-            load_expected_output(
-                "default_config_all_services", setup_and_start_containers
-            )
-            == output
+        expected_output = load_expected_output(
+            "default_config_all_services", setup_and_start_containers
         )
+        assert expected_output == output
 
 
 class TestStoppedContainers:
