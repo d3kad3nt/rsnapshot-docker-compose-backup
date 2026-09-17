@@ -23,4 +23,5 @@ Issues = "https://github.com/d3kad3nt/rsnapshot-docker-compose-backup/issues"
 [tool.hatch.version]
 source = "versioningit"
 [tool.hatch.envs.default]
+python = "3.10"
 dependencies = ["mypy", "black", "pytest", "pylint"]
