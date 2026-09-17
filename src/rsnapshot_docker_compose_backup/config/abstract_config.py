@@ -46,7 +46,8 @@ class AbstractConfig(ABC):
         if os.path.isfile(config_path):
             config_file.read(config_path)
             if not config_file.sections():
-                raise ValueError(f"The Config for {config_path} has no Sections")
+                msg = f"The Config for {config_path} has no Sections"
+                raise ValueError(msg)
         for step in self.backup_steps:
             if config_file.has_option(section_name, step):
                 self.backup_steps[step] = (
