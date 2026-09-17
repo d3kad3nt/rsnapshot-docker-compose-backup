@@ -6,16 +6,15 @@
 
 import argparse
 import os
-
-# Imports for typing
 from dataclasses import dataclass
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from rsnapshot_docker_compose_backup.docker import docker_compose
-
-# Other imports
 from rsnapshot_docker_compose_backup.global_values import set_config_file, set_folder
-from rsnapshot_docker_compose_backup.structure.container import Container
+
+if TYPE_CHECKING:
+    from rsnapshot_docker_compose_backup.structure.container import Container
 
 
 @dataclass
