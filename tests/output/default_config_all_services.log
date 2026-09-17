@@ -1,21 +1,3 @@
-##Start backup for compose project heimdall - service heimdall
-#runtime_backup
-backup_exec	/bin/date +%s
-backup_script	/usr/bin/docker image save linuxserver/heimdall -o heimdall_image.tar	./heimdall/image
-backup_exec	/bin/date +%s
-backup	${{container_folder}}/heimdall	./heimdall/yaml	+rsync_long_args=--include=*.yml,+rsync_long_args=--include=*.yaml
-#stop
-backup_exec	/bin/date +%s
-backup_exec	cd ${{container_folder}}/heimdall; /usr/bin/docker-compose stop
-#backup
-backup_exec	/bin/date +%s
-backup	/var/lib/docker/volumes/heimdall_heimdall/_data	./heimdall/heimdall_heimdall
-#restart
-backup_exec	/bin/date +%s
-backup_exec	cd ${{container_folder}}/heimdall; /usr/bin/docker-compose start
-backup_exec	/bin/date +%s
-##End backup for compose project heimdall - service heimdall
-
 ##Start backup for compose project nextcloud - service mariaDB
 #runtime_backup
 backup_exec	/bin/date +%s
@@ -54,3 +36,21 @@ backup_exec	/bin/date +%s
 backup_exec	/usr/bin/docker exec -u www-data nextcloud /var/www/html/occ maintenance:mode --off
 backup_exec	/bin/date +%s
 ##End backup for compose project nextcloud - service nextcloud
+
+##Start backup for compose project heimdall - service heimdall
+#runtime_backup
+backup_exec	/bin/date +%s
+backup_script	/usr/bin/docker image save linuxserver/heimdall -o heimdall_image.tar	./heimdall/image
+backup_exec	/bin/date +%s
+backup	${{container_folder}}/heimdall	./heimdall/yaml	+rsync_long_args=--include=*.yml,+rsync_long_args=--include=*.yaml
+#stop
+backup_exec	/bin/date +%s
+backup_exec	cd ${{container_folder}}/heimdall; /usr/bin/docker-compose stop
+#backup
+backup_exec	/bin/date +%s
+backup	/var/lib/docker/volumes/heimdall_heimdall/_data	./heimdall/heimdall_heimdall
+#restart
+backup_exec	/bin/date +%s
+backup_exec	cd ${{container_folder}}/heimdall; /usr/bin/docker-compose start
+backup_exec	/bin/date +%s
+##End backup for compose project heimdall - service heimdall
