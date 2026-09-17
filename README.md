@@ -141,3 +141,8 @@ Some Variables are predefined and can be used in the backup.ini without being de
 - $containerID: The ID of the Container
 - $projectFolder: The Path of the Project Folder
 - $volumes: A List of the volumes that are defined for the service. The backup commands are copied for each volume.
+
+## Developement
+
+This program uses [hatch](https://hatch.pypa.io/latest/) for project management.  
+You can run the tests via `hatch test` and get a virtual envirnment with `hatch shell`
