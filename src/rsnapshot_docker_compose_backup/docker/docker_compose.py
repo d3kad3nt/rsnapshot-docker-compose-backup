@@ -91,9 +91,11 @@ def get_services(path: Path) -> tuple[list[ContainerInfo], Path]:
     return services, path
 
 
-def find_docker_dirs(root_folder: Path = Path(os.getcwd())) -> list[Path]:
+def find_docker_dirs(root_folder: Path | None = None) -> list[Path]:
     """Finds all docker-compose dirs in current sub folder
     :returns: a list of all folders"""
+    if root_folder is None:
+        root_folder = Path.cwd()
     dirs: list[Path] = []
     docker_compose_files = [
         "compose.yaml",
