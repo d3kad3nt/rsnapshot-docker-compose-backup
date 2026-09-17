@@ -12,10 +12,10 @@ from rsnapshot_docker_compose_backup.utils import CaseInsensitiveRe
 
 class DefaultConfig(AbstractConfig):
     __instance: Optional["DefaultConfig"] = None
-    defaultConfig = "default_config"
-    defaultConfigName = "backup.ini"
-    settingsSection = "settings"
-    actionSection = "actions"
+    default_config = "default_config"
+    default_config_name = "backup.ini"
+    settings_section = "settings"
+    action_section = "actions"
 
     # Settings
     settings: ClassVar[dict[str, bool]] = {
@@ -44,11 +44,11 @@ class DefaultConfig(AbstractConfig):
             self.filename: Path = global_values.config_file
         else:
             self.filename = global_values.folder / Path(
-                self.defaultConfigName,
+                self.default_config_name,
             )
         if not os.path.isfile(self.filename):
             self._create_default_config()
-        super().__init__(self.filename, self.defaultConfig)
+        super().__init__(self.filename, self.default_config)
         self._load_actions()
         self._load_settings()
 
@@ -57,11 +57,11 @@ class DefaultConfig(AbstractConfig):
             "rsnapshot_docker_compose_backup.config", "backup.ini"
         ) as default_backup_ini:
             default_config = default_backup_ini.read().format(
-                default_config=self.defaultConfig,
-                default_config_actions=self.actions_name(self.defaultConfig),
-                default_config_vars=self.vars_name(self.defaultConfig),
-                actions=self.actionSection,
-                default_config_settings=self.settingsSection,
+                default_config=self.default_config,
+                default_config_actions=self.actions_name(self.default_config),
+                default_config_vars=self.vars_name(self.default_config),
+                actions=self.action_section,
+                default_config_settings=self.settings_section,
             )
 
             with open(self.filename, "w", encoding="UTF-8") as config_file:
@@ -77,8 +77,8 @@ class DefaultConfig(AbstractConfig):
         )  # type: ignore
         config_file.read(self.filename)
         for section in config_file.sections():
-            if section.startswith(self.actionSection):
-                action_name = section[len(self.actionSection + ".") :]
+            if section.startswith(self.action_section):
+                action_name = section[len(self.action_section + ".") :]
                 commands = {}
                 for step in self.backup_steps:
                     if config_file.has_option(section.lower(), step):
@@ -94,9 +94,9 @@ class DefaultConfig(AbstractConfig):
         config_file.read(self.filename)
         # print(f"filename {self.filename}")
         for setting in self.settings:
-            if config_file.has_option(self.settingsSection, setting):
+            if config_file.has_option(self.settings_section, setting):
                 self.settings[setting] = config_file.getboolean(
-                    self.settingsSection, setting
+                    self.settings_section, setting
                 )
                 # print(f"{setting} is set to {self.settings[setting]}")
 
