@@ -1,19 +1,19 @@
 [build-system]
-requires = ["hatchling","versioningit"]
+requires = ["hatchling", "versioningit"]
 build-backend = "hatchling.build"
 [project]
 name = "rsnapshot-docker-compose-backup"
 dynamic = ["version"]
 authors = [
-  { name="Christoph Wildhagen", email="git@christoph-wildhagen.de" },
+  { name = "Christoph Wildhagen", email = "git@christoph-wildhagen.de" },
 ]
 description = "A config generator for rsnapshot"
 readme = "README.md"
 requires-python = ">=3.8"
 classifiers = [
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: Apache Software License",
-    "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: Apache Software License",
+  "Operating System :: OS Independent",
 ]
 [project.scripts]
 rsnapshot-docker-compose-backup = "rsnapshot_docker_compose_backup.backup_planer:main"

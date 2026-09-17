@@ -5,7 +5,7 @@
 # analyse-fallback-blocks =
 
 # Clear in-memory caches upon conclusion of linting. Useful if running pylint in
-# a server-like mode.
+# a server-like mode. 
 # clear-cache-post-run =
 
 # Always return a 0 (non-error) status code, even if lint errors are found. This
@@ -72,31 +72,33 @@ limit-inference-results = 100
 
 # List of plugins (as comma separated values of python module names) to load,
 # usually to register additional checkers.
-load-plugins = [ "pylint.extensions.bad_builtin",
-"pylint.extensions.broad_try_clause",
-"pylint.extensions.check_elif",
-"pylint.extensions.code_style",
-"pylint.extensions.comparison_placement",
-"pylint.extensions.confusing_elif",
-"pylint.extensions.consider_refactoring_into_while_condition",
-"pylint.extensions.consider_ternary_expression",
-"pylint.extensions.dict_init_mutate",
-"pylint.extensions.docparams",
-"pylint.extensions.docstyle",
-"pylint.extensions.dunder",
-"pylint.extensions.empty_comment",
-"pylint.extensions.eq_without_hash",
-"pylint.extensions.for_any_all",
-"pylint.extensions.magic_value",
-"pylint.extensions.mccabe",
-"pylint.extensions.no_self_use",
-"pylint.extensions.overlapping_exceptions",
-"pylint.extensions.private_import",
-"pylint.extensions.redefined_loop_name",
-"pylint.extensions.redefined_variable_type",
-"pylint.extensions.set_membership",
-"pylint.extensions.typing",
-"pylint.extensions.while_used" ]
+load-plugins = [
+  "pylint.extensions.bad_builtin",
+  "pylint.extensions.broad_try_clause",
+  "pylint.extensions.check_elif",
+  "pylint.extensions.code_style",
+  "pylint.extensions.comparison_placement",
+  "pylint.extensions.confusing_elif",
+  "pylint.extensions.consider_refactoring_into_while_condition",
+  "pylint.extensions.consider_ternary_expression",
+  "pylint.extensions.dict_init_mutate",
+  "pylint.extensions.docparams",
+  "pylint.extensions.docstyle",
+  "pylint.extensions.dunder",
+  "pylint.extensions.empty_comment",
+  "pylint.extensions.eq_without_hash",
+  "pylint.extensions.for_any_all",
+  "pylint.extensions.magic_value",
+  "pylint.extensions.mccabe",
+  "pylint.extensions.no_self_use",
+  "pylint.extensions.overlapping_exceptions",
+  "pylint.extensions.private_import",
+  "pylint.extensions.redefined_loop_name",
+  "pylint.extensions.redefined_variable_type",
+  "pylint.extensions.set_membership",
+  "pylint.extensions.typing",
+  "pylint.extensions.while_used",
+]
 
 # Pickle collected data for later comparisons.
 persistent = true
@@ -400,7 +402,13 @@ valid-magic-values = [0, -1, 1, "", "__main__"]
 [tool.pylint."messages control"]
 # Only show warnings with the listed confidence levels. Leave empty to show all.
 # Valid levels: HIGH, CONTROL_FLOW, INFERENCE, INFERENCE_FAILURE, UNDEFINED.
-confidence = ["HIGH", "CONTROL_FLOW", "INFERENCE", "INFERENCE_FAILURE", "UNDEFINED"]
+confidence = [
+  "HIGH",
+  "CONTROL_FLOW",
+  "INFERENCE",
+  "INFERENCE_FAILURE",
+  "UNDEFINED",
+]
 
 # Disable the message, report, category or checker with the given id(s). You can
 # either give multiple identifiers separated by comma (,) or put this option
@@ -411,7 +419,15 @@ confidence = ["HIGH", "CONTROL_FLOW", "INFERENCE", "INFERENCE_FAILURE", "UNDEFIN
 # --enable=similarities". If you want to run only the classes checker, but have
 # no Warning level messages displayed, use "--disable=all --enable=classes
 # --disable=W".
-disable = [ "consider-using-augmented-assign", "consider-using-f-string", "missing-function-docstring", "missing-module-docstring", "missing-class-docstring", "consider-using-assignment-expr", "consider-ternary-expression"]
+disable = [
+  "consider-using-augmented-assign",
+  "consider-using-f-string",
+  "missing-function-docstring",
+  "missing-module-docstring",
+  "missing-class-docstring",
+  "consider-using-assignment-expr",
+  "consider-ternary-expression",
+]
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
@@ -422,7 +438,16 @@ enable = ["c-extension-no-member"]
 [tool.pylint.method_args]
 # List of qualified names (i.e., library.method) which require a timeout
 # parameter e.g. 'requests.api.get,requests.api.post'
-timeout-methods = ["requests.api.delete", "requests.api.get", "requests.api.head", "requests.api.options", "requests.api.patch", "requests.api.post", "requests.api.put", "requests.api.request"]
+timeout-methods = [
+  "requests.api.delete",
+  "requests.api.get",
+  "requests.api.head",
+  "requests.api.options",
+  "requests.api.patch",
+  "requests.api.post",
+  "requests.api.put",
+  "requests.api.request",
+]
 
 [tool.pylint.miscellaneous]
 # List of note tags to take in consideration, separated by a comma.
@@ -552,7 +577,12 @@ ignore-none = true
 ignore-on-opaque-inference = true
 
 # List of symbolic message names to ignore for Mixin members.
-ignored-checks-for-mixins = ["no-member", "not-async-context-manager", "not-context-manager", "attribute-defined-outside-init"]
+ignored-checks-for-mixins = [
+  "no-member",
+  "not-async-context-manager",
+  "not-context-manager",
+  "attribute-defined-outside-init",
+]
 
 # List of class names for which member attributes should not be checked (useful
 # for classes with dynamically set attributes). This supports the use of
@@ -612,6 +642,10 @@ ignored-argument-names = "_.*|^ignored_|^unused_"
 
 # List of qualified module names which can have objects that can redefine
 # builtins.
-redefining-builtins-modules = ["six.moves", "past.builtins", "future.builtins", "builtins", "io"]
-
-
+redefining-builtins-modules = [
+  "six.moves",
+  "past.builtins",
+  "future.builtins",
+  "builtins",
+  "io",
+]
