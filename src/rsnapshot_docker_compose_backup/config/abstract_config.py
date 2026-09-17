@@ -11,9 +11,9 @@ from rsnapshot_docker_compose_backup.utils import CaseInsensitiveRe
 
 
 class AbstractConfig(ABC):
-    actionSection = "actions"
-    varSection = "vars"
-    backupOrder = (
+    action_section = "actions"
+    var_section = "vars"
+    backup_order = (
         "runtime_backup",
         "pre_stop",
         "stop",
@@ -28,7 +28,7 @@ class AbstractConfig(ABC):
         self.enabled_actions: dict[str, bool] = {}
         self.backup_steps: dict[str, str] = {}
         self.vars: dict[str, str | list[Volume]] = {}
-        for step in self.backupOrder:
+        for step in self.backup_order:
             self.backup_steps[step] = ""
         self._load_config_file(config_path, name)
         self.name = name
@@ -85,13 +85,13 @@ class AbstractConfig(ABC):
     @staticmethod
     def actions_name(section_name: str) -> str:
         return AbstractConfig._create_subsection(
-            section_name, AbstractConfig.actionSection
+            section_name, AbstractConfig.action_section
         )
 
     @staticmethod
     def vars_name(section_name: str) -> str:
         return AbstractConfig._create_subsection(
-            section_name, AbstractConfig.varSection
+            section_name, AbstractConfig.var_section
         )
 
 

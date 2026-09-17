@@ -81,7 +81,7 @@ class ContainerConfig(AbstractConfig):
             return None
         result: list[str] = []
 
-        for step in self.backupOrder:
+        for step in self.backup_order:
             backup_action = self.get_step(step)
             if backup_action:
                 result.append(f"#{step}")
