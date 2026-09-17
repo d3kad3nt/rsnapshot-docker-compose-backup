@@ -2,7 +2,6 @@ import os
 from pathlib import Path
 from typing import Optional
 
-
 folder: Path = Path(os.getcwd())
 config_file: Optional[Path] = None
 
