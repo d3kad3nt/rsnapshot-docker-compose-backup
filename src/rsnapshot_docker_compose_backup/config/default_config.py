@@ -3,7 +3,7 @@ import os
 import re
 from importlib import resources
 from pathlib import Path
-from typing import Optional
+from typing import ClassVar, Optional
 
 from rsnapshot_docker_compose_backup import global_values
 from rsnapshot_docker_compose_backup.config.abstract_config import AbstractConfig
@@ -18,12 +18,12 @@ class DefaultConfig(AbstractConfig):
     actionSection = "actions"
 
     # Settings
-    settings = {
+    settings: ClassVar[dict[str, bool]] = {
         "logTime": True,
         "onlyRunning": True,
     }
 
-    actions: dict[str, dict[str, str]] = {}
+    actions: ClassVar[dict[str, dict[str, str]]] = {}
 
     @staticmethod
     def get_instance() -> "DefaultConfig":
