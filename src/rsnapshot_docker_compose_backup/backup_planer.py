@@ -61,7 +61,7 @@ def run(args: ProgramArgs) -> str:
 
 def main() -> None:
     args: ProgramArgs = parse_arguments()
-    print(run(args))
+    print(run(args))  # noqa: T201
 
 
 if __name__ == "__main__":
