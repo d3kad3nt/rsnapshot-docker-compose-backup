@@ -21,9 +21,7 @@ def get_binary() -> str:
 
 
 def get_container_id(service_name: str, path: Path) -> str:
-    return command(
-        f"{get_binary()} ps --all -q {service_name}", path=path
-    ).stdout[:12]
+    return command(f"{get_binary()} ps --all -q {service_name}", path=path).stdout[:12]
 
 
 def get_container_name(service_name: str, path: Path) -> str:
@@ -57,17 +55,17 @@ def find_container(root_folder: Path) -> list[Container]:
     with futures.ProcessPoolExecutor() as pool:
         for service_list, directory in pool.map(get_services, docker_dirs):
             # container_list: list[str] = get_services(output)
-            for container_info in service_list:
-                if container_info.container_id:
-                    all_container.append(
-                        Container(
-                            folder=directory,
-                            service_name=container_info.service_name,
-                            container_name=container_info.container_name,
-                            container_id=container_info.container_id,
-                            running=not container_stopped(container_info.container_id),
-                        )
-                    )
+            all_container.extend(
+                Container(
+                    folder=directory,
+                    service_name=x.service_name,
+                    container_name=x.container_name,
+                    container_id=x.container_id,
+                    running=not container_stopped(x.container_id),
+                )
+                for x in service_list
+                if x.container_id
+            )
     return all_container
 
 

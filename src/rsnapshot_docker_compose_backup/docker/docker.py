@@ -25,9 +25,11 @@ def ps(container_id: str | None = None) -> str:
 def volumes(container_id: str) -> list[Volume]:
     result: list[Volume] = []
     container_info = inspect(container_id)
-    for mount in container_info["Mounts"]:
-        if mount["Type"] == "volume":
-            result.append(Volume(mount["Name"], mount["Source"]))
+    result = [
+        Volume(mount["Name"], mount["Source"])
+        for mount in container_info["Mounts"]
+        if mount["Type"] == "volume"
+    ]
     return sorted(result)
 
 
