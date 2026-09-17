@@ -19,6 +19,7 @@ class Container:
         service_name: str,
         container_name: str,
         container_id: str,
+        *,
         running: bool,
     ):
         self.folder: Path = folder
