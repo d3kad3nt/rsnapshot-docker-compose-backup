@@ -1,10 +1,11 @@
-from importlib import resources
 import os
-from pathlib import Path
-import subprocess
-from tempfile import TemporaryDirectory
-from typing import Any, Generator
 import shutil
+import subprocess
+from collections.abc import Generator
+from importlib import resources
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from typing import Any
 
 import pytest
 
@@ -44,7 +45,7 @@ def start_containers(root_folder: Path) -> None:
     ]
     for subfolder in subfolders:
         # print(subfolder)
-        subprocess.run("docker compose up -d".split(), cwd=subfolder, check=True)
+        subprocess.run(["docker", "compose", "up", "-d"], cwd=subfolder, check=True)
 
 
 def stop_containers(root_folder: Path) -> None:
@@ -52,7 +53,7 @@ def stop_containers(root_folder: Path) -> None:
         Path(f.path) for f in os.scandir(root_folder) if f.is_dir()
     ]
     for subfolder in subfolders:
-        subprocess.run("docker compose stop".split(), cwd=subfolder, check=True)
+        subprocess.run(["docker", "compose", "stop"], cwd=subfolder, check=True)
 
 
 def remove_containers(root_folder: Path) -> None:
@@ -61,7 +62,7 @@ def remove_containers(root_folder: Path) -> None:
     ]
     for subfolder in subfolders:
         subprocess.run(
-            "docker compose rm --force --stop --volumes ".split(),
+            ["docker", "compose", "rm", "--force", "--stop", "--volumes"],
             cwd=subfolder,
             check=True,
         )

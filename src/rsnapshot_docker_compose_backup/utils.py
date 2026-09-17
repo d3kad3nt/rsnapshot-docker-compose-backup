@@ -1,9 +1,8 @@
 from __future__ import annotations
-from pathlib import Path
-from re import Match, Pattern
 
 import subprocess
-from typing import Optional
+from pathlib import Path
+from re import Match, Pattern
 
 
 class CaseInsensitiveRe:
@@ -26,7 +25,7 @@ class CaseInsensitiveMatch:
 
 
 def command(
-    cmd: str | list[str], path: Optional[Path] = None
+    cmd: str | list[str], path: Path | None = None
 ) -> subprocess.CompletedProcess[str]:
     if isinstance(cmd, list):
         split_cmd = cmd
@@ -36,14 +35,14 @@ def command(
         res = subprocess.run(
             split_cmd,
             cwd=path,
-            universal_newlines=True,
+            text=True,
             stdout=subprocess.PIPE,
             check=False,
         )
     else:
         res = subprocess.run(
             split_cmd,
-            universal_newlines=True,
+            text=True,
             stdout=subprocess.PIPE,
             check=False,
         )

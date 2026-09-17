@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 
-from dataclasses import dataclass
+import json
 import os
-from pathlib import Path
 import re
 from concurrent import futures
-import json
-from typing import Optional
+from dataclasses import dataclass
+from pathlib import Path
 
 from rsnapshot_docker_compose_backup.structure.container import Container
 from rsnapshot_docker_compose_backup.utils import command
@@ -23,13 +22,13 @@ def get_binary() -> str:
 
 def get_container_id(service_name: str, path: Path) -> str:
     return command(
-        "{} ps --all -q {}".format(get_binary(), service_name), path=path
+        f"{get_binary()} ps --all -q {service_name}", path=path
     ).stdout[:12]
 
 
 def get_container_name(service_name: str, path: Path) -> str:
     stdout = command(
-        "{} config --format json {}".format(get_binary(), service_name),
+        f"{get_binary()} config --format json {service_name}",
         path=path,
     ).stdout
     # print(f"stdout: {stdout} (End)")
@@ -81,7 +80,7 @@ class ContainerInfo:
 
 def get_services(path: Path) -> tuple[list[ContainerInfo], Path]:
     service_name: list[str] = command(
-        "{} config --services".format(get_binary()), path=path
+        f"{get_binary()} config --services", path=path
     ).stdout.splitlines()
     # Docker doesn't return it always in the same order
     service_name.sort()
@@ -120,7 +119,7 @@ def get_column(column_nr: int, input_str: str) -> str:
     return re.sub(r"\s\s+", "  ", input_str).split("  ")[column_nr]
 
 
-def get_container(ps_out: str, state: Optional[str] = None) -> list[str]:
+def get_container(ps_out: str, state: str | None = None) -> list[str]:
     all_container: list[str] = ps_out.splitlines()[2:]
     container: list[str] = []
     if not all_container:

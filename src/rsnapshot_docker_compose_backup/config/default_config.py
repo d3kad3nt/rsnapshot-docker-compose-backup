@@ -1,8 +1,8 @@
 import configparser
-from importlib import resources
 import os
-from pathlib import Path
 import re
+from importlib import resources
+from pathlib import Path
 from typing import Optional
 
 from rsnapshot_docker_compose_backup import global_values
