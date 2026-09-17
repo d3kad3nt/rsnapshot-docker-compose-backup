@@ -25,3 +25,7 @@ source = "versioningit"
 [tool.hatch.envs.default]
 python = "3.10"
 dependencies = ["mypy", "black", "pytest", "pylint"]
+[tool.hatch.envs.hatch-static-analysis]
+config-path = "ruff_defaults.toml"
+[tool.ruff]
+extend = "ruff_defaults.toml"
