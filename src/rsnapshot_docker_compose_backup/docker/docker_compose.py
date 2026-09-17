@@ -11,13 +11,17 @@ from rsnapshot_docker_compose_backup.structure.container import Container
 from rsnapshot_docker_compose_backup.utils import command
 
 
+class NotInstalledError(Exception):
+    pass
+
+
 def get_binary() -> str:
     if command("docker compose").returncode == 0:
         return "docker compose"
     if command("docker-compose").returncode == 0:
         return "docker-compose"
     msg = "Docker Compose is not installed"
-    raise Exception(msg)
+    raise NotInstalledError(msg)
 
 
 def get_container_id(service_name: str, path: Path) -> str:

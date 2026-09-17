@@ -46,7 +46,7 @@ class AbstractConfig(ABC):
         if os.path.isfile(config_path):
             config_file.read(config_path)
             if not config_file.sections():
-                raise Exception(f"The Config for {config_path} has no Sections")
+                raise ValueError(f"The Config for {config_path} has no Sections")
         for step in self.backup_steps:
             if config_file.has_option(section_name, step):
                 self.backup_steps[step] = (
@@ -70,7 +70,7 @@ class AbstractConfig(ABC):
                 replace_function = _replace_var.get(type(variables[var]))
                 if not replace_function:
                     msg = f"Illegal Type for variable {var}: {type(variables[var])}"
-                    raise Exception(msg)
+                    raise ValueError(msg)
                 cmd = replace_function(cmd, var, variables[var])
         return cmd
 
