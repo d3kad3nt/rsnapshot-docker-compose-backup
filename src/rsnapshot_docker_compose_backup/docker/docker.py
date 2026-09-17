@@ -1,18 +1,18 @@
 import json
 import re
-from typing import Any, Optional
+from typing import Any
 
-from rsnapshot_docker_compose_backup.utils import command
 from rsnapshot_docker_compose_backup.structure.volume import Volume
+from rsnapshot_docker_compose_backup.utils import command
 
 
 def inspect(container: str) -> Any:
     # converts docker inspect to json and return only first container,
     # because this works only with one container
-    return json.loads(command("docker inspect {}".format(container)).stdout)[0]
+    return json.loads(command(f"docker inspect {container}").stdout)[0]
 
 
-def ps(container_id: Optional[str] = None) -> str:
+def ps(container_id: str | None = None) -> str:
     result = command("docker ps -a").stdout
     if container_id:
         for line in ps().splitlines():

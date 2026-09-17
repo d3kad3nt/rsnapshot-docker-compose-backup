@@ -1,12 +1,13 @@
 import configparser
 import os
-from pathlib import Path
 import re
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Union
+from collections.abc import Callable
+from pathlib import Path
+from typing import Any
 
-from rsnapshot_docker_compose_backup.utils import CaseInsensitiveRe
 from rsnapshot_docker_compose_backup.structure.volume import Volume
+from rsnapshot_docker_compose_backup.utils import CaseInsensitiveRe
 
 
 class AbstractConfig(ABC):
@@ -26,7 +27,7 @@ class AbstractConfig(ABC):
     def __init__(self, config_path: Path, name: str):
         self.enabled_actions: dict[str, bool] = {}
         self.backup_steps: dict[str, str] = {}
-        self.vars: dict[str, Union[str, list[Volume]]] = {}
+        self.vars: dict[str, str | list[Volume]] = {}
         for step in self.backupOrder:
             self.backup_steps[step] = ""
         self._load_config_file(config_path, name)
@@ -45,7 +46,7 @@ class AbstractConfig(ABC):
         if os.path.isfile(config_path):
             config_file.read(config_path)
             if not config_file.sections():
-                raise Exception("The Config for {} has no Sections".format(config_path))
+                raise Exception(f"The Config for {config_path} has no Sections")
         for step in self.backup_steps:
             if config_file.has_option(section_name, step):
                 self.backup_steps[step] = (
@@ -61,12 +62,12 @@ class AbstractConfig(ABC):
         if config_file.has_section(vars_section):
             for var in config_file.options(vars_section):
                 val = config_file.get(vars_section, var)
-                self.vars["${}".format(var)] = val
+                self.vars[f"${var}"] = val
 
     def _resolve_vars(
-        self, cmd: str, variables: dict[str, Union[str, list[Volume]]]
+        self, cmd: str, variables: dict[str, str | list[Volume]]
     ) -> str:
-        for var in variables.keys():
+        for var in variables:
             if var.lower() in cmd.lower():
                 replace_function = _replace_var.get(type(variables[var]))
                 if not replace_function:
@@ -80,7 +81,7 @@ class AbstractConfig(ABC):
 
     @staticmethod
     def _create_subsection(super_section: str, sub_section: str) -> str:
-        return "{}.{}".format(super_section, sub_section)
+        return f"{super_section}.{sub_section}"
 
     @staticmethod
     def actions_name(section_name: str) -> str:
@@ -106,7 +107,7 @@ def ireplace(old: str, new: str, text: str) -> str:
     return text
 
 
-def _replace_list(cmd: str, var: str, val: list[Union[list[Any], str, Volume]]) -> str:
+def _replace_list(cmd: str, var: str, val: list[list[Any] | str | Volume]) -> str:
     result: str = ""
     for i in val:
         result += str(_replace_var[type(i)](cmd, var, i)) + "\n"

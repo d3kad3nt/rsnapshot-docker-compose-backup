@@ -1,12 +1,10 @@
-from pathlib import Path
-from typing import Optional, Union
-
 import os
+from pathlib import Path
 
-from rsnapshot_docker_compose_backup.docker import docker
-from rsnapshot_docker_compose_backup.structure.volume import Volume
 from rsnapshot_docker_compose_backup.config.abstract_config import AbstractConfig
 from rsnapshot_docker_compose_backup.config.default_config import DefaultConfig
+from rsnapshot_docker_compose_backup.docker import docker
+from rsnapshot_docker_compose_backup.structure.volume import Volume
 
 
 class Container:
@@ -41,24 +39,20 @@ class Container:
             # print("output is none")
             return ""
         result.append(
-            "##Start backup for compose project {} - service {}".format(
-                self.project_name, self.service_name
-            )
+            f"##Start backup for compose project {self.project_name} - service {self.service_name}"
         )
         result.append(output)
         result.append(
-            "##End backup for compose project {} - service {}".format(
-                self.project_name, self.service_name
-            )
+            f"##End backup for compose project {self.project_name} - service {self.service_name}"
         )
         result.append("")
         return "\n".join(result)
 
     def __str__(self) -> str:
-        return "Container {} in folder {}".format(self.service_name, self.folder)
+        return f"Container {self.service_name} in folder {self.folder}"
 
     def __repr__(self) -> str:
-        return "Container {} in folder {}".format(self.service_name, self.folder)
+        return f"Container {self.service_name} in folder {self.folder}"
 
 
 class ContainerConfig(AbstractConfig):
@@ -75,13 +69,13 @@ class ContainerConfig(AbstractConfig):
         self._is_running = container.is_running
         self.add_action_content()
 
-    def _all_vars(self) -> dict[str, Union[str, list[Volume]]]:
-        variables: dict[str, Union[str, list[Volume]]] = {}
+    def _all_vars(self) -> dict[str, str | list[Volume]]:
+        variables: dict[str, str | list[Volume]] = {}
         variables.update(self.default_config.vars)
         variables.update(self.vars)
         return variables
 
-    def output(self) -> Optional[str]:
+    def output(self) -> str | None:
         if self.default_config.settings["onlyRunning"] and not self._is_running:
             return None
         result: list[str] = []
@@ -89,7 +83,7 @@ class ContainerConfig(AbstractConfig):
         for step in self.backupOrder:
             backup_action = self.get_step(step)
             if backup_action:
-                result.append("#{}".format(step))
+                result.append(f"#{step}")
                 for line in backup_action.splitlines():
                     script_command = self._resolve_vars(line, self._all_vars()).strip(
                         "\n"
