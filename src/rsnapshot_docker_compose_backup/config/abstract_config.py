@@ -13,7 +13,7 @@ from rsnapshot_docker_compose_backup.utils import CaseInsensitiveRe
 class AbstractConfig(ABC):
     actionSection = "actions"
     varSection = "vars"
-    backupOrder = [
+    backupOrder = (
         "runtime_backup",
         "pre_stop",
         "stop",
@@ -22,7 +22,7 @@ class AbstractConfig(ABC):
         "post_backup",
         "restart",
         "post_restart",
-    ]
+    )
 
     def __init__(self, config_path: Path, name: str):
         self.enabled_actions: dict[str, bool] = {}
