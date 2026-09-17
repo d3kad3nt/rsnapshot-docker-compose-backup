@@ -39,7 +39,7 @@ class DefaultConfig(AbstractConfig):
     def __init__(self) -> None:
         if DefaultConfig.__instance is not None:
             msg = "This class is a singleton!"
-            raise Exception(msg)
+            raise RuntimeError(msg)
         if global_values.config_file is not None:
             self.filename: Path = global_values.config_file
         else:
