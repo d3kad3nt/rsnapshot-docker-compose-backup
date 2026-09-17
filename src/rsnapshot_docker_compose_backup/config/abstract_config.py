@@ -64,14 +64,13 @@ class AbstractConfig(ABC):
                 val = config_file.get(vars_section, var)
                 self.vars[f"${var}"] = val
 
-    def _resolve_vars(
-        self, cmd: str, variables: dict[str, str | list[Volume]]
-    ) -> str:
+    def _resolve_vars(self, cmd: str, variables: dict[str, str | list[Volume]]) -> str:
         for var in variables:
             if var.lower() in cmd.lower():
                 replace_function = _replace_var.get(type(variables[var]))
                 if not replace_function:
-                    raise Exception("Illegal Type")
+                    msg = f"Illegal Type for variable {var}: {type(variables[var])}"
+                    raise Exception(msg)
                 cmd = replace_function(cmd, var, variables[var])
         return cmd
 

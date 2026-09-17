@@ -16,8 +16,8 @@ def get_binary() -> str:
         return "docker compose"
     if command("docker-compose").returncode == 0:
         return "docker-compose"
-
-    raise Exception("Docker Compose is not installed")
+    msg = "Docker Compose is not installed"
+    raise Exception(msg)
 
 
 def get_container_id(service_name: str, path: Path) -> str:
