@@ -25,6 +25,10 @@ The config file for this script has to be in the docker compose root.
 3. Change newly generated backup.ini in docker compose root directory if necessary
 4. Create backup.ini files in projectDirs that need special configuration
 
+## Install
+
+This can be installed with pip via `pip install rsnapshot-docker-compose-backup`
+
 ## Steps
 
 The Backup process is divided in steps.
