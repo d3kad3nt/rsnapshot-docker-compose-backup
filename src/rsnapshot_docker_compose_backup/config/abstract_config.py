@@ -120,8 +120,7 @@ def _replace_str(cmd: str, var: str, val: str) -> str:
 def _replace_volume(cmd: str, var: str, val: Volume) -> str:
     tmp = _replace_str(cmd, var + ".name", val.name)
     tmp = _replace_str(tmp, var + ".path", val.path)
-    tmp = _replace_str(tmp, var, val.path)
-    return tmp
+    return _replace_str(tmp, var, val.path)
 
 
 _replace_var: dict[type, Callable[..., str]] = {
