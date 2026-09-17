@@ -65,13 +65,13 @@ class AbstractConfig(ABC):
                 self.vars[f"${var}"] = val
 
     def _resolve_vars(self, cmd: str, variables: dict[str, str | list[Volume]]) -> str:
-        for var in variables:
+        for var, value in variables.items():
             if var.lower() in cmd.lower():
-                replace_function = _replace_var.get(type(variables[var]))
+                replace_function = _replace_var.get(type(value))
                 if not replace_function:
-                    msg = f"Illegal Type for variable {var}: {type(variables[var])}"
+                    msg = f"Illegal Type for variable {var}: {type(value)}"
                     raise ValueError(msg)
-                cmd = replace_function(cmd, var, variables[var])
+                cmd = replace_function(cmd, var, value)
         return cmd
 
     @abstractmethod
