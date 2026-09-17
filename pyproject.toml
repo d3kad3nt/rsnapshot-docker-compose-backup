@@ -30,10 +30,10 @@ config-path = "ruff_defaults.toml"
 dependencies = ["black", "isort", "ruff"]
 [tool.hatch.envs.hatch-static-analysis.scripts]
 format-check = [
-  "black --check --diff {args:.}",
+  "black --check --diff -t py310 {args:.}",
   "isort --check-only --diff {args:.}",
 ]
-format-fix = ["isort {args:.}", "black {args:.}"]
+format-fix = ["isort {args:.}", "black -t py310 {args:.}"]
 lint-check = "ruff check {args:.}"
 lint-fix = "ruff check --fix {args:.}"
 [tool.ruff]
