@@ -23,6 +23,7 @@ if TYPE_CHECKING:
 class ProgramArgs:
     folder: Path
     config: Path | None
+    socket: str | None
 
 
 def parse_arguments() -> ProgramArgs:
@@ -41,18 +42,29 @@ def parse_arguments() -> ProgramArgs:
         help="Path to the root config file, if it isn't in the root docker-compose folder",
         default=None,
     )
+    ap.add_argument(
+        "-s",
+        "--socket",
+        required=False,
+        help="Path to the docker socket, if it isn't in the default location",
+        default=None,
+    )
     args = vars(ap.parse_args())
     if args["config"] is not None:
         config_file = Path(args["config"])
     else:
         config_file = None
-    return ProgramArgs(folder=Path(args["folder"]), config=config_file)
+    return ProgramArgs(
+        folder=Path(args["folder"]), config=config_file, socket=args["socket"]
+    )
 
 
 def run(args: ProgramArgs) -> str:
     set_folder(args.folder)
     set_config_file(args.config)
-    docker_container: list[Container] = docker.get_compose_container(args.folder)
+    docker_container: list[Container] = docker.get_compose_container(
+        args.folder, socket_connection=args.socket
+    )
     result: list[str] = []
     for container in docker_container:
         container_result = container.backup()

@@ -148,7 +148,7 @@ class Api:
             for curr_header in response.getheaders():
                 headers[curr_header[0]] = curr_header[1]
             return HttpResponse(
-                status_code=response.getcode(),
+                status_code=response.status,
                 status_text="",
                 headers=headers,
                 json_body=json.loads(response.read()),
