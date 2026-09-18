@@ -1,8 +1,8 @@
-from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 import threading
 import time
-from typing import Any, Dict, List, Tuple, Union
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from typing import Any
 
 
 class ApiRequestHandler(BaseHTTPRequestHandler):
@@ -18,21 +18,19 @@ class ApiRequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(ApiRequestHandler.next_response)
 
 
-def run_server(responses: List[Tuple[int, Union[Dict[str, Any], List[Any]]]]) -> None:
+def run_server(responses: list[tuple[int, dict[str, Any] | list[Any]]]) -> None:
     server_address = ("localhost", 8000)
     httpd = HTTPServer(server_address, ApiRequestHandler)
     i = 0
     while i < len(responses):
-        print(f"serve response {i+1} / {len(responses)}")
+        # print(f"serve response {i+1} / {len(responses)}")
         ApiRequestHandler.next_response = json.dumps(responses[i][1]).encode("utf-8")
         ApiRequestHandler.next_status = int(responses[i][0])
         httpd.handle_request()
         i += 1
 
 
-def mock_responses(
-    responses: List[Tuple[int, Union[Dict[str, Any], List[Any]]]]
-) -> None:
+def mock_responses(responses: list[tuple[int, dict[str, Any] | list[Any]]]) -> None:
     def server() -> None:
         run_server(responses=responses)
 

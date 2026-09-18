@@ -1,7 +1,5 @@
-from pathlib import Path
-from typing import List
-
 import os
+from pathlib import Path
 
 from rsnapshot_docker_compose_backup.config.container_config import ContainerConfig
 from rsnapshot_docker_compose_backup.structure.volume import Volume
@@ -17,7 +15,7 @@ class Container:
         container_name: str,
         container_id: str,
         running: bool,
-        volumes: List[Volume],
+        volumes: list[Volume],
         image: str,
         docker_compose_file: Path,
     ):
@@ -33,7 +31,7 @@ class Container:
         self.docker_compose_file: Path = docker_compose_file
 
     def backup(self) -> str:
-        result: List[str] = []
+        result: list[str] = []
         config = ContainerConfig(
             {
                 "$serviceName": self.service_name,

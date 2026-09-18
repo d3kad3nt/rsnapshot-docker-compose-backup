@@ -1,16 +1,14 @@
 from pathlib import Path
-from typing import Dict, List, Optional, Union
 
-
-from rsnapshot_docker_compose_backup.structure.volume import Volume
 from rsnapshot_docker_compose_backup.config.abstract_config import AbstractConfig
 from rsnapshot_docker_compose_backup.config.default_config import DefaultConfig
+from rsnapshot_docker_compose_backup.structure.volume import Volume
 
 
 class ContainerConfig(AbstractConfig):
     def __init__(
         self,
-        container_vars: Dict[str, Union[str, List[Volume]]],
+        container_vars: dict[str, str | list[Volume]],
         is_running: bool,
         config_file: Path,
         service_name: str,
@@ -22,26 +20,26 @@ class ContainerConfig(AbstractConfig):
         self._is_running = is_running
         self.add_action_content()
 
-    def _all_vars(self) -> Dict[str, Union[str, List[Volume]]]:
-        variables: Dict[str, Union[str, List[Volume]]] = {}
+    def _all_vars(self) -> dict[str, str | list[Volume]]:
+        variables: dict[str, str | list[Volume]] = {}
         variables.update(self.default_config.vars)
         variables.update(self.vars)
         return variables
 
-    def output(self) -> Optional[str]:
+    def output(self) -> str | None:
         if self.default_config.settings["onlyRunning"] and not self._is_running:
             return None
-        result: List[str] = []
+        result: list[str] = []
 
-        for step in self.backupOrder:
+        for step in self.backup_order:
             backup_action = self.get_step(step)
             if backup_action:
-                result.append("#{}".format(step))
+                result.append(f"#{step}")
                 for line in backup_action.splitlines():
                     script_command = self._resolve_vars(line, self._all_vars()).strip(
                         "\n"
                     )
-                    single_commands: List[str] = []
+                    single_commands: list[str] = []
                     if "\n" in script_command:
                         single_commands = script_command.split("\n")
                     else:
@@ -52,7 +50,7 @@ class ContainerConfig(AbstractConfig):
         self._log_time(result)
         return "\n".join(result)
 
-    def _log_time(self, result: List[str]) -> None:
+    def _log_time(self, result: list[str]) -> None:
         log_time = self.default_config.settings["logTime"]
         if log_time:
             result.append("backup_exec\t/bin/date +%s")
@@ -62,7 +60,7 @@ class ContainerConfig(AbstractConfig):
             return self.backup_steps.get(step, "")
         return self.default_config.get_step(step)
 
-    def get_enabled_actions(self) -> Dict[str, bool]:
+    def get_enabled_actions(self) -> dict[str, bool]:
         merged_dict = self.default_config.enabled_actions.copy()
         merged_dict.update(self.enabled_actions)
         return merged_dict

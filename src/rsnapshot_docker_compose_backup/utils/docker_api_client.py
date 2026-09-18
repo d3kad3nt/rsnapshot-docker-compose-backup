@@ -1,23 +1,23 @@
+import json
+import socket
+import urllib.parse
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from http import client
-import json
-import socket
-from typing import Any, Dict, List, Optional
-import urllib.parse
+from typing import Any
 
 
 @dataclass
 class HttpResponse:
     status_code: int
     status_text: str
-    headers: Dict[str, str]
+    headers: dict[str, str]
     json_body: Any
 
 
 class Api:
 
-    _docker_socket: Optional[socket.socket] = None
+    _docker_socket: socket.socket | None = None
 
     def __init__(
         self, socket_connection: str = "unix:///run/docker.sock", version: str = "v1.46"
@@ -36,12 +36,12 @@ class Api:
         self,
         endpoint: str,
         *,
-        query_parameter: Optional[Dict[str, str]] = None,
-        header: Optional[Dict[str, str]] = None,
+        query_parameter: dict[str, str] | None = None,
+        header: dict[str, str] | None = None,
     ) -> HttpResponse:
         path = f"/{self.version}{endpoint}"
         if query_parameter is not None:
-            parameter: List[str] = []
+            parameter: list[str] = []
             for name, value in query_parameter.items():
                 parameter.append(f"{name}={urllib.parse.quote_plus(value)}")
             path = path + "?" + "&".join(parameter)
@@ -54,7 +54,7 @@ class Api:
             self,
             path: str,
             *,
-            header: Optional[Dict[str, str]] = None,
+            header: dict[str, str] | None = None,
         ) -> HttpResponse:
             pass
 
@@ -68,7 +68,7 @@ class Api:
             self,
             path: str,
             *,
-            header: Optional[Dict[str, str]] = None,
+            header: dict[str, str] | None = None,
         ) -> HttpResponse:
 
             request = [
@@ -87,7 +87,7 @@ class Api:
             message_start = b""
             while not message_start.endswith(b"\r\n\r\n"):
                 message_start = message_start + self.sock.recv(1)
-            lines: List[str] = message_start.decode("utf-8").splitlines()
+            lines: list[str] = message_start.decode("utf-8").splitlines()
             # Parse statusline
             status_line = lines[0]
             status_code = int(status_line.split(" ")[1])
@@ -95,7 +95,7 @@ class Api:
             if status_code >= 400:
                 raise ValueError(status_text)
             # Read headers
-            headers: Dict[str, str] = {}
+            headers: dict[str, str] = {}
             for line in lines[1:]:
                 split = line.split(":")
                 if len(split) == 2:
@@ -138,12 +138,12 @@ class Api:
             self,
             path: str,
             *,
-            header: Optional[Dict[str, str]] = None,
+            header: dict[str, str] | None = None,
         ) -> HttpResponse:
 
             self.httpConnection.request("GET", path)
             response = self.httpConnection.getresponse()
-            headers: Dict[str, str] = {}
+            headers: dict[str, str] = {}
             for curr_header in response.getheaders():
                 headers[curr_header[0]] = curr_header[1]
             return HttpResponse(
