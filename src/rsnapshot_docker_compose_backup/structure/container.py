@@ -33,7 +33,7 @@ class Container:
     def backup(self) -> str:
         result: list[str] = []
         config = ContainerConfig(
-            {
+            container_vars={
                 "$serviceName": self.service_name,
                 "$containerID": self.container_id,
                 "$containerName": self.container_name,
