@@ -10,3 +10,6 @@ class Volume:
         if not isinstance(other, Volume):
             return False
         return self.name == other.name and self.path == other.path
+
+    def __hash__(self) -> int:
+        return hash((self.name, self.path))

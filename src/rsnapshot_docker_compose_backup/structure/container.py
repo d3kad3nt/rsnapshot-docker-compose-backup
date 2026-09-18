@@ -93,6 +93,22 @@ class Container:
             return False
         if self.service_name != other.service_name:
             return False
-        if self.volumes != other.volumes:
+        if self.volumes != other.volumes:  # noqa: SIM103
             return False
         return True
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                self.backup_config,
+                self.container_id,
+                self.container_name,
+                self.docker_compose_file,
+                self.folder,
+                self.image,
+                self.is_running,
+                self.project_name,
+                self.service_name,
+                tuple(self.volumes),
+            )
+        )

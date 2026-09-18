@@ -138,7 +138,8 @@ def _volumes(mounts: list[DockerMount]) -> list[Volume]:
     result: list[Volume] = []
     for mount in mounts:
         if mount.type == DockerMountType.VOLUME:
-            assert mount.name is not None
+            if mount.name is None:
+                raise ValueError("Volume mount has no name: " + str(mount))
             result.append(Volume(mount.name, mount.source))
     return sorted(result)
 
@@ -162,7 +163,7 @@ def get_compose_container(
                         image=container.image,
                         docker_compose_file=Path(
                             container.labels["com.docker.compose.project.config_files"]
-                        ),  # TODO check if this can be multiple files
+                        ),  # TODO: check if this can be multiple files
                     )
                 )
     return sorted(container_list)

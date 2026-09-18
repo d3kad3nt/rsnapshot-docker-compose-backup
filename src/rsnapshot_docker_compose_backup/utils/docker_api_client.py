@@ -3,7 +3,7 @@ import socket
 import urllib.parse
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from http import client
+from http import HTTPStatus, client
 from typing import Any
 
 
@@ -30,7 +30,8 @@ class Api:
             return Api.SocketConnection(socket_connection)
         if socket_connection.startswith("http://"):
             return Api.HttpConnection(socket_connection)
-        raise ValueError("Only Unix and http Sockets are supported")
+        msg = "Only Unix and http Sockets are supported"
+        raise ValueError(msg)
 
     def get(
         self,
@@ -92,13 +93,13 @@ class Api:
             status_line = lines[0]
             status_code = int(status_line.split(" ")[1])
             status_text = " ".join(status_line.split(" ")[2:])
-            if status_code >= 400:
+            if status_code >= HTTPStatus.BAD_REQUEST:
                 raise ValueError(status_text)
             # Read headers
             headers: dict[str, str] = {}
             for line in lines[1:]:
                 split = line.split(":")
-                if len(split) == 2:
+                if len(split) == 2:  # noqa: PLR2004
                     headers[split[0]] = split[1].strip()
             # read body
             if "Content-Length" in headers:
@@ -138,7 +139,7 @@ class Api:
             self,
             path: str,
             *,
-            header: dict[str, str] | None = None,
+            header: dict[str, str] | None = None,  # noqa: ARG002
         ) -> HttpResponse:
 
             self.httpConnection.request("GET", path)
