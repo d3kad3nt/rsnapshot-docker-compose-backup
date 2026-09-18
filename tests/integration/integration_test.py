@@ -74,6 +74,7 @@ class TestRunningContainers:
         args = backup_planer.ProgramArgs(
             folder=setup_and_start_containers,
             config=load_config_path("default_config"),
+            socket=None,
         )
         output = backup_planer.run(args)
         expected_output = load_expected_output(
@@ -89,6 +90,7 @@ class TestStoppedContainers:
         args = backup_planer.ProgramArgs(
             folder=setup_and_start_containers,
             config=load_config_path("default_config"),
+            socket=None,
         )
         output = backup_planer.run(args)
         assert load_expected_output("empty", setup_and_start_containers) == output
@@ -98,6 +100,7 @@ class TestStoppedContainers:
         args = backup_planer.ProgramArgs(
             folder=setup_and_start_containers,
             config=load_config_path("not_running"),
+            socket=None,
         )
         output = backup_planer.run(args)
         # print(output)
@@ -109,7 +112,7 @@ class TestStoppedContainers:
 
 def test_not_started_containers(setup_containers: Path) -> None:
     args = backup_planer.ProgramArgs(
-        folder=setup_containers, config=load_config_path("default_config")
+        folder=setup_containers, config=load_config_path("default_config"), socket=None
     )
     assert load_expected_output("empty", setup_containers) == backup_planer.run(args)
 
