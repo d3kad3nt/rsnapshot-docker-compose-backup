@@ -8,6 +8,7 @@ from rsnapshot_docker_compose_backup.structure.volume import Volume
 class ContainerConfig(AbstractConfig):
     def __init__(
         self,
+        *,
         container_vars: dict[str, str | list[Volume]],
         is_running: bool,
         config_file: Path,
