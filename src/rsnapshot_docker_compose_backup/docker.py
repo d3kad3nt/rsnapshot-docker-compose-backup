@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum, auto
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from rsnapshot_docker_compose_backup.structure.container import Container
 from rsnapshot_docker_compose_backup.structure.volume import Volume
@@ -40,11 +40,11 @@ class DockerMountType(Enum):
 
 @dataclass
 class DockerMount:
-    name: Optional[str]
+    name: str | None
     type: DockerMountType
     source: str
     destination: str
-    driver: Optional[str]
+    driver: str | None
     mode: str
     rw: bool
     propagation: str
@@ -82,8 +82,8 @@ class DockerInspect:
     image: str
     image_id: str
     state: ContainerState
-    mounts: List[DockerMount]
-    labels: Dict[str, str]
+    mounts: list[DockerMount]
+    labels: dict[str, str]
 
     @staticmethod
     def from_json(json_data: Any) -> "DockerInspect":
@@ -114,7 +114,7 @@ class DockerInspect:
 
 
 def inspect_container(
-    container_id: str, socket_connection: Optional[str] = None
+    container_id: str, socket_connection: str | None = None
 ) -> DockerInspect:
     if socket_connection is None:
         api = Api()
@@ -124,7 +124,7 @@ def inspect_container(
     return DockerInspect.from_json(response.json_body)
 
 
-def get_container(socket_connection: Optional[str] = None) -> List[DockerInspect]:
+def get_container(socket_connection: str | None = None) -> list[DockerInspect]:
     parameter = {"all": "true"}
     if socket_connection is None:
         api = Api()
@@ -134,8 +134,8 @@ def get_container(socket_connection: Optional[str] = None) -> List[DockerInspect
     return [DockerInspect.from_json(x) for x in response.json_body]
 
 
-def _volumes(mounts: List[DockerMount]) -> List[Volume]:
-    result: List[Volume] = []
+def _volumes(mounts: list[DockerMount]) -> list[Volume]:
+    result: list[Volume] = []
     for mount in mounts:
         if mount.type == DockerMountType.VOLUME:
             assert mount.name is not None
@@ -144,9 +144,9 @@ def _volumes(mounts: List[DockerMount]) -> List[Volume]:
 
 
 def get_compose_container(
-    root_folder: Path, socket_connection: Optional[str] = None
-) -> List[Container]:
-    container_list: List[Container] = []
+    root_folder: Path, socket_connection: str | None = None
+) -> list[Container]:
+    container_list: list[Container] = []
     for container in get_container(socket_connection=socket_connection):
         if "com.docker.compose.project" in container.labels:
             workdir = Path(container.labels["com.docker.compose.project.working_dir"])
