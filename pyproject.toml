@@ -36,6 +36,8 @@ format-check = [
 format-fix = ["isort {args:.}", "black -t py310 {args:.}"]
 lint-check = ["ruff check {args:.}", "flake8 {args:.}", "mypy {args:.}"]
 lint-fix = ["ruff check --fix {args:.}", "lint-check"]
+[[tool.hatch.envs.hatch-test.matrix]]
+python = ["3.10", "3.11", "3.12", "3.13", "3.14"]
 [tool.ruff]
 extend = "ruff_defaults.toml"
 [tool.isort]
