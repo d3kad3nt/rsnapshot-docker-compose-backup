@@ -24,10 +24,17 @@ Issues = "https://github.com/d3kad3nt/rsnapshot-docker-compose-backup/issues"
 source = "versioningit"
 [tool.hatch.envs.default]
 python = "3.10"
-dependencies = ["mypy", "pytest", "pylint"]
+dependencies = ["mypy==2.3", "pytest==9.1", "pylint==4.0"]
 [tool.hatch.envs.hatch-static-analysis]
 config-path = "ruff_defaults.toml"
-dependencies = ["black", "isort", "ruff", "flake8", "mypy", "pytest"]
+dependencies = [
+  "black==26.5",
+  "isort==9.0",
+  "ruff==0.16",
+  "flake8==7.3",
+  "mypy==2.3",
+  "pytest==9.1",
+]
 [tool.hatch.envs.hatch-static-analysis.scripts]
 format-check = [
   "black --check --diff -t py310 {args:.}",
