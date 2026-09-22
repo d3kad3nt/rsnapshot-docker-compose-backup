@@ -52,30 +52,26 @@ def start_containers(root_folder: Path) -> None:
     subfolders: list[Path] = [
         Path(f.path) for f in os.scandir(root_folder) if f.is_dir()
     ]
-    commands: list[tuple[str, Path]] = []
-    for subfolder in subfolders:
-        commands.append(("docker compose up -d", subfolder))
-    execute_commands(commands)
+    execute_commands([("docker compose up -d", subfolder) for subfolder in subfolders])
 
 
 def stop_containers(root_folder: Path) -> None:
     subfolders: list[Path] = [
         Path(f.path) for f in os.scandir(root_folder) if f.is_dir()
     ]
-    commands: list[tuple[str, Path]] = []
-    for subfolder in subfolders:
-        commands.append(("docker compose stop", subfolder))
-    execute_commands(commands)
+    execute_commands([("docker compose stop", subfolder) for subfolder in subfolders])
 
 
 def remove_containers(root_folder: Path) -> None:
     subfolders: list[Path] = [
         Path(f.path) for f in os.scandir(root_folder) if f.is_dir()
     ]
-    commands: list[tuple[str, Path]] = []
-    for subfolder in subfolders:
-        commands.append(("docker compose rm --force --stop --volumes", subfolder))
-    execute_commands(commands)
+    execute_commands(
+        [
+            ("docker compose rm --force --stop --volumes", subfolder)
+            for subfolder in subfolders
+        ]
+    )
 
 
 class TestRunningContainers:
