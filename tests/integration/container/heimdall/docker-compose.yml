@@ -1,7 +1,7 @@
 services:
   heimdall:
     container_name: heimdall
-    image: linuxserver/heimdall
+    image: hello-world
     mem_limit: 4096m
     restart: unless-stopped
     expose:
