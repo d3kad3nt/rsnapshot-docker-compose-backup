@@ -39,33 +39,43 @@ def fixture_setup_and_start_containers() -> Generator[Path, Any, None]:
     temp_dir.cleanup()
 
 
+def execute_commands(command: list[tuple[str, Path]]) -> None:
+    processes: list[subprocess.Popen[Any]] = []
+    for cmd, cwd in command:
+        processes.append(subprocess.Popen(cmd.split(), cwd=cwd))
+
+    for process in processes:
+        process.wait()
+
+
 def start_containers(root_folder: Path) -> None:
     subfolders: list[Path] = [
         Path(f.path) for f in os.scandir(root_folder) if f.is_dir()
     ]
+    commands: list[tuple[str, Path]] = []
     for subfolder in subfolders:
-        # print(subfolder)
-        subprocess.run(["docker", "compose", "up", "-d"], cwd=subfolder, check=True)
+        commands.append(("docker compose up -d", subfolder))
+    execute_commands(commands)
 
 
 def stop_containers(root_folder: Path) -> None:
     subfolders: list[Path] = [
         Path(f.path) for f in os.scandir(root_folder) if f.is_dir()
     ]
+    commands: list[tuple[str, Path]] = []
     for subfolder in subfolders:
-        subprocess.run(["docker", "compose", "stop"], cwd=subfolder, check=True)
+        commands.append(("docker compose stop", subfolder))
+    execute_commands(commands)
 
 
 def remove_containers(root_folder: Path) -> None:
     subfolders: list[Path] = [
         Path(f.path) for f in os.scandir(root_folder) if f.is_dir()
     ]
+    commands: list[tuple[str, Path]] = []
     for subfolder in subfolders:
-        subprocess.run(
-            ["docker", "compose", "rm", "--force", "--stop", "--volumes"],
-            cwd=subfolder,
-            check=True,
-        )
+        commands.append(("docker compose rm --force --stop --volumes", subfolder))
+    execute_commands(commands)
 
 
 class TestRunningContainers:
