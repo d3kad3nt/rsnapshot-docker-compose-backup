@@ -6,13 +6,13 @@ backup_exec	/bin/date +%s
 backup	${{container_folder}}/heimdall	./heimdall/yaml	+rsync_long_args=--include=*.yml,+rsync_long_args=--include=*.yaml
 #stop
 backup_exec	/bin/date +%s
-backup_exec	cd ${{container_folder}}/heimdall; /usr/bin/docker-compose stop
+backup_exec	cd ${{container_folder}}/heimdall; /usr/bin/docker-compose stop heimdall
 #backup
 backup_exec	/bin/date +%s
 backup	/var/lib/docker/volumes/heimdall_heimdall/_data	./heimdall/heimdall_heimdall
 #restart
 backup_exec	/bin/date +%s
-backup_exec	cd ${{container_folder}}/heimdall; /usr/bin/docker-compose start
+backup_exec	cd ${{container_folder}}/heimdall; /usr/bin/docker-compose start heimdall
 backup_exec	/bin/date +%s
 ##End backup for compose project heimdall - service heimdall
 
