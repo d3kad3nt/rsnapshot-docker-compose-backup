@@ -141,7 +141,7 @@ def _volumes(mounts: list[DockerMount]) -> list[Volume]:
             if mount.name is None:
                 raise ValueError("Volume mount has no name: " + str(mount))
             result.append(Volume(mount.name, mount.source))
-    return sorted(result)
+    return sorted(result, key=lambda x: x.name)
 
 
 def get_compose_container(
@@ -166,4 +166,4 @@ def get_compose_container(
                         ),  # TODO: check if this can be multiple files
                     )
                 )
-    return sorted(container_list)
+    return sorted(container_list, key=lambda x: x.container_name)
