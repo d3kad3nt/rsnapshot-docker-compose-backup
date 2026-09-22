@@ -5,8 +5,7 @@ networks:
 services:
   mariaDB:
     container_name: mariadb
-    image: mariadb
-    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    image: hello-world
     ports:
       - "3306:3306"
     volumes:
@@ -16,7 +15,7 @@ services:
       - nextcloud_mariadb
   nextcloud:
     container_name: nextcloud
-    image: nextcloud
+    image: k8s.gcr.io/pause
     expose:
       - 80
     volumes:

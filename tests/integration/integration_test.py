@@ -39,38 +39,45 @@ def fixture_setup_and_start_containers() -> Generator[Path, Any, None]:
     temp_dir.cleanup()
 
 
+def execute_commands(command: list[tuple[str, Path]]) -> None:
+    processes: list[subprocess.Popen[Any]] = []
+    for cmd, cwd in command:
+        processes.append(subprocess.Popen(cmd.split(), cwd=cwd))
+
+    for process in processes:
+        process.wait()
+
+
 def start_containers(root_folder: Path) -> None:
     subfolders: list[Path] = [
         Path(f.path) for f in os.scandir(root_folder) if f.is_dir()
     ]
-    for subfolder in subfolders:
-        # print(subfolder)
-        subprocess.run(["docker", "compose", "up", "-d"], cwd=subfolder, check=True)
+    execute_commands([("docker compose up -d", subfolder) for subfolder in subfolders])
 
 
 def stop_containers(root_folder: Path) -> None:
     subfolders: list[Path] = [
         Path(f.path) for f in os.scandir(root_folder) if f.is_dir()
     ]
-    for subfolder in subfolders:
-        subprocess.run(["docker", "compose", "stop"], cwd=subfolder, check=True)
+    execute_commands([("docker compose stop", subfolder) for subfolder in subfolders])
 
 
 def remove_containers(root_folder: Path) -> None:
     subfolders: list[Path] = [
         Path(f.path) for f in os.scandir(root_folder) if f.is_dir()
     ]
-    for subfolder in subfolders:
-        subprocess.run(
-            ["docker", "compose", "rm", "--force", "--stop", "--volumes"],
-            cwd=subfolder,
-            check=True,
-        )
+    execute_commands(
+        [
+            ("docker compose rm --force --stop --volumes", subfolder)
+            for subfolder in subfolders
+        ]
+    )
 
 
 class TestRunningContainers:
 
-    def test_default_config(self, setup_and_start_containers: Path) -> None:
+    @staticmethod
+    def test_default_config(setup_and_start_containers: Path) -> None:
         args = backup_planer.ProgramArgs(
             folder=setup_and_start_containers,
             config=load_config_path("default_config"),
@@ -85,7 +92,8 @@ class TestRunningContainers:
 
 class TestStoppedContainers:
 
-    def test_only_running_enabled(self, setup_and_start_containers: Path) -> None:
+    @staticmethod
+    def test_only_running_enabled(setup_and_start_containers: Path) -> None:
         stop_containers(setup_and_start_containers)
         args = backup_planer.ProgramArgs(
             folder=setup_and_start_containers,
@@ -95,7 +103,8 @@ class TestStoppedContainers:
         output = backup_planer.run(args)
         assert load_expected_output("empty", setup_and_start_containers) == output
 
-    def test_only_running_disabled(self, setup_and_start_containers: Path) -> None:
+    @staticmethod
+    def test_only_running_disabled(setup_and_start_containers: Path) -> None:
         stop_containers(setup_and_start_containers)
         args = backup_planer.ProgramArgs(
             folder=setup_and_start_containers,
