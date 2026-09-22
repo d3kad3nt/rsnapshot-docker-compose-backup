@@ -70,7 +70,8 @@ def remove_containers(root_folder: Path) -> None:
 
 class TestRunningContainers:
 
-    def test_default_config(self, setup_and_start_containers: Path) -> None:
+    @staticmethod
+    def test_default_config(setup_and_start_containers: Path) -> None:
         args = backup_planer.ProgramArgs(
             folder=setup_and_start_containers,
             config=load_config_path("default_config"),
@@ -85,7 +86,8 @@ class TestRunningContainers:
 
 class TestStoppedContainers:
 
-    def test_only_running_enabled(self, setup_and_start_containers: Path) -> None:
+    @staticmethod
+    def test_only_running_enabled(setup_and_start_containers: Path) -> None:
         stop_containers(setup_and_start_containers)
         args = backup_planer.ProgramArgs(
             folder=setup_and_start_containers,
@@ -95,7 +97,8 @@ class TestStoppedContainers:
         output = backup_planer.run(args)
         assert load_expected_output("empty", setup_and_start_containers) == output
 
-    def test_only_running_disabled(self, setup_and_start_containers: Path) -> None:
+    @staticmethod
+    def test_only_running_disabled(setup_and_start_containers: Path) -> None:
         stop_containers(setup_and_start_containers)
         args = backup_planer.ProgramArgs(
             folder=setup_and_start_containers,
